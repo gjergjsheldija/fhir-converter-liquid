@@ -8,19 +8,16 @@ const liquidBlockKeywords = ['if', 'elsif', 'else', 'endif', 'unless', 'endunles
 const liquidLoopKeywords = ['forloop.index', 'forloop.index0', 'forloop.first', 'forloop.last', 'forloop.length', 'forloop.rindex', 'forloop.rindex0']; 
 const liquidFilterKeywords = ['abs', 'append', 'at_least', 'at_most', 'capitalize', 'ceil', 'compact', 'concat', 'date', 'default', 'divided_by', 'downcase', 'escape', 'first', 'floor', 'join', 'last', 'lstrip', 'map', 'minus', 'modulo', 'newline_to_br', 'plus', 'prepend', 'remove', 'remove_first', 'replace', 'replace_first', 'reverse', 'round', 'rstrip', 'size', 'slice', 'sort', 'split', 'strip', 'strip_html', 'strip_newlines', 'times', 'truncate', 'truncatewords', 'uniq', 'upcase', 'url_decode', 'url_encode', 'where'];
 const varNameRegexp = /as\s+\|(\w+)\||'(\w\w\w)'/g;
-const helpersHintRegexp = /\($/;
 const mixHintRegexp = /{{$/;
 const tagHintRegexp = /{%\s*$/;
 const varNamesHintRegexp = /{%\s*(if|unless|for)\s$/;
 const templatesHintRegexp = /{%\s*(include|render)\s$/;
 const filterHintRegexp = /\|\s*$/;
 var hintAfterChars = {};
-var helperNames;
 var hintExtraKeysObj = {};
 
 initHintAfterChars();
 initHintExtraKeysObj();
-initHelperList();
 
 function initHintExtraKeysObj() {
     hintExtraKeysObj[`"Ctrl-Space"`] = "autocomplete";
@@ -57,13 +54,6 @@ function initHintAfterChars() {
         charList.push(String.fromCharCode(k));
     }
     charList.forEach(c => hintAfterChars[c] = true);
-}
-
-function initHelperList() {
-    /*global getApiKey*/
-    $.getJSON('/api/v1/helpers?code=' + getApiKey(), function (helperList) {
-        helperNames = helperList;
-    });
 }
 
 function completeAfter(cm, pred) {
