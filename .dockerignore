@@ -1,0 +1,13 @@
+node_modules/
+npm-debug.log
+.nyc_output/
+.test_output/
+xunit.xml
+src/service-templates/
+.git/
+.idea/
+docs/
+ci/
+Makefile
+README.md
+docs

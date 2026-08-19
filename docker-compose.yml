@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+
+  fhir_converter:
+    image: ${APPLICATION_NAME:-fhir-converter-liquid}
+    ports:
+      - "2019:2019"
+
+  fhir_converter_dev:
+    image: ${APPLICATION_NAME:-fhir-converter-liquid}_dev
+    volumes:
+      - ./src:/app/src
+    command: npm test
+    ports:
+      - "2019:2019"

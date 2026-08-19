@@ -1,0 +1,662 @@
+[
+  {
+    "template": "ADT_A01",
+    "dataFile": "ADT-A01-01.hl7",
+    "expectedFile": "ADT-A01-01-expected.json"
+  },
+  {
+    "template": "ADT_A01",
+    "dataFile": "ADT-A01-02.hl7",
+    "expectedFile": "ADT-A01-02-expected.json"
+  },
+  {
+    "template": "ADT_A02",
+    "dataFile": "ADT-A02-01.hl7",
+    "expectedFile": "ADT-A02-01-expected.json"
+  },
+  {
+    "template": "ADT_A02",
+    "dataFile": "ADT-A02-02.hl7",
+    "expectedFile": "ADT-A02-02-expected.json"
+  },
+  {
+    "template": "ADT_A03",
+    "dataFile": "ADT-A03-01.hl7",
+    "expectedFile": "ADT-A03-01-expected.json"
+  },
+  {
+    "template": "ADT_A03",
+    "dataFile": "ADT-A03-02.hl7",
+    "expectedFile": "ADT-A03-02-expected.json"
+  },
+  {
+    "template": "ADT_A04",
+    "dataFile": "ADT-A04-01.hl7",
+    "expectedFile": "ADT-A04-01-expected.json"
+  },
+  {
+    "template": "ADT_A04",
+    "dataFile": "ADT-A04-02.hl7",
+    "expectedFile": "ADT-A04-02-expected.json"
+  },
+  {
+    "template": "ADT_A05",
+    "dataFile": "ADT-A05-01.hl7",
+    "expectedFile": "ADT-A05-01-expected.json"
+  },
+  {
+    "template": "ADT_A05",
+    "dataFile": "ADT-A05-02.hl7",
+    "expectedFile": "ADT-A05-02-expected.json"
+  },
+  {
+    "template": "ADT_A06",
+    "dataFile": "ADT-A06-01.hl7",
+    "expectedFile": "ADT-A06-01-expected.json"
+  },
+  {
+    "template": "ADT_A06",
+    "dataFile": "ADT-A06-02.hl7",
+    "expectedFile": "ADT-A06-02-expected.json"
+  },
+  {
+    "template": "ADT_A07",
+    "dataFile": "ADT-A07-01.hl7",
+    "expectedFile": "ADT-A07-01-expected.json"
+  },
+  {
+    "template": "ADT_A07",
+    "dataFile": "ADT-A07-02.hl7",
+    "expectedFile": "ADT-A07-02-expected.json"
+  },
+  {
+    "template": "ADT_A08",
+    "dataFile": "ADT-A08-01.hl7",
+    "expectedFile": "ADT-A08-01-expected.json"
+  },
+  {
+    "template": "ADT_A08",
+    "dataFile": "ADT-A08-02.hl7",
+    "expectedFile": "ADT-A08-02-expected.json"
+  },
+  {
+    "template": "ADT_A09",
+    "dataFile": "ADT-A09-01.hl7",
+    "expectedFile": "ADT-A09-01-expected.json"
+  },
+  {
+    "template": "ADT_A09",
+    "dataFile": "ADT-A09-02.hl7",
+    "expectedFile": "ADT-A09-02-expected.json"
+  },
+  {
+    "template": "ADT_A10",
+    "dataFile": "ADT-A10-01.hl7",
+    "expectedFile": "ADT-A10-01-expected.json"
+  },
+  {
+    "template": "ADT_A10",
+    "dataFile": "ADT-A10-02.hl7",
+    "expectedFile": "ADT-A10-02-expected.json"
+  },
+  {
+    "template": "ADT_A11",
+    "dataFile": "ADT-A11-01.hl7",
+    "expectedFile": "ADT-A11-01-expected.json"
+  },
+  {
+    "template": "ADT_A11",
+    "dataFile": "ADT-A11-02.hl7",
+    "expectedFile": "ADT-A11-02-expected.json"
+  },
+  {
+    "template": "ADT_A13",
+    "dataFile": "ADT-A13-01.hl7",
+    "expectedFile": "ADT-A13-01-expected.json"
+  },
+  {
+    "template": "ADT_A13",
+    "dataFile": "ADT-A13-02.hl7",
+    "expectedFile": "ADT-A13-02-expected.json"
+  },
+  {
+    "template": "ADT_A14",
+    "dataFile": "ADT-A14-01.hl7",
+    "expectedFile": "ADT-A14-01-expected.json"
+  },
+  {
+    "template": "ADT_A14",
+    "dataFile": "ADT-A14-02.hl7",
+    "expectedFile": "ADT-A14-02-expected.json"
+  },
+  {
+    "template": "ADT_A15",
+    "dataFile": "ADT-A15-01.hl7",
+    "expectedFile": "ADT-A15-01-expected.json"
+  },
+  {
+    "template": "ADT_A15",
+    "dataFile": "ADT-A15-02.hl7",
+    "expectedFile": "ADT-A15-02-expected.json"
+  },
+  {
+    "template": "ADT_A16",
+    "dataFile": "ADT-A16-01.hl7",
+    "expectedFile": "ADT-A16-01-expected.json"
+  },
+  {
+    "template": "ADT_A16",
+    "dataFile": "ADT-A16-02.hl7",
+    "expectedFile": "ADT-A16-02-expected.json"
+  },
+  {
+    "template": "ADT_A25",
+    "dataFile": "ADT-A25-01.hl7",
+    "expectedFile": "ADT-A25-01-expected.json"
+  },
+  {
+    "template": "ADT_A25",
+    "dataFile": "ADT-A25-02.hl7",
+    "expectedFile": "ADT-A25-02-expected.json"
+  },
+  {
+    "template": "ADT_A26",
+    "dataFile": "ADT-A26-01.hl7",
+    "expectedFile": "ADT-A26-01-expected.json"
+  },
+  {
+    "template": "ADT_A26",
+    "dataFile": "ADT-A26-02.hl7",
+    "expectedFile": "ADT-A26-02-expected.json"
+  },
+  {
+    "template": "ADT_A27",
+    "dataFile": "ADT-A27-01.hl7",
+    "expectedFile": "ADT-A27-01-expected.json"
+  },
+  {
+    "template": "ADT_A27",
+    "dataFile": "ADT-A27-02.hl7",
+    "expectedFile": "ADT-A27-02-expected.json"
+  },
+  {
+    "template": "ADT_A28",
+    "dataFile": "ADT-A28-01.hl7",
+    "expectedFile": "ADT-A28-01-expected.json"
+  },
+  {
+    "template": "ADT_A28",
+    "dataFile": "ADT-A28-02.hl7",
+    "expectedFile": "ADT-A28-02-expected.json"
+  },
+  {
+    "template": "ADT_A29",
+    "dataFile": "ADT-A29-01.hl7",
+    "expectedFile": "ADT-A29-01-expected.json"
+  },
+  {
+    "template": "ADT_A29",
+    "dataFile": "ADT-A29-02.hl7",
+    "expectedFile": "ADT-A29-02-expected.json"
+  },
+  {
+    "template": "ADT_A31",
+    "dataFile": "ADT-A31-01.hl7",
+    "expectedFile": "ADT-A31-01-expected.json"
+  },
+  {
+    "template": "ADT_A31",
+    "dataFile": "ADT-A31-02.hl7",
+    "expectedFile": "ADT-A31-02-expected.json"
+  },
+  {
+    "template": "ADT_A40",
+    "dataFile": "ADT-A40-01.hl7",
+    "expectedFile": "ADT-A40-01-expected.json"
+  },
+  {
+    "template": "ADT_A40",
+    "dataFile": "ADT-A40-02.hl7",
+    "expectedFile": "ADT-A40-02-expected.json"
+  },
+  {
+    "template": "ADT_A41",
+    "dataFile": "ADT-A41-01.hl7",
+    "expectedFile": "ADT-A41-01-expected.json"
+  },
+  {
+    "template": "ADT_A41",
+    "dataFile": "ADT-A41-02.hl7",
+    "expectedFile": "ADT-A41-02-expected.json"
+  },
+  {
+    "template": "ADT_A45",
+    "dataFile": "ADT-A45-01.hl7",
+    "expectedFile": "ADT-A45-01-expected.json"
+  },
+  {
+    "template": "ADT_A45",
+    "dataFile": "ADT-A45-02.hl7",
+    "expectedFile": "ADT-A45-02-expected.json"
+  },
+  {
+    "template": "ADT_A47",
+    "dataFile": "ADT-A47-01.hl7",
+    "expectedFile": "ADT-A47-01-expected.json"
+  },
+  {
+    "template": "ADT_A47",
+    "dataFile": "ADT-A47-02.hl7",
+    "expectedFile": "ADT-A47-02-expected.json"
+  },
+  {
+    "template": "ADT_A60",
+    "dataFile": "ADT-A60-01.hl7",
+    "expectedFile": "ADT-A60-01-expected.json"
+  },
+  {
+    "template": "ADT_A60",
+    "dataFile": "ADT-A60-02.hl7",
+    "expectedFile": "ADT-A60-02-expected.json"
+  },
+  {
+    "template": "SIU_S12",
+    "dataFile": "SIU-S12-01.hl7",
+    "expectedFile": "SIU-S12-01-expected.json"
+  },
+  {
+    "template": "SIU_S12",
+    "dataFile": "SIU-S12-02.hl7",
+    "expectedFile": "SIU-S12-02-expected.json"
+  },
+  {
+    "template": "SIU_S13",
+    "dataFile": "SIU-S13-01.hl7",
+    "expectedFile": "SIU-S13-01-expected.json"
+  },
+  {
+    "template": "SIU_S13",
+    "dataFile": "SIU-S13-02.hl7",
+    "expectedFile": "SIU-S13-02-expected.json"
+  },
+  {
+    "template": "SIU_S14",
+    "dataFile": "SIU-S14-01.hl7",
+    "expectedFile": "SIU-S14-01-expected.json"
+  },
+  {
+    "template": "SIU_S14",
+    "dataFile": "SIU-S14-02.hl7",
+    "expectedFile": "SIU-S14-02-expected.json"
+  },
+  {
+    "template": "SIU_S15",
+    "dataFile": "SIU-S15-01.hl7",
+    "expectedFile": "SIU-S15-01-expected.json"
+  },
+  {
+    "template": "SIU_S15",
+    "dataFile": "SIU-S15-02.hl7",
+    "expectedFile": "SIU-S15-02-expected.json"
+  },
+  {
+    "template": "SIU_S16",
+    "dataFile": "SIU-S16-01.hl7",
+    "expectedFile": "SIU-S16-01-expected.json"
+  },
+  {
+    "template": "SIU_S16",
+    "dataFile": "SIU-S16-02.hl7",
+    "expectedFile": "SIU-S16-02-expected.json"
+  },
+  {
+    "template": "SIU_S17",
+    "dataFile": "SIU-S17-01.hl7",
+    "expectedFile": "SIU-S17-01-expected.json"
+  },
+  {
+    "template": "SIU_S17",
+    "dataFile": "SIU-S17-02.hl7",
+    "expectedFile": "SIU-S17-02-expected.json"
+  },
+  {
+    "template": "SIU_S26",
+    "dataFile": "SIU-S26-01.hl7",
+    "expectedFile": "SIU-S26-01-expected.json"
+  },
+  {
+    "template": "SIU_S26",
+    "dataFile": "SIU-S26-02.hl7",
+    "expectedFile": "SIU-S26-02-expected.json"
+  },
+  {
+    "template": "ORU_R01",
+    "dataFile": "ORU-R01-01.hl7",
+    "expectedFile": "ORU-R01-01-expected.json"
+  },
+  {
+    "template": "ORM_O01",
+    "dataFile": "ORM-O01-01.hl7",
+    "expectedFile": "ORM-O01-01-expected.json"
+  },
+  {
+    "template": "ORM_O01",
+    "dataFile": "ORM-O01-02.hl7",
+    "expectedFile": "ORM-O01-02-expected.json"
+  },
+  {
+    "template": "ORM_O01",
+    "dataFile": "ORM-O01-03.hl7",
+    "expectedFile": "ORM-O01-03-expected.json"
+  },
+  {
+    "template": "ORM_O01",
+    "dataFile": "ORM-O01-04.hl7",
+    "expectedFile": "ORM-O01-04-expected.json"
+  },
+  {
+    "template": "ORM_O01",
+    "dataFile": "ORM-O01-05.hl7",
+    "expectedFile": "ORM-O01-05-expected.json"
+  },
+  {
+    "template": "ORM_O01",
+    "dataFile": "ORM-O01-06.hl7",
+    "expectedFile": "ORM-O01-06-expected.json"
+  },
+  {
+    "template": "MDM_T01",
+    "dataFile": "MDM-T01-01.hl7",
+    "expectedFile": "MDM-T01-01-expected.json"
+  },
+  {
+    "template": "MDM_T01",
+    "dataFile": "MDM-T01-02.hl7",
+    "expectedFile": "MDM-T01-02-expected.json"
+  },
+  {
+    "template": "MDM_T02",
+    "dataFile": "MDM-T02-01.hl7",
+    "expectedFile": "MDM-T02-01-expected.json"
+  },
+  {
+    "template": "MDM_T02",
+    "dataFile": "MDM-T02-02.hl7",
+    "expectedFile": "MDM-T02-02-expected.json"
+  },
+  {
+    "template": "MDM_T02",
+    "dataFile": "MDM-T02-03.hl7",
+    "expectedFile": "MDM-T02-03-expected.json"
+  },
+  {
+    "template": "MDM_T05",
+    "dataFile": "MDM-T05-01.hl7",
+    "expectedFile": "MDM-T05-01-expected.json"
+  },
+  {
+    "template": "MDM_T05",
+    "dataFile": "MDM-T05-02.hl7",
+    "expectedFile": "MDM-T05-02-expected.json"
+  },
+  {
+    "template": "MDM_T06",
+    "dataFile": "MDM-T06-01.hl7",
+    "expectedFile": "MDM-T06-01-expected.json"
+  },
+  {
+    "template": "MDM_T06",
+    "dataFile": "MDM-T06-02.hl7",
+    "expectedFile": "MDM-T06-02-expected.json"
+  },
+  {
+    "template": "MDM_T09",
+    "dataFile": "MDM-T09-01.hl7",
+    "expectedFile": "MDM-T09-01-expected.json"
+  },
+  {
+    "template": "MDM_T09",
+    "dataFile": "MDM-T09-02.hl7",
+    "expectedFile": "MDM-T09-02-expected.json"
+  },
+  {
+    "template": "MDM_T10",
+    "dataFile": "MDM-T10-01.hl7",
+    "expectedFile": "MDM-T10-01-expected.json"
+  },
+  {
+    "template": "MDM_T10",
+    "dataFile": "MDM-T10-02.hl7",
+    "expectedFile": "MDM-T10-02-expected.json"
+  },
+  {
+    "template": "RDE_O11",
+    "dataFile": "RDE-O11-01.hl7",
+    "expectedFile": "RDE-O11-01-expected.json"
+  },
+  {
+    "template": "RDE_O11",
+    "dataFile": "RDE-O11-02.hl7",
+    "expectedFile": "RDE-O11-02-expected.json"
+  },
+  {
+    "template": "RDE_O25",
+    "dataFile": "RDE-O25-01.hl7",
+    "expectedFile": "RDE-O25-01-expected.json"
+  },
+  {
+    "template": "RDE_O25",
+    "dataFile": "RDE-O25-02.hl7",
+    "expectedFile": "RDE-O25-02-expected.json"
+  },
+  {
+    "template": "RDS_O13",
+    "dataFile": "RDS-O13-01.hl7",
+    "expectedFile": "RDS-O13-01-expected.json"
+  },
+  {
+    "template": "RDS_O13",
+    "dataFile": "RDS-O13-02.hl7",
+    "expectedFile": "RDS-O13-02-expected.json"
+  },
+  {
+    "template": "OML_O21",
+    "dataFile": "OML-O21-01.hl7",
+    "expectedFile": "OML-O21-01-expected.json"
+  },
+  {
+    "template": "OML_O21",
+    "dataFile": "OML-O21-02.hl7",
+    "expectedFile": "OML-O21-02-expected.json"
+  },
+  {
+    "template": "OML_O21",
+    "dataFile": "OML-O21-03.hl7",
+    "expectedFile": "OML-O21-03-expected.json"
+  },
+  {
+    "template": "OUL_R22",
+    "dataFile": "OUL-R22-01.hl7",
+    "expectedFile": "OUL-R22-01-expected.json"
+  },
+  {
+    "template": "OUL_R22",
+    "dataFile": "OUL-R22-02.hl7",
+    "expectedFile": "OUL-R22-02-expected.json"
+  },
+  {
+    "template": "OUL_R23",
+    "dataFile": "OUL-R23-01.hl7",
+    "expectedFile": "OUL-R23-01-expected.json"
+  },
+  {
+    "template": "OUL_R23",
+    "dataFile": "OUL-R23-02.hl7",
+    "expectedFile": "OUL-R23-02-expected.json"
+  },
+  {
+    "template": "OUL_R24",
+    "dataFile": "OUL-R24-01.hl7",
+    "expectedFile": "OUL-R24-01-expected.json"
+  },
+  {
+    "template": "OUL_R24",
+    "dataFile": "OUL-R24-02.hl7",
+    "expectedFile": "OUL-R24-02-expected.json"
+  },
+  {
+    "template": "VXU_V04",
+    "dataFile": "VXU-V04-01.hl7",
+    "expectedFile": "VXU-V04-01-expected.json"
+  },
+  {
+    "template": "VXU_V04",
+    "dataFile": "VXU-V04-02.hl7",
+    "expectedFile": "VXU-V04-02-expected.json"
+  },
+  {
+    "template": "BAR_P01",
+    "dataFile": "BAR-P01-01.hl7",
+    "expectedFile": "BAR-P01-01-expected.json"
+  },
+  {
+    "template": "BAR_P01",
+    "dataFile": "BAR-P01-02.hl7",
+    "expectedFile": "BAR-P01-02-expected.json"
+  },
+  {
+    "template": "BAR_P02",
+    "dataFile": "BAR-P02-01.hl7",
+    "expectedFile": "BAR-P02-01-expected.json"
+  },
+  {
+    "template": "BAR_P02",
+    "dataFile": "BAR-P02-02.hl7",
+    "expectedFile": "BAR-P02-02-expected.json"
+  },
+  {
+    "template": "BAR_P12",
+    "dataFile": "BAR-P12-01.hl7",
+    "expectedFile": "BAR-P12-01-expected.json"
+  },
+  {
+    "template": "BAR_P12",
+    "dataFile": "BAR-P12-02.hl7",
+    "expectedFile": "BAR-P12-02-expected.json"
+  },
+  {
+    "template": "DFT_P03",
+    "dataFile": "DFT-P03-01.hl7",
+    "expectedFile": "DFT-P03-01-expected.json"
+  },
+  {
+    "template": "DFT_P03",
+    "dataFile": "DFT-P03-02.hl7",
+    "expectedFile": "DFT-P03-02-expected.json"
+  },
+  {
+    "template": "DFT_P11",
+    "dataFile": "DFT-P11-01.hl7",
+    "expectedFile": "DFT-P11-01-expected.json"
+  },
+  {
+    "template": "DFT_P11",
+    "dataFile": "DFT-P11-02.hl7",
+    "expectedFile": "DFT-P11-02-expected.json"
+  },
+  {
+    "template": "OMG_O19",
+    "dataFile": "OMG-O19-01.hl7",
+    "expectedFile": "OMG-O19-01-expected.json"
+  },
+  {
+    "template": "OMG_O19",
+    "dataFile": "OMG-O19-02.hl7",
+    "expectedFile": "OMG-O19-02-expected.json"
+  },
+  {
+    "template": "REF_I12",
+    "dataFile": "REF-I12-01.hl7",
+    "expectedFile": "REF-I12-01-expected.json"
+  },
+  {
+    "template": "REF_I12",
+    "dataFile": "REF-I12-02.hl7",
+    "expectedFile": "REF-I12-02-expected.json"
+  },
+  {
+    "template": "REF_I14",
+    "dataFile": "REF-I14-01.hl7",
+    "expectedFile": "REF-I14-01-expected.json"
+  },
+  {
+    "template": "REF_I14",
+    "dataFile": "REF-I14-02.hl7",
+    "expectedFile": "REF-I14-02-expected.json"
+  },
+  {
+    "template": "ADT_A01",
+    "dataFile": "ADT01-23.hl7",
+    "expectedFile": "ADT01-23-expected.json"
+  },
+  {
+    "template": "ADT_A01",
+    "dataFile": "ADT01-28.hl7",
+    "expectedFile": "ADT01-28-expected.json"
+  },
+  {
+    "template": "ADT_A04",
+    "dataFile": "ADT04-23.hl7",
+    "expectedFile": "ADT04-23-expected.json"
+  },
+  {
+    "template": "ADT_A04",
+    "dataFile": "ADT04-251.hl7",
+    "expectedFile": "ADT04-251-expected.json"
+  },
+  {
+    "template": "ADT_A04",
+    "dataFile": "ADT04-28.hl7",
+    "expectedFile": "ADT04-28-expected.json"
+  },
+  {
+    "template": "OML_O21",
+    "dataFile": "MDHHS-OML-O21-1.hl7",
+    "expectedFile": "MDHHS-OML-O21-1-expected.json"
+  },
+  {
+    "template": "OML_O21",
+    "dataFile": "MDHHS-OML-O21-2.hl7",
+    "expectedFile": "MDHHS-OML-O21-2-expected.json"
+  },
+  {
+    "template": "ORU_R01",
+    "dataFile": "LAB-ORU-1.hl7",
+    "expectedFile": "LAB-ORU-1-expected.json"
+  },
+  {
+    "template": "ORU_R01",
+    "dataFile": "LAB-ORU-2.hl7",
+    "expectedFile": "LAB-ORU-2-expected.json"
+  },
+  {
+    "template": "ORU_R01",
+    "dataFile": "LRI_2.0-NG_CBC_Typ_Message.hl7",
+    "expectedFile": "LRI_2.0-NG_CBC_Typ_Message-expected.json"
+  },
+  {
+    "template": "ORU_R01",
+    "dataFile": "ORU-R01-RMGEAD.hl7",
+    "expectedFile": "ORU-R01-RMGEAD-expected.json"
+  },
+  {
+    "template": "VXU_V04",
+    "dataFile": "IZ_1_1.1_Admin_Child_Max_Message.hl7",
+    "expectedFile": "IZ_1_1.1_Admin_Child_Max_Message-expected.json"
+  },
+  {
+    "template": "VXU_V04",
+    "dataFile": "VXU.hl7",
+    "expectedFile": "VXU-expected.json"
+  }
+]

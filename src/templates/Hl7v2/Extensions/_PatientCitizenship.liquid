@@ -1,0 +1,43 @@
+{
+    {% if CITIZENSHIP -%}   
+        "url": "http://hl7.org/fhir/StructureDefinition/patient-citizenship",                                
+        "extension": 
+        [
+            {
+                "url": "code",
+                "valueCodeableConcept": 
+                {
+                    "coding":
+                    [  
+                    {% for citizen in CITIZENSHIP.Repeats -%}
+                        {% if citizen -%} 
+                            {% assign CWE_2 = citizen.2.Value %}
+                            {% assign CWE_5 = citizen.5.Value %}
+                            {% assign CWE_11 = citizen.11.Value %}
+                            {% assign CWE_2_doubleDash = citizen.2.Value |append: '--' %} 
+                            {% assign CWE_5_doubleDash = citizen.5.Value |append: '--' %} 
+                            {% comment %} Determine which values are populated for text construction {% endcomment %}
+                            {% assign has_CWE_2 = false %}{% if CWE_2 and CWE_2 != "" %}{% assign has_CWE_2 = true %}{% endif %}
+                            {% assign has_CWE_5 = false %}{% if CWE_5 and CWE_5 != "" %}{% assign has_CWE_5 = true %}{% endif %}
+                            {% assign has_CWE_11 = false %}{% if CWE_11 and CWE_11 != "" %}{% assign has_CWE_11 = true %}{% endif %}
+                            {% include 'DataType/CWECodeableConceptRepeatable' CWE:citizen %}
+                        {% endif -%}   
+                    {% endfor -%}     
+                    ],
+                {% comment %} DotLiquid compatibility: use helper booleans to check original values {% endcomment %}
+                {% if has_CWE_2 and has_CWE_5 == false and has_CWE_11 == false %}
+                    "text":"{{ CWE_2 }}",
+                {% elsif has_CWE_2 and has_CWE_5 and has_CWE_11 == false %}
+                    "text":"{{ CWE_2_doubleDash }}{{ CWE_5 }}",
+                {% elsif has_CWE_2 and has_CWE_11 and has_CWE_5 == false %}
+                    "text":"{{ CWE_2_doubleDash }}{{ CWE_11 }}",
+                {% elsif has_CWE_5 and has_CWE_11 and has_CWE_2 == false %}
+                    "text":"{{ CWE_5_doubleDash }}{{ CWE_11 }}",
+                {% elsif has_CWE_2 and has_CWE_5 and has_CWE_11 %}
+                    "text":"{{ CWE_2_doubleDash }}{{ CWE_5_doubleDash }}{{ CWE_11 }}",
+                {% endif %}       
+                }
+            }
+        ],    
+    {% endif -%}
+}
