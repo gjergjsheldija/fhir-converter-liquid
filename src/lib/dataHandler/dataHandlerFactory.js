@@ -6,7 +6,6 @@ import {lstatSync, readdirSync} from "fs";
 import {resolve} from "path";
 //import {fileURLToPath} from "url";
 import hl7v2 from "../parsers/hl7v2/hl7v2Liquid.js";
-import cda from "../parsers/cda/cda.js";
 import dummy from "../parsers/dummy/dummy.js";
 
 //const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +14,7 @@ import dummy from "../parsers/dummy/dummy.js";
 //const directory = join(__dirname, "../parsers/");
 
 
-const map = {hl7v2, cda, dummy};
+const map = {hl7v2, dummy};
 
 export default class dataHandlerFactory {
     static createDataHandler(dataType) {

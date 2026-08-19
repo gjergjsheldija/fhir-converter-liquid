@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 
 describe("fsCache", function () {
     let folderPath = join(__dirname, "test-fsCache");
-    let fileName = "fsCacheTempFile.hbs";
+    let fileName = "fsCacheTempFile.liquid";
     let filePath = join(folderPath, fileName);
 
     before(function () {

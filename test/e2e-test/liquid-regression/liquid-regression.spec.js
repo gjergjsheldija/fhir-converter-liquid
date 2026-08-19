@@ -4,7 +4,7 @@ import { readFileSync, existsSync } from 'fs';
 import path, { join } from 'path';
 import { fileURLToPath } from 'url';
 import routes from '../../../src/routes.js';
-import { compareContent } from '../regression-test/util/utils.js';
+import { compareContent } from '../util/compare.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

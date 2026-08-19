@@ -4,8 +4,8 @@
 // -------------------------------------------------------------------------------------------------
 
 import { strictEqual, throws, ok } from 'assert';
-import { createDeepObject } from '../../util/utils.js';
-import { getGroundTruthFileName, compareContent, MAX_COMPARISION_DEPTH } from './utils.js';
+import { createDeepObject } from './utils.js';
+import { getGroundTruthFileName, compareContent, MAX_COMPARISION_DEPTH } from './compare.js';
 
 const testData = () => ({
     "resourceType": "Bundle",
@@ -47,9 +47,9 @@ const testData = () => ({
 
 describe('Regression test testUtils - getGroundTruthFileName', () => {
     it ('should generate normal ground truth file name', () => {
-        const testCase = { dataFile: 'sample.cda', templateFile: 'ccd.hbs' };
+        const testCase = { dataFile: 'sample.hl7', templateFile: 'ADT_A01.liquid' };
         const fileName = getGroundTruthFileName(testCase);
-        strictEqual(fileName, 'ccd.hbs-sample.cda.json');
+        strictEqual(fileName, 'ADT_A01.liquid-sample.hl7.json');
     });
     it ('should throw appropriate error when encountering invalid input.', () => {
         const testCases = [
@@ -58,11 +58,11 @@ describe('Regression test testUtils - getGroundTruthFileName', () => {
             true,
             'invalid-input',
             [],
-            [ 'sample.cda', 'ccd.hbs' ],
+            [ 'sample.hl7', 'ADT_A01.liquid' ],
             {},
-            { dataFile: 'sample.cda', templateFile_invalid: 'ccd.hbs' },
-            { dataFile_invalid: 'sample.cda', templateFile: 'ccd.hbs' },
-            { dataFile_invalid: 'sample.cda', templateFile_invalid: 'ccd.hbs' }
+            { dataFile: 'sample.hl7', templateFile_invalid: 'ADT_A01.liquid' },
+            { dataFile_invalid: 'sample.hl7', templateFile: 'ADT_A01.liquid' },
+            { dataFile_invalid: 'sample.hl7', templateFile_invalid: 'ADT_A01.liquid' }
         ];
         const expectError = {
             name: 'Error',

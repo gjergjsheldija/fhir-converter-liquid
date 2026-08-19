@@ -265,7 +265,7 @@ export default function (app) {
      *       - text/plain
      *     parameters:
      *       - name: srcDataType
-     *         description: Data type of the source (e.g. 'hl7v2', 'cda')
+     *         description: Data type of the source (e.g. 'hl7v2')
      *         in: path
      *         required: true
      *         type: string
@@ -349,7 +349,7 @@ export default function (app) {
      *       - text/plain
      *     parameters:
      *       - name: srcDataType
-     *         description: Data type of the source (e.g. 'hl7v2', 'cda')
+     *         description: Data type of the source (e.g. 'hl7v2')
      *         in: path
      *         required: true
      *         type: string

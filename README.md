@@ -129,7 +129,7 @@ flowchart LR
 | `src/service-templates/Hl7v2/` | The templates actually served/used at runtime — regenerated from `templates/` on startup by `src/init-service.js`; edit here to customize |
 | `src/sample-data/hl7v2/` | Sample messages used by the web UI and for local testing |
 
-**This project is template-compatible with [microsoft/FHIR-Converter](https://github.com/microsoft/FHIR-Converter)** — because it uses the same Liquid syntax and the same `hl7v2FHIR`/`cdaFHIR`-style helper filters, you can:
+**This project is template-compatible with [microsoft/FHIR-Converter](https://github.com/microsoft/FHIR-Converter)** — because it uses the same Liquid syntax and the same `hl7v2FHIR`-style helper filters, you can:
 
 - Drop newer or additional templates straight from Microsoft's repo into `src/service-templates/Hl7v2/` — no code changes needed
 - Author your own templates the same way: start from an existing `.liquid` file, use `{% include 'DataType/...' %}` to reuse the shared building blocks, and reference [Liquid's own syntax docs](https://shopify.github.io/liquid/) plus the [HL7 v2-to-FHIR mapping project](https://confluence.hl7.org/display/OO/2-To-FHIR+Project) for field-level guidance
