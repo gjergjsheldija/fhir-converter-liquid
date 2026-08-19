@@ -1,0 +1,7 @@
+{% assign demo = "test" %}
+{% assign demo2 = "test2" %}
+{% evaluate bundleID using 'ID/Bundle' Data: demo, HD: demo2 -%}
+{
+"resourceType": "Bundle",
+"id":"{{ bundleID }}"
+}

@@ -1,0 +1,40 @@
+{  
+    
+    {% if NATIONALITY -%}
+    "url": "http://hl7.org/fhir/StructureDefinition/patient-nationality",
+    "extension": 
+        [
+            {"url": "code",
+            "valueCodeableConcept": 
+            {
+                "coding":
+                    [   
+                        {% assign CWE_2 = NATIONALITY.2.Value %}
+                        {% assign CWE_5 = NATIONALITY.5.Value %}
+                        {% assign CWE_11 = NATIONALITY.11.Value %}
+                        {% assign CWE_2_doubleDash = NATIONALITY.2.Value |append: '--' %} 
+                        {% assign CWE_5_doubleDash = NATIONALITY.5.Value |append: '--' %} 
+                        {% comment %} Determine which values are populated for text construction {% endcomment %}
+                        {% assign has_CWE_2 = false %}{% if CWE_2 and CWE_2 != "" %}{% assign has_CWE_2 = true %}{% endif %}
+                        {% assign has_CWE_5 = false %}{% if CWE_5 and CWE_5 != "" %}{% assign has_CWE_5 = true %}{% endif %}
+                        {% assign has_CWE_11 = false %}{% if CWE_11 and CWE_11 != "" %}{% assign has_CWE_11 = true %}{% endif %}
+                        {% include 'DataType/CWECodeableConceptRepeatable' CWE:NATIONALITY %}    
+                    ],
+                    {% comment %} DotLiquid compatibility: use helper booleans to check original values {% endcomment %}
+                    {% if has_CWE_2 and has_CWE_5 == false and has_CWE_11 == false %}
+                    "text":"{{ CWE_2 }}",
+                {% elsif has_CWE_2 and has_CWE_5 and has_CWE_11 == false %}
+                    "text":"{{ CWE_2_doubleDash }}{{ CWE_5 }}",
+                {% elsif has_CWE_2 and has_CWE_11 and has_CWE_5 == false %}
+                    "text":"{{ CWE_2_doubleDash }}{{ CWE_11 }}",
+                {% elsif has_CWE_5 and has_CWE_11 and has_CWE_2 == false %}
+                    "text":"{{ CWE_5_doubleDash }}{{ CWE_11 }}",
+                {% elsif has_CWE_2 and has_CWE_5 and has_CWE_11 %}
+                    "text":"{{ CWE_2_doubleDash }}{{ CWE_5_doubleDash }}{{ CWE_11 }}",
+                {% endif %}  
+            }
+        },
+        ],
+        
+    {% endif -%}  
+}

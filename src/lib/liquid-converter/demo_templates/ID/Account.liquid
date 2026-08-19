@@ -1,0 +1,6 @@
+{% capture identifiers -%}
+    {% if demo and demo2 -%}
+        {{demo}},{{demo2}}
+    {% endif -%}
+{% endcapture -%}
+{{ identifiers | generate_id_input: 'Account', false, baseId | generate_uuid }}
