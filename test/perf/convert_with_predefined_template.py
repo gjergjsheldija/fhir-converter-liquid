@@ -17,7 +17,7 @@ class UserBehavior(TaskSet):
     @task(1)
     def profile(self):
         self.client.headers.update({'content-type': 'text/plain'})
-        self.client.post("/api/v1/convert/hl7/ADT_A01.hbs", data=self.msg_decoded)
+        self.client.post("/api/v1/convert/hl7v2/ADT_A01.liquid", data=self.msg_decoded)
     
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior

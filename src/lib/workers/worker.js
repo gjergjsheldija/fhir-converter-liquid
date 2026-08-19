@@ -10,7 +10,6 @@ import Promise from 'promise';
 import pkg from 'memory-cache';
 import {
     CLS_NAMESPACE,
-    TEMPLATE_FILES_LOCATION,
     TIMEZONE
 } from '../constants/constants.js';
 import {errorCodes, errorMessage} from '../error/error.js';
@@ -156,7 +155,7 @@ workerTaskProcessor((msg) => {
                             return new Promise((fulfill, reject) => {
                                 var template = get(templateName);
                                 if (!template) {
-                                    readFile(join(TEMPLATE_FILES_LOCATION, srcDataType, templateName), (err, templateContent) => {
+                                    readFile(join(HL7V2_LIQUID_TEMPLATE_LOCATION, templateName), (err, templateContent) => {
                                         if (err) {
                                             reject({
                                                 'status': 404,

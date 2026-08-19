@@ -33,17 +33,10 @@ export const HL7V2_LIQUID_TEMPLATE_LOCATION = join(
     "Hl7v2"
 );
 export const HL7V2_DATA_LOCATION = join(__dirname, sampleDataFolder, "hl7v2");
-export const CDA_TEMPLATE_LOCATION = join(
-    __dirname,
-    serviceTemplateFolder,
-    "cda"
-);
-export const CDA_DATA_LOCATION = join(__dirname, sampleDataFolder, "cda");
 export const CLS_NAMESPACE = "conversionRequest";
-export const CLS_KEY_HANDLEBAR_INSTANCE = "hbs";
 export const CLS_KEY_TEMPLATE_LOCATION = "templateLocation";
 export const TIMEZONE = "TIMEZONE";
 
 export let constants = [AVAILABLE_PARSERS, BASE_TEMPLATE_FILES_LOCATION, TEMPLATE_FILES_LOCATION, SAMPLE_DATA_LOCATION,
     STATIC_LOCATION, CODE_MIRROR_LOCATION, MOVE_TO_GLOBAL_KEY_NAME, HL7V2_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION, HL7V2_DATA_LOCATION,
-    CDA_DATA_LOCATION, CLS_NAMESPACE, CLS_KEY_HANDLEBAR_INSTANCE, CLS_KEY_TEMPLATE_LOCATION, TIMEZONE];
+    CLS_NAMESPACE, CLS_KEY_TEMPLATE_LOCATION, TIMEZONE];
