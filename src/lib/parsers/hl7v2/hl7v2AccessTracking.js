@@ -24,6 +24,11 @@ function isIndexKey(prop) {
 function trackComponent(component) {
     if (component === null || component === undefined) return component;
     component._accessed = false;
+    // Capture the raw value now, off the plain (not-yet-proxied) object, so
+    // buildUnusedSegmentsReport can read it back later without going through the `get` trap
+    // below -- reading `.Value` there would itself count as an access and mark every reported
+    // (i.e. still-unused) component as accessed as a side effect of merely reporting it.
+    component._rawValue = component.Value;
     return new Proxy(component, {
         get(target, prop, receiver) {
             if (ACCESSIBLE_COMPONENT_KEYS.has(prop) || isIndexKey(prop)) {
@@ -133,7 +138,9 @@ export function buildUnusedSegmentsReport(trackedModel) {
             for (let k = 0; k < field.Components.length; k++) {
                 const component = field.Components[k];
                 if (component && component._accessed === false) {
-                    unusedComponents.push({ index: k, value: component.Value });
+                    // Read the pre-captured raw value (see trackComponent), not `.Value` through
+                    // the tracking proxy -- that read would itself flip `_accessed` to true.
+                    unusedComponents.push({ index: k, value: component._rawValue });
                 }
             }
             if (unusedComponents.length > 0) {
