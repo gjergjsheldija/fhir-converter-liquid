@@ -111,17 +111,30 @@ function convertData() {
                                 dataDoc.getAllMarks().forEach((mark) => mark.clear());
 
                                 unusedReport.forEach((line) => {
+                                    // MSH (always line 0) is field-numbered specially: MSH-1 (the field
+                                    // separator character) occupies no pipe-delimited token of its own, so
+                                    // every conventional field number after it is shifted back by one
+                                    // relative to its raw pipe-split token position. Non-MSH segments have
+                                    // no such shift -- field N is directly the Nth pipe-delimited token.
+                                    var isHeaderSegment = line.line === 0;
+                                    var fieldIndexOffset = isHeaderSegment ? 1 : 0;
                                     line.field.forEach((field) => {
                                         if (field && field.index !== 0 && field.component.length > 0) {
                                             field.component.forEach((component) => {
                                                 var lineText = dataDoc.getLine(line.line);
-                                                var startFieldIndex = indexOfX(lineText, fieldSeparator, field.index - 1) + 1;
-                                                var endFieldIndex = indexOfX(lineText, fieldSeparator, field.index);
+                                                var startFieldIndex = indexOfX(lineText, fieldSeparator, field.index - 1 - fieldIndexOffset) + 1;
+                                                var endFieldIndex = indexOfX(lineText, fieldSeparator, field.index - fieldIndexOffset);
                                                 if (endFieldIndex === -1) {
                                                     endFieldIndex = lineText.length;
                                                 }
 
-                                                var startComponentIndex = indexOfX(lineText.substring(startFieldIndex, endFieldIndex), componentSeparator, component.index - 1) + startFieldIndex + 1;
+                                                // Components are 1-indexed with index 0 reserved as null
+                                                // padding (matching upstream), so the real component at
+                                                // report index N is the (N-1)th token in a 0-indexed split --
+                                                // and locating the start of that token needs the (N-2)th
+                                                // separator occurrence (indexOfX returns -1 for N<2, which
+                                                // correctly resolves to "no separator before it" for N=1).
+                                                var startComponentIndex = indexOfX(lineText.substring(startFieldIndex, endFieldIndex), componentSeparator, component.index - 2) + startFieldIndex + 1;
                                                 var endComponentIndex = startComponentIndex + component.value.length;
                                                 dataDoc.markText({
                                                     line: line.line,
