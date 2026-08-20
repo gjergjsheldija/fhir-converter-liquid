@@ -22,6 +22,9 @@
 // - Repeats: NOT padded -- index 0 is the first repetition. A field's own top-level
 //   Value/Components always mirror Repeats[0], so unrepeated fields work identically
 //   whether accessed directly or via `.Repeats[0]`.
+// - Field.Value is the RAW WHOLE-FIELD TEXT (repetition separators included, if any) -- it is
+//   NOT the same as Field.Repeats[0].Value for a field with more than one repetition. Only
+//   Components mirrors Repeats[0]; Value does not. Verified against Hl7v2DataParser.ParseFields.
 
 import { Escape } from '../../inputProcessor/specialCharProcessor.js';
 import { Unescape } from './hl7EscapeSequence.js';
@@ -66,12 +69,14 @@ function buildFieldInstance(text, seps) {
     return instance;
 }
 
-// A full field: Value/Components mirror the first repetition, plus the 0-indexed Repeats list.
+// A full field: Value is the raw whole-field text (repetition separators included, matching
+// upstream's Hl7v2Field constructor call in ParseFields -- Value is set once, directly from the
+// raw field text, and never overwritten; only Components gets reassigned to mirror Repeats[0]).
 function buildField(text, seps) {
     var repeatsRaw = text.split(seps.repetitionSeparator);
     var repeats = repeatsRaw.map(function (rt) { return buildFieldInstance(rt, seps); });
     var field = repeats[0].slice();
-    field.Value = repeats[0].Value;
+    field.Value = normalizeText(text, seps.fieldSeparator, seps.componentSeparator, seps.subcomponentSeparator, seps.repetitionSeparator);
     field.Components = repeats[0].Components;
     field.Repeats = repeats;
     return field;
