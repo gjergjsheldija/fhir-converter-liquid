@@ -54,4 +54,13 @@ describe('hl7v2AccessTracking', function () {
         strictEqual(pidReport !== undefined, true);
         strictEqual(pidReport.field.some(f => f.index === 0), false);
     });
+
+    it('should return the same non-empty report on a second call, not erase itself by reading component.Value through the tracking proxy', function () {
+        const tracked = trackAccess(parseHl7v2FieldModel(MSG));
+        const firstReport = buildUnusedSegmentsReport(tracked);
+        const secondReport = buildUnusedSegmentsReport(tracked);
+        strictEqual(firstReport.length > 0, true);
+        strictEqual(secondReport.length, firstReport.length);
+        strictEqual(JSON.stringify(secondReport), JSON.stringify(firstReport));
+    });
 });
