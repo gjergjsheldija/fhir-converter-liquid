@@ -4,6 +4,7 @@
 // -------------------------------------------------------------------------------------------------
 import dataHandler from '../../dataHandler/dataHandler.js';
 import { parseHl7v2FieldModel } from './hl7v2FieldModel.js';
+import { trackAccess, buildUnusedSegmentsReport } from './hl7v2AccessTracking.js';
 import {
     stripDoubleBraceInsideTags,
     normalizeDoubleDotToSingleDot,
@@ -21,7 +22,7 @@ export default class hl7v2Liquid extends dataHandler {
     parseSrcData(msg) {
         return new Promise((fulfill, reject) => {
             try {
-                fulfill({ v2: parseHl7v2FieldModel(msg) });
+                fulfill({ v2: trackAccess(parseHl7v2FieldModel(msg)) });
             } catch (err) {
                 reject(err);
             }
@@ -40,5 +41,11 @@ export default class hl7v2Liquid extends dataHandler {
                 )
             )
         );
+    }
+
+    getConversionResultMetadata(context) {
+        return {
+            unusedSegments: buildUnusedSegmentsReport(context.v2)
+        };
     }
 }

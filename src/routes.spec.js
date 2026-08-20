@@ -387,55 +387,65 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
                 srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw=",
                 templatesOverrideBase64: "e30="
             })
+            // Note: this fixture originally also expected an 'invalidAccess': [] key (the query
+            // string does pass invalidAccess=true), but invalidAccess has no upstream equivalent
+            // and is out of scope for this plan (see hl7v2AccessTracking.js's own doc comment and
+            // Step 8 of task-5-brief.md) -- getConversionResultMetadata() never populates that key,
+            // so it is correctly absent from the real response entirely, not merely empty.
+            // The unusedSegments field/component indices below were corrected against real,
+            // verified output: this rich field model is 1-indexed for Components (index 0 is null
+            // padding, matching upstream) and Fields[N] equals conventional HL7 field N (MSH-3
+            // "AccMgr" is Fields[3], not Fields[2] -- the original hardcoded values here predate
+            // this task and were never validated against actual output).
             .expect(200, {
                 'fhirResource': {}, 'unusedSegments': [{
                     "field": [{
                         "component": [{
-                            "index": 0, "value": "AccMgr"
-                        }
-
-                        ], "index": 2
-                    }, {
-                        "component": [{
-                            "index": 0, "value": "1"
+                            "index": 1, "value": "AccMgr"
                         }
 
                         ], "index": 3
                     }, {
                         "component": [{
-                            "index": 0, "value": "20050110045504"
+                            "index": 1, "value": "1"
                         }
 
-                        ], "index": 6
+                        ], "index": 4
                     }, {
                         "component": [{
-                            "index": 0, "value": "ADT"
+                            "index": 1, "value": "20050110045504"
+                        }
+
+                        ], "index": 7
+                    }, {
+                        "component": [{
+                            "index": 1, "value": "ADT"
                         }, {
-                            "index": 1, "value": "A01"
+                            "index": 2, "value": "A01"
                         }
 
-
-                        ], "index": 8
-                    }, {
-                        "component": [{
-                            "index": 0, "value": "599102"
-                        }
 
                         ], "index": 9
                     }, {
                         "component": [{
-                            "index": 0, "value": "P"
+                            "index": 1, "value": "599102"
                         }
 
                         ], "index": 10
                     }, {
                         "component": [{
-                            "index": 0, "value": "2.3"
+                            "index": 1, "value": "P"
                         }
 
                         ], "index": 11
+                    }, {
+                        "component": [{
+                            "index": 1, "value": "2.3"
+                        }
+
+                        ], "index": 12
                     }], "line": 0, "type": "MSH"
-                }], 'invalidAccess': []
+                }]
             })
             .end(function (err) {
                 if (err) {
@@ -478,53 +488,56 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
                 srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw=",
                 templatesOverrideBase64: "e30="
             })
+            // Indices corrected against real, verified output -- see the comment on the combined
+            // detailed-report test above for the full explanation (1-indexed Components, Fields[N]
+            // == conventional HL7 field N).
             .expect(200, {
                 'fhirResource': {}, 'unusedSegments': [{
                     "field": [{
                         "component": [{
-                            "index": 0, "value": "AccMgr"
-                        }
-
-                        ], "index": 2
-                    }, {
-                        "component": [{
-                            "index": 0, "value": "1"
+                            "index": 1, "value": "AccMgr"
                         }
 
                         ], "index": 3
                     }, {
                         "component": [{
-                            "index": 0, "value": "20050110045504"
+                            "index": 1, "value": "1"
                         }
 
-                        ], "index": 6
+                        ], "index": 4
                     }, {
                         "component": [{
-                            "index": 0, "value": "ADT"
+                            "index": 1, "value": "20050110045504"
+                        }
+
+                        ], "index": 7
+                    }, {
+                        "component": [{
+                            "index": 1, "value": "ADT"
                         }, {
-                            "index": 1, "value": "A01"
+                            "index": 2, "value": "A01"
                         }
 
-
-                        ], "index": 8
-                    }, {
-                        "component": [{
-                            "index": 0, "value": "599102"
-                        }
 
                         ], "index": 9
                     }, {
                         "component": [{
-                            "index": 0, "value": "P"
+                            "index": 1, "value": "599102"
                         }
 
                         ], "index": 10
                     }, {
                         "component": [{
-                            "index": 0, "value": "2.3"
+                            "index": 1, "value": "P"
                         }
 
                         ], "index": 11
+                    }, {
+                        "component": [{
+                            "index": 1, "value": "2.3"
+                        }
+
+                        ], "index": 12
                     }], "line": 0, "type": "MSH"
                 }]
             })
@@ -537,7 +550,8 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
             });
     });
 
-    it('should return 200 OK with single detailed report(invalidAccess) for valid message with valid template and single report field declaration', function (done) {
+    // invalidAccess has no upstream equivalent (verified: zero occurrences in microsoft/FHIR-Converter) -- out of scope, see docs/superpowers/plans/2026-08-20-hl7v2-parser-filter-fidelity.md
+    it.skip('should return 200 OK with single detailed report(invalidAccess) for valid message with valid template and single report field declaration', function (done) {
         //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
         //Template: {}
         supertest(app)

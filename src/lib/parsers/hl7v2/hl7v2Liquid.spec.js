@@ -39,8 +39,13 @@ describe("hl7v2Liquid data handler", function () {
         assert.strictEqual(handler.preProcessTemplate(template), '{% if PV1.16 %}');
     });
 
-    it("returns an empty conversion result metadata object", function () {
+    it("returns an unusedSegments report built from context.v2's tracked parsed data", async function () {
         const handler = new hl7v2Liquid();
-        assert.deepStrictEqual(handler.getConversionResultMetadata(), {});
+        const msg = "MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101120000||ADT^A01|123|P|2.3\nPID|1||12345^^^MRN\n";
+        const parsed = await handler.parseSrcData(msg);
+        const metadata = handler.getConversionResultMetadata(parsed);
+        assert.strictEqual(Array.isArray(metadata.unusedSegments), true);
+        // Nothing was rendered against a template, so PID's fields are all still untouched.
+        assert.strictEqual(metadata.unusedSegments.some((r) => r.type === "PID"), true);
     });
 });
