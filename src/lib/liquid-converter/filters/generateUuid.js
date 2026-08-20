@@ -1,13 +1,17 @@
+// -------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
+// -------------------------------------------------------------------------------------------------
 import {createHash} from "crypto";
 
 export function generateUuid(namespace) {
-    if (!namespace && this) {
-        if (this.context.scopes.length === 1) {
-            const obj = this.context.scopes[0];
-            if (typeof obj === 'object') {
-                namespace = Object.values(obj)[0];
-            }
-        }
+    // Matches upstream's GenerateUUID (GeneralFilters.cs): string.IsNullOrWhiteSpace(input) -> null.
+    // No scope-sniffing fallback exists there; a prior version of this filter guessed at one
+    // for an unresolved "multiple vars" TODO, which silently substituted unrelated render-context
+    // data whenever the real piped value was legitimately empty, producing well-formed but
+    // meaningless UUIDs.
+    if (namespace === null || namespace === undefined || String(namespace).trim().length === 0) {
+        return null;
     }
     const input = ''.concat(namespace);
     const hash = createHash('sha256').update(input, 'utf8').digest();

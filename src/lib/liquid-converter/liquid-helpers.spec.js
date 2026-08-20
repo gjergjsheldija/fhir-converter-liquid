@@ -84,6 +84,18 @@ EVN|A01|20050110045502|||||`);
         it('should generate different UUIDs for different inputs', function () {
             assert.notEqual(generateUuid('Encounter_0123456789'), generateUuid('Encounter_0123456780'));
         });
+        it('should return null for null input, matching upstream GenerateUUID', function () {
+            assert.equal(generateUuid(null), null);
+        });
+        it('should return null for undefined input, matching upstream GenerateUUID', function () {
+            assert.equal(generateUuid(undefined), null);
+        });
+        it('should return null for empty string input, matching upstream GenerateUUID', function () {
+            assert.equal(generateUuid(''), null);
+        });
+        it('should return null for whitespace-only input, matching upstream GenerateUUID', function () {
+            assert.equal(generateUuid('   '), null);
+        });
     });
 });
 
