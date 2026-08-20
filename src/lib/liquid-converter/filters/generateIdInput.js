@@ -11,6 +11,8 @@ export function generateIdInput(segment, resourceType, isBaseIdRequired, baseId)
     // Handle empty/whitespace segment (including empty objects from Liquid context)
     if (!segment ||
         segment.length === 0 ||
+        // liquidjs-specific: an empty {% capture %} block binds to {}, not '' -- no C# analog,
+        // since upstream's `segment` parameter is a string and can never be an object.
         (typeof segment === 'object' && Object.keys(segment).length === 0) ||
         segment.toString().trim().length === 0) {
         return null;
