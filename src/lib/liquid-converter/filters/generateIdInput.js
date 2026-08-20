@@ -1,27 +1,25 @@
+// -------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
+// -------------------------------------------------------------------------------------------------
 
+// Matches upstream's GenerateIdInput (GeneralFilters.cs): string.IsNullOrWhiteSpace(segment) -> null.
+// No scope-sniffing fallback exists there; a prior version of this filter guessed at one for an
+// unresolved "multiple vars" TODO, which silently substituted unrelated render-context data
+// whenever the real piped value was legitimately empty.
 export function generateIdInput(segment, resourceType, isBaseIdRequired, baseId) {
-
-    if (!segment) {
-        if (!this) return null;
-        if (this.context.scopes.length === 1) {
-            const obj = this.context.scopes[0];
-            if (typeof obj === 'object') {
-                segment = Object.values(obj);
-            }
-        }
+    // Handle empty/whitespace segment (including empty objects from Liquid context)
+    if (!segment ||
+        segment.length === 0 ||
+        (typeof segment === 'object' && Object.keys(segment).length === 0) ||
+        segment.toString().trim().length === 0) {
+        return null;
     }
 
-    const filter = function (segment, resourceType, isBaseIdRequired, baseId = "default") {
-        if (!segment || segment.length === 0 || segment.toString().trim().length === 0) {
-            return null;
-        }
+    if ((!resourceType || resourceType.length === 0) || (isBaseIdRequired && (baseId === undefined))) {
+        throw new Error("invalid id generation input");
+    }
 
-        if ((!resourceType || resourceType.length === 0) || (isBaseIdRequired && (baseId === "default"))) {
-            throw new Error("invalid id generation input");
-        }
-
-        segment = segment.toString().trim();
-        return baseId !== "default" ? `${resourceType}_${segment}_${baseId}` : `${resourceType}_${segment}`;
-    };
-    return filter(segment, resourceType, isBaseIdRequired, baseId);
+    segment = segment.toString().trim();
+    return baseId !== undefined ? `${resourceType}_${segment}_${baseId}` : `${resourceType}_${segment}`;
 }
