@@ -25,4 +25,24 @@ describe('parseHl7v2FieldModel', function () {
         strictEqual(pidSegment.Fields[3].Value, '111111');
         strictEqual(pidSegment.Fields[3].Repeats[0].Value, '111111');
     });
+
+    it('should split segments on a bare carriage return, matching upstream Hl7v2DataUtility.SplitMessageToSegments', function () {
+        const msg = 'MSH|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||\rPID|1||111111||DUCK^DONALD^D';
+        const result = parseHl7v2FieldModel(msg);
+        strictEqual(result.meta.length, 2);
+        strictEqual(result.meta[0], 'MSH');
+        strictEqual(result.meta[1], 'PID');
+    });
+
+    it('should split segments on CRLF, matching upstream', function () {
+        const msg = 'MSH|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||\r\nPID|1||111111||DUCK^DONALD^D';
+        const result = parseHl7v2FieldModel(msg);
+        strictEqual(result.meta.length, 2);
+    });
+
+    it('should ignore empty segments from consecutive separators, matching RemoveEmptyEntries', function () {
+        const msg = 'MSH|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||\r\rPID|1||111111||DUCK^DONALD^D';
+        const result = parseHl7v2FieldModel(msg);
+        strictEqual(result.meta.length, 2);
+    });
 });

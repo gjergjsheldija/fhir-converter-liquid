@@ -136,7 +136,10 @@ export function parseHl7v2FieldModel(msg) {
 
     parseHL7v2(msg); // validates and throws on malformed input; result intentionally discarded
 
-    var segments = msg.split(/\r?\n/);
+    // Matches upstream's Hl7v2DataUtility.SplitMessageToSegments: any of \r\n, \r, or \n is a
+    // valid segment terminator (bare \r is the traditional native HL7v2/MLLP wire-format one),
+    // and consecutive/trailing separators produce no empty segments.
+    var segments = msg.split(/\r\n|\r|\n/).filter(function (s) { return s.length > 0; });
     var seps = {
         fieldSeparator: segments[0][3],
         componentSeparator: segments[0][4],
