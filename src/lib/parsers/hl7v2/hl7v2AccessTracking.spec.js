@@ -33,4 +33,25 @@ describe('hl7v2AccessTracking', function () {
             strictEqual(mshReport.field.some(f => f.index === 1 || f.index === 2), false);
         }
     });
+
+    it('should mark a component accessed through the plain numeric-index chain real templates use, not only via .Fields/.Components', function () {
+        // Mirrors segmentFilters.getFirstSegments(), which returns the raw segment object
+        // (msg.data[i]) directly, and real templates (e.g. src/templates/Hl7v2/ADT_A01.liquid's
+        // `firstSegments.MSH.7.Value`) index into it by plain field number -- this never touches
+        // the `.Fields`/`.Components` named properties at all. MSH.7 (date/time) is Fields[7]
+        // ("20050110045504") in this message.
+        const tracked = trackAccess(parseHl7v2FieldModel(MSG));
+        void tracked.data[0][7].Value;
+        const report = buildUnusedSegmentsReport(tracked);
+        const mshReport = report.find(r => r.type === 'MSH');
+        strictEqual(mshReport === undefined || mshReport.field.some(f => f.index === 7), false);
+    });
+
+    it('should not report a non-MSH segment\'s own field 0 (the segment name itself) as unused', function () {
+        const tracked = trackAccess(parseHl7v2FieldModel(MSG));
+        const report = buildUnusedSegmentsReport(tracked);
+        const pidReport = report.find(r => r.type === 'PID');
+        strictEqual(pidReport !== undefined, true);
+        strictEqual(pidReport.field.some(f => f.index === 0), false);
+    });
 });
