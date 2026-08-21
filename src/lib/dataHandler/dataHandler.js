@@ -6,6 +6,7 @@
 import { Process } from '../outputProcessor/jsonProcessor.js';
 import { Process as resourceMergerProcessor }  from '../outputProcessor/resourceMerger.js';
 import {UnescapeHtml} from "../inputProcessor/specialCharProcessor.js";
+import {applyDotLiquidCompatTransforms} from "../liquid-converter/dotLiquidCompat.js";
 
 export default class dataHandler {
     constructor(dataType) {
@@ -19,7 +20,11 @@ export default class dataHandler {
     }
 
     preProcessTemplate(templateStr) {
-        return templateStr;
+        // Root/top-level message-type templates arrive here as raw request-payload content,
+        // never passing through liquid-converter.js's custom fs.readFileSync hook that
+        // {% include %}/{% evaluate %}-loaded sub-templates get -- apply the same DotLiquid
+        // compat transforms here so root templates get the same fixes. See dotLiquidCompat.js.
+        return applyDotLiquidCompatTransforms(templateStr);
     }
 
     postProcessResult(inResult) {
