@@ -6,10 +6,6 @@ import {expect} from 'chai';
 import fs from 'fs-extra';
 import {join} from 'path';
 import os from 'os';
-import {fileURLToPath} from 'url';
-import path from 'path';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe('init-service base-template sync', () => {
     let baseDir, destDir;
