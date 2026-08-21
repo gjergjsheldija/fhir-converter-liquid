@@ -23,7 +23,8 @@
     "posttest": "eslint {src,test}/**/*.js",
     "prestart": "node src/init-service.js",
     "start": "node src/index.js",
-    "eslint": "eslint {src,test}/**/*.js"
+    "eslint": "eslint {src,test}/**/*.js",
+    "prepare": "husky"
   },
   "eslintConfig": {
     "env": {
@@ -95,6 +96,7 @@
   "devDependencies": {
     "assert": "^2.0.0",
     "eslint": "^8.20.0",
+    "husky": "^9.1.7",
     "mocha": "10.1.0",
     "mocha-junit-reporter": "^2.0.2",
     "mocha-multi-reporters": "^1.5.1",
@@ -136,6 +138,5 @@
     "uuid": "^8.3.2",
     "winston": "^3.8.2",
     "xml2js": "0.5.0"
-  },
-  "license": "MIT"
+  }
 }
