@@ -8,14 +8,7 @@ import fs from "fs";
 import path from "path";
 import evaluate from "./tags/evaluate.js";
 import { external as filters } from "./liquid-helpers.js";
-import {
-    stripDoubleBraceInsideTags,
-    normalizeDoubleDotToSingleDot,
-    normalizeElseifTagName,
-    normalizeTripleBraceOutput,
-    normalizeMalformedOutputCloser,
-    normalizeVariableNameTypos
-} from "./dotLiquidCompat.js";
+import { applyDotLiquidCompatTransforms } from "./dotLiquidCompat.js";
 
 var liquidInstances = {};
 
@@ -49,18 +42,8 @@ export function instance(
                     if (relativeName in overrides) {
                         return overrides[relativeName];
                     }
-                    return normalizeVariableNameTypos(
-                        normalizeMalformedOutputCloser(
-                            normalizeTripleBraceOutput(
-                                normalizeElseifTagName(
-                                    normalizeDoubleDotToSingleDot(
-                                        stripDoubleBraceInsideTags(
-                                            fs.readFileSync(templateFilePath, "utf8")
-                                        )
-                                    )
-                                )
-                            )
-                        )
+                    return applyDotLiquidCompatTransforms(
+                        fs.readFileSync(templateFilePath, "utf8")
                     );
                 },
                 existsSync(templateFilePath) {
