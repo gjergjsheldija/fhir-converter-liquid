@@ -5,14 +5,7 @@
 import dataHandler from '../../dataHandler/dataHandler.js';
 import { parseHl7v2FieldModel } from './hl7v2FieldModel.js';
 import { trackAccess, buildUnusedSegmentsReport } from './hl7v2AccessTracking.js';
-import {
-    stripDoubleBraceInsideTags,
-    normalizeDoubleDotToSingleDot,
-    normalizeElseifTagName,
-    normalizeTripleBraceOutput,
-    normalizeMalformedOutputCloser,
-    normalizeVariableNameTypos
-} from '../../liquid-converter/dotLiquidCompat.js';
+import { applyDotLiquidCompatTransforms } from '../../liquid-converter/dotLiquidCompat.js';
 
 export default class hl7v2Liquid extends dataHandler {
     constructor() {
@@ -30,17 +23,7 @@ export default class hl7v2Liquid extends dataHandler {
     }
 
     preProcessTemplate(templateStr) {
-        return normalizeVariableNameTypos(
-            normalizeMalformedOutputCloser(
-                normalizeTripleBraceOutput(
-                    normalizeElseifTagName(
-                        normalizeDoubleDotToSingleDot(
-                            stripDoubleBraceInsideTags(templateStr)
-                        )
-                    )
-                )
-            )
-        );
+        return applyDotLiquidCompatTransforms(templateStr);
     }
 
     getConversionResultMetadata(context) {
