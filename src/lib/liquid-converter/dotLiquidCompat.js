@@ -128,3 +128,71 @@ export function normalizeVariableNameTypos(content) {
     content = content.replace(/\bPatientId\b/g, 'patientId');
     return content;
 }
+
+/**
+ * DotLiquid (upstream's C# Liquid engine) treats the bare `null`/`nil` literal
+ * as a real nil value wherever it's assigned or passed as a parameter --
+ * `{% assign x = null %}` leaves `x` falsy, matching a genuinely-undefined
+ * variable. liquidjs does NOT: confirmed via a standalone liquidjs render
+ * that `{% assign x = null %}` (or `= nil`) leaves `x` TRUTHY while `{{x}}`
+ * still renders empty -- liquidjs's own internal representation for the
+ * literal keyword is an empty object `{}`, not a real null/undefined. (Liquid
+ * `== null`/`!= null` COMPARISONS already work correctly against a real
+ * null/undefined; only assigning or passing the bare literal is affected.)
+ * Confirmed by also testing that assigning from a deliberately-undefined
+ * variable reference DOES produce a correctly-falsy result in liquidjs, so
+ * this rewrites `= null`/`= nil` (in `{% assign %}`) and `param: null`/
+ * `param: nil` (named parameters, e.g. in `{% include %}`/`{% evaluate %}`)
+ * to reference a variable name that can never legitimately exist in any
+ * HL7v2 render context, which liquidjs then correctly resolves as falsy.
+ * Confirmed via upstream template audit: 81 occurrences across the vendored
+ * Hl7v2 tree (79 `{% assign %}`, 2 `{% include %}` named parameters).
+ *
+ * KNOWN ISSUE (2026-08-21, shipped anyway per explicit direction): fixed 13
+ * previously-failing regression tests but introduced 9 new failures
+ * (previously-passing tests regressing), net +4 passing / -4 failing. At
+ * least one traced regression (ORU-R01-01.hl7) shows a genuinely-missing
+ * `Observation` entry (id literally the string "undefined") and a spurious
+ * extra `DiagnosticReport.performer` reference -- some site(s) among the 81
+ * rewritten occurrences depend on the OLD truthy-`{}` behavior in a way not
+ * yet identified. Needs a targeted trace of the regressed tests (OUL_R22/
+ * R23/R24, OMG_O19, ORM-O01-05/06, OML-O21-03, ORU-R01-01) before this can
+ * be considered fully correct -- do not assume this transform is safe to
+ * extend further without first resolving the known regressions.
+ */
+export function normalizeNullNilLiteralAssignment(content) {
+    // The lookbehind on the operator excludes `==`/`!=` comparisons (which liquidjs already
+    // evaluates correctly against a real null/undefined) -- only a bare assign/parameter `=`
+    // or `:` immediately before the literal is rewritten.
+    return content.replace(/(\{%-?[^%]*?(?<![=!])[=:]\s*)(null|nil)\b(\s*(?:,|-?%\}))/g, (match, prefix, literal, suffix) => {
+        return `${prefix}__liquidjs_nil_shim__${suffix}`;
+    });
+}
+
+/**
+ * Applies every DotLiquid-compat transform above, in the order this module has always applied
+ * them for `{% include %}`/`{% evaluate %}`-loaded sub-templates. Root/top-level message-type
+ * templates (e.g. `ORM_O01.liquid`) are supplied directly as request payload content rather than
+ * loaded from disk, so they never passed through liquid-converter.js's custom `fs.readFileSync`
+ * hook where these transforms lived -- confirmed by tracing a real regression test
+ * (ORM-O01-01.hl7) where `normalizeNullNilLiteralAssignment` fixed the same `{% assign X = null %}`
+ * pattern in an included partial but had no effect until also applied to root templates via
+ * hl7v2Liquid.js's `preProcessTemplate` (which had its own stale, duplicate transform chain that
+ * silently shadowed this one -- see hl7v2Liquid.js). Call this on root template content before
+ * rendering, matching what sub-templates already receive.
+ */
+export function applyDotLiquidCompatTransforms(content) {
+    return normalizeNullNilLiteralAssignment(
+        normalizeVariableNameTypos(
+            normalizeMalformedOutputCloser(
+                normalizeTripleBraceOutput(
+                    normalizeElseifTagName(
+                        normalizeDoubleDotToSingleDot(
+                            stripDoubleBraceInsideTags(content)
+                        )
+                    )
+                )
+            )
+        )
+    );
+}
