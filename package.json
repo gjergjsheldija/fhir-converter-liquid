@@ -23,7 +23,8 @@
     "posttest": "eslint {src,test}/**/*.js",
     "prestart": "node src/init-service.js",
     "start": "node src/index.js",
-    "eslint": "eslint {src,test}/**/*.js"
+    "eslint": "eslint {src,test}/**/*.js",
+    "test:generate": "env NODE_ENV=testing AI_OPENAI_API_KEY=test-mock-key NODE_OPTIONS=\"--experimental-loader ./test/mocks/templategenerate-loader.mjs\" node node_modules/.bin/nyc --exit --timeout 10000 node node_modules/mocha/bin/_mocha src/routes.spec.js"
   },
   "eslintConfig": {
     "env": {
