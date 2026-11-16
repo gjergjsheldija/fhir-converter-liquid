@@ -1,0 +1,17 @@
+# Spec order
+
+Implement in this order. Do not start a later UI spec by editing the Bootstrap page the earlier spec is about to replace.
+
+1. **`specs/inline-conversion-plain-json.md`** — Inline convert requests use `srcData`, `template`, and `templatesOverride`. Do this before the generate route, because that route calls the converter with this body. **DONE (2026-11-16).** Base64 removed from the inline-conversion flow: the route handler (`src/routes.js`) and worker (`src/lib/workers/worker.js`) now pass plain `srcData`/`template`/`templatesOverride` strings with string-type validation (see requirement 5: no `*Base64` field names). The browser editor (`src/static/js/template-editor.js`) sends the plain JSON request shape, and the regression helper plus `src/routes.spec.js` were updated to match. Docs updated (`docs/api-summary.md`, `docs/convert-data-concept.md`). Tests: 438 passing, 17 failing (the 17 are known spec-05 cases only, unrelated to this change). ESLint clean. Successful response shape, endpoint paths, diagnostics query options, and timezone header behavior are unchanged; the stored-template endpoint is untouched.
+2. **`specs/web-ui/simple-editor.md`** — The editor page to build. Left file browser, Convert, Settings, New, Save, Copy, and Generate. The generate route is `specs/liquid-template-compat/06-generate-liquid-template-via-ai.md`. Do not implement the other UI specs while doing this.
+3. **`specs/web-ui/git-integration.md`** — After the simple editor. Do not start it during step 2.
+
+Not scheduled:
+
+- **`specs/web-ui/modern-ide-workbench.md`** and **`specs/web-ui/file-browser-sidebar-pane.md`** — Replaced for now by `simple-editor.md`. Do not implement them.
+
+
+- **`specs/liquid-template-compat/03-pin-and-refresh-upstream-baseline.md`** — **Verified (2026-11-16).** Pin `v7.0` @ commit `253307fe6063a42b024ef7dbeb6aae157f1c2f61` confirmed immutable and current — it equals upstream `main` HEAD; there is no newer release beyond `v7.0`. Local `UPSTREAM_VERSION.md` already records this commit (no provenance change needed). Content comparison (sha256) of 916 local templates + 139 local samples against the pin: 1050 paths match exactly and 5 are the documented local-only edits (`Extensions/_PatientCitizenship.liquid`, `Extensions/_PatientNationality.liquid`, `Resource/_Coverage.liquid`, `Resource/_Patient.liquid`, `Resource/_PLLocation.liquid`). Manifest (`testcases-hl7v2.json`, 132 cases) resolves fully (0 missing inputs/expected); the 7 extra disk samples are local test-only, not upstream cases. Validation: `npm test` 438 passing / 17 failing (17 = known spec-05 upstream-version-mismatch cases only), `npm run eslint` clean, `git diff --check` clean. No baseline change was made — the pin was verified, not re-synced.
+
+- **`specs/liquid-template-compat/05-fix-hl7v2-57-failures.md`** — **DONE** (2026-11-16). Both mechanisms implemented engine-only: §2 timezone-offset normalization (38 cases) and §3 empty-resource-id uuid attachment (9 cases). Spec 09's 3 "Observation of an event" divergence cases (OMG_O19-01, OML_O21-03, OUL_R24-01) are left as a **known upstream-version mismatch** — they exercise a feature absent from the pinned v7.0 engine, so no selector was guessed, per spec §8/§9. No tests weakened; `git diff --check` clean, only engine source changed. See `specs/ORDER.md` for the rewrite note that has since been resolved.
+- **`specs/liquid-template-compat/HANDOFF.md`** — Historical notes from 2026-11-15. Specs 01–04 are gone. Follow this file instead.

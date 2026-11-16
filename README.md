@@ -25,12 +25,14 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 ## Features
 
 **Conversion**
+
 - HL7v2 → FHIR R4, with templates for every major trigger-event family: `ADT`, `BAR`, `DFT`, `MDM`, `OMG`, `OML`, `ORM`, `ORU`, `OUL`, `RDE`, `RDS`, `REF`, `SIU`, `VXU`
 - Per-request template overrides — test a template change against real data without touching what's stored on the server
 - Diagnostics on demand: `unusedSegments` (data the template ignored) and `invalidAccess` (fields the template reached for but weren't there)
 - Timezone-aware date/time conversion via request header
 
 **Serving & tooling**
+
 - REST API with interactive OpenAPI/Swagger docs (`/api-docs`)
 - Browser-based template editor (CodeMirror) with live message → FHIR preview and sample data/templates to try it against
 - Async, queue-driven conversion over AMQP (Apache ActiveMQ Artemis via `rhea`) for pipeline integration — optional, off by default
@@ -82,25 +84,25 @@ Open `http://localhost:2019` for the browser-based editor:
 
 All endpoints are versioned under `/api/v1`. Full interactive reference: `GET /api-docs` (Swagger UI) / `GET /api-docs.json` (raw OpenAPI spec).
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/v1/parsers` | List available source-data parsers |
-| GET | `/api/v1/templates` | List templates on the server |
-| GET | `/api/v1/templates/{file}` | Fetch a specific template's contents |
-| GET | `/api/v1/sample-data` | List bundled sample messages |
-| GET | `/api/v1/sample-data/{file}` | Fetch a specific sample message |
-| POST | `/api/v1/convert/{srcDataType}` | Convert data using an inline template (`templateBase64`, plus optional `templatesOverrideBase64`) passed in the request body |
-| POST | `/api/v1/convert/{srcDataType}/{template}` | Convert data using a template already stored on the server |
-| GET | `/health` | Liveness check |
-| GET | `/version` | Build version |
+| Method | Path                                       | Description                                                                                                                  |
+| ------ | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/parsers`                          | List available source-data parsers                                                                                           |
+| GET    | `/api/v1/templates`                        | List templates on the server                                                                                                 |
+| GET    | `/api/v1/templates/{file}`                 | Fetch a specific template's contents                                                                                         |
+| GET    | `/api/v1/sample-data`                      | List bundled sample messages                                                                                                 |
+| GET    | `/api/v1/sample-data/{file}`               | Fetch a specific sample message                                                                                              |
+| POST   | `/api/v1/convert/{srcDataType}`            | Convert data using an inline template (`templateBase64`, plus optional `templatesOverrideBase64`) passed in the request body |
+| POST   | `/api/v1/convert/{srcDataType}/{template}` | Convert data using a template already stored on the server                                                                   |
+| GET    | `/health`                                  | Liveness check                                                                                                               |
+| GET    | `/version`                                 | Build version                                                                                                                |
 
 Useful query/header options on the convert endpoints:
 
-| Name | Where | Effect |
-|------|-------|--------|
-| `unusedSegments=true` | query | Include segments present in the source but never accessed by the template |
-| `invalidAccess=true` | query | Include fields the template tried to read that didn't exist |
-| `timezone` | header | Normalize date/times to a given IANA/offset timezone, e.g. `America/New_York` or `+0400` |
+| Name                  | Where  | Effect                                                                                   |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `unusedSegments=true` | query  | Include segments present in the source but never accessed by the template                |
+| `invalidAccess=true`  | query  | Include fields the template tried to read that didn't exist                              |
+| `timezone`            | header | Normalize date/times to a given IANA/offset timezone, e.g. `America/New_York` or `+0400` |
 
 ```bash
 curl -X POST "http://localhost:2019/api/v1/convert/hl7v2/ADT_A01?unusedSegments=true&invalidAccess=true" \
@@ -123,11 +125,11 @@ flowchart LR
 
 **Where they live:**
 
-| Path | Contents |
-|------|----------|
-| `src/templates/Hl7v2/` | Microsoft's base HL7v2 Liquid templates (entry points + `CodeSystem`, `DataType`, `Extensions`, `ID` includes) |
+| Path                           | Contents                                                                                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/templates/Hl7v2/`         | Microsoft's base HL7v2 Liquid templates (entry points + `CodeSystem`, `DataType`, `Extensions`, `ID` includes)                            |
 | `src/service-templates/Hl7v2/` | The templates actually served/used at runtime — regenerated from `templates/` on startup by `src/init-service.js`; edit here to customize |
-| `src/sample-data/hl7v2/` | Sample messages used by the web UI and for local testing |
+| `src/sample-data/hl7v2/`       | Sample messages used by the web UI and for local testing                                                                                  |
 
 **This project is template-compatible with [microsoft/FHIR-Converter](https://github.com/microsoft/FHIR-Converter)** — because it uses the same Liquid syntax and the same `hl7v2FHIR`-style helper filters, you can:
 
@@ -136,24 +138,34 @@ flowchart LR
 - Iterate fast with the web UI (instant preview) or with `templatesOverrideBase64` on `POST /api/v1/convert/{srcDataType}` (test one or more templates against real data with nothing written to disk)
 - Use `unusedSegments`/`invalidAccess` on a convert call to spot exactly what your template is missing or mis-referencing in the source message
 
+To restore the bundled HL7v2 templates and official expected-result fixtures from the exact Microsoft revision pinned in `test/e2e-test/liquid-fixtures/UPSTREAM_VERSION.md`, run:
+
+```bash
+make sync-templates
+make sync-expected-results
+make sync-hl7v2-samples
+```
+
+The first command replaces both the source template directory and the generated runtime copy. The second replaces the test suite's expected JSON files with Microsoft's checked-in results. The third replaces the UI's bundled HL7v2 sample messages with Microsoft's full sample set. All three verify the pinned commit and copied contents. Do not edit vendored Liquid files, expected results, or bundled sample messages by hand.
+
 ## Configuration
 
 `.env` (see `.env.example`):
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `PORT` | `2019` | HTTP port |
+| Variable                | Default | Purpose                        |
+| ----------------------- | ------- | ------------------------------ |
+| `PORT`                  | `2019`  | HTTP port                      |
 | `CONVERSION_TIMEOUT_MS` | `30000` | Per-message conversion timeout |
-| `LOG_LEVEL` | `info` | Winston log level |
+| `LOG_LEVEL`             | `info`  | Winston log level              |
 
 `config/default.json` (loaded via `nconf`, overridable by env vars) controls the optional AMQP integration:
 
-| Key | Purpose |
-|-----|---------|
-| `enable_message_broker` | Turn on queue-driven conversion (off by default) |
-| `input_queue_name` / `output_queue_name` | Queues consumed/produced when enabled |
-| `message_broker.*` | Broker host/port/credentials |
-| `max_retries` | Retry attempts for a failed conversion before giving up |
+| Key                                      | Purpose                                                 |
+| ---------------------------------------- | ------------------------------------------------------- |
+| `enable_message_broker`                  | Turn on queue-driven conversion (off by default)        |
+| `input_queue_name` / `output_queue_name` | Queues consumed/produced when enabled                   |
+| `message_broker.*`                       | Broker host/port/credentials                            |
+| `max_retries`                            | Retry attempts for a failed conversion before giving up |
 
 ## Docker
 

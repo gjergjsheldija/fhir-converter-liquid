@@ -49,7 +49,7 @@
     "resource":{
         "resourceType": "Location",
         "id":"{{ locationId_PL_1 }}",
-        {% if PL.8 and PL.8.Value and PL.8.Value != "" and locationId_PL_8 -%}
+        {% if locationId_PL_8 -%}
         "partOf":{
             "reference":"Location/{{locationId_PL_8}}"
         },
@@ -97,7 +97,7 @@
     "resource":{
         "resourceType": "Location",
         "id":"{{ locationId_PL_2 }}",
-        {% if PL.1 and PL.1.Value and PL.1.Value != "" and locationId_PL_1 -%}
+        {% if locationId_PL_1 -%}
         "partOf":{
             "reference":"Location/{{locationId_PL_1}}"
         },
@@ -145,7 +145,7 @@
     "resource":{
         "resourceType": "Location",
         "id":"{{ locationId_PL_3 }}",
-        {% if PL.2 and PL.2.Value and PL.2.Value != "" and locationId_PL_2 -%}
+        {% if locationId_PL_2 -%}
         "partOf":{
             "reference":"Location/{{locationId_PL_2}}"
         },
@@ -236,7 +236,7 @@
     "resource":{
         "resourceType": "Location",
         "id":"{{ locationId_PL_7 }}",
-        {% if PL.4 and PL.4.Value and PL.4.Value != "" and locationId_PL_4 -%}
+        {% if locationId_PL_4 -%}
         "partOf":{
             "reference":"Location/{{locationId_PL_4}}"
         },
@@ -284,7 +284,7 @@
     "resource":{
         "resourceType": "Location",
         "id":"{{ locationId_PL_8 }}",
-        {% if PL.7 and PL.7.Value and PL.7.Value != "" and locationId_PL_7 -%}
+        {% if locationId_PL_7 -%}
         "partOf":{
             "reference":"Location/{{locationId_PL_7}}"
         },

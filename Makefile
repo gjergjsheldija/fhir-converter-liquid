@@ -53,6 +53,18 @@ lint-dockerfile: ## Lint the docker file
 	docker run --rm -i hadolint/hadolint < Dockerfile
 .PHONY: lint-dockerfile
 
+sync-templates: ## Sync HL7v2 templates from the pinned Microsoft FHIR Converter revision
+	node scripts/sync-upstream-assets.js templates
+.PHONY: sync-templates
+
+sync-expected-results: ## Sync official HL7v2 expected JSON results from the pinned revision
+	node scripts/sync-upstream-assets.js expected-results
+.PHONY: sync-expected-results
+
+sync-hl7v2-samples: ## Sync HL7v2 UI sample messages from the pinned Microsoft revision
+	node scripts/sync-upstream-assets.js hl7v2-samples
+.PHONY: sync-hl7v2-samples
+
 restart: ## Restart the app
 restart: stop start
 .PHONY: restart

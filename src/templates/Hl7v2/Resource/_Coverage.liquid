@@ -150,7 +150,6 @@
                 },
             {% endfor -%}
         ],
-        {% if IN1.37 and IN1.37.2 and IN1.37.2.Value and IN1.37.2.Value != "" -%}
         "costToBeneficiary" : [
             { 
                 "type" : {                   
@@ -169,7 +168,6 @@
                  },
             }
         ],
-        {% endif -%}
         "subscriberId" : "{{ IN1.49.1.Value }}",
         "status" : "active",
         {% if IN1.55.Value == "D" -%}
