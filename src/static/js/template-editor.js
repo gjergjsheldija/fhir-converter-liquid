@@ -62,9 +62,7 @@ function convertData() {
         var outputLines = [];
 
         if (dataEditor.getValue() && dataEditor.getValue() !== "") {
-            // The following way can convert utf8 string to base64 string.
-            //   Ref: https://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array/18729931
-            reqBody.srcDataBase64 = btoa(unescape(encodeURIComponent(dataEditor.getValue())));
+            reqBody.srcData = dataEditor.getValue();
         } else {
             return;
         }
@@ -78,8 +76,8 @@ function convertData() {
             var partialTemplatesMap = {};
             partialTemplates.forEach(template => partialTemplatesMap[template.name] = template.data);
 
-            reqBody.templateBase64 = btoa(templateLines.join('\n'));
-            reqBody.templatesOverrideBase64 = btoa(JSON.stringify(partialTemplatesMap));
+            reqBody.template = templateLines.join('\n');
+            reqBody.templatesOverride = partialTemplatesMap;
         }
 
         latestRequest++;

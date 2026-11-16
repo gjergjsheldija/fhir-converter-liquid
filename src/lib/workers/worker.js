@@ -45,48 +45,31 @@ workerTaskProcessor((msg) => {
             switch (msg.type) {
                 case '/api/convert/:srcDataType': {
                     try {
-                        const base64RegEx = /^[a-zA-Z0-9/\r\n+]*={0,2}$/;
+                        var s = msg.srcData;
 
-                        if (!base64RegEx.test(msg.srcDataBase64)) {
+                        if (typeof s !== 'string') {
                             reject({
                                 'status': 400,
-                                'resultMsg': errorMessage(errorCodes.BadRequest, "srcData is not a base 64 encoded string.")
+                                'resultMsg': errorMessage(errorCodes.BadRequest, "srcData must be a string.")
                             });
                         }
 
-                        if (!base64RegEx.test(msg.templateBase64)) {
-                            reject({
-                                'status': 400,
-                                'resultMsg': errorMessage(errorCodes.BadRequest, "Template is not a base 64 encoded string.")
-                            });
+                        var templateString = "";
+                        if (msg.template) {
+                            templateString = msg.template;
                         }
 
                         var templatesMap = undefined;
-                        if (msg.templatesOverrideBase64) {
-                            if (!base64RegEx.test(msg.templatesOverrideBase64)) {
+                        if (msg.templatesOverride) {
+                            if (msg.templatesOverride.constructor !== Object) {
                                 reject({
                                     'status': 400,
-                                    'resultMsg': errorMessage(errorCodes.BadRequest, "templatesOverride is not a base 64 encoded string.")
+                                    'resultMsg': errorMessage(errorCodes.BadRequest, "templatesOverride must be a JSON object.")
                                 });
                             }
-                            templatesMap = JSON.parse(Buffer.from(msg.templatesOverrideBase64, 'base64').toString());
+                            templatesMap = msg.templatesOverride;
                         }
 
-
-                        var templateString = "";
-                        if (msg.templateBase64) {
-                            templateString = Buffer.from(msg.templateBase64, 'base64').toString();
-                        }
-
-                        try {
-                            var b = Buffer.from(msg.srcDataBase64, 'base64');
-                            var s = b.toString();
-                        } catch (err) {
-                            reject({
-                                'status': 400,
-                                'resultMsg': errorMessage(errorCodes.BadRequest, `Unable to parse input data. ${err.message}`)
-                            });
-                        }
                         var dataTypeHandler = dataHandlerFactory.createDataHandler(msg.srcDataType);
 
                         if (dataTypeHandler.dataType === 'hl7v2') {

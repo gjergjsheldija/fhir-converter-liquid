@@ -276,15 +276,14 @@ export default function (app) {
      *         schema:
      *           type: object
      *           properties:
-     *             templateBase64:
+     *             srcData:
      *               type: string
-     *             srcDataBase64:
+     *             template:
      *               type: string
-     *             templatesOverrideBase64:
-     *               type: string
+     *             templatesOverride:
+     *               type: object
      *           required:
-     *             - templateBase64
-     *             - srcDataBase64
+     *             - srcData
      *       - name: api-version
      *         in: query
      *         description: API version to use.
@@ -320,9 +319,9 @@ export default function (app) {
             .exec({
                 type: "/api/convert/:srcDataType",
                 srcDataType: req.params.srcDataType,
-                srcDataBase64: req.body.srcDataBase64,
-                templateBase64: req.body.templateBase64,
-                templatesOverrideBase64: req.body.templatesOverrideBase64,
+                srcData: req.body.srcData,
+                template: req.body.template,
+                templatesOverride: req.body.templatesOverride,
                 timezone: req.headers.timezone,
             })
             .then((result) => {

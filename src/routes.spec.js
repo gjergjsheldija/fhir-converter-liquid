@@ -270,14 +270,17 @@ describe("GET /api/v1/templates/:file", function () {
 });
 
 describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
-    it('should return 400 Bad Request when given a payload without a message', function (done) {
+    const validMessage = 'MSH|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||';
+
+    it('should return 400 Bad Request when srcData is not a string (payload without a message)', function (done) {
+        // srcData is now a plain JSON value; omitting it (undefined) is a 400.
         supertest(app)
             .post("/api/v1/convert/hl7v2")
-            .send({templateBase64: ""})
+            .send({srcData: 123})
             .expect(400, {
                 error: {
                     code: "BadRequest",
-                    message: "Unable to parse input data. The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined"
+                    message: "srcData must be a string."
                 }
             })
             .end(function (err) {
@@ -289,17 +292,36 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
             });
     });
 
-    it('should return 400 Bad Request with invalid templatesMap', function (done) {
+    it('should return 400 Bad Request when srcData is missing entirely', function (done) {
+        supertest(app)
+            .post("/api/v1/convert/hl7v2")
+            .send({})
+            .expect(400, {
+                error: {
+                    code: "BadRequest",
+                    message: "srcData must be a string."
+                }
+            })
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+
+    it('should return 400 Bad Request when templatesOverride is not a JSON object', function (done) {
         supertest(app)
             .post("/api/v1/convert/hl7v2")
             .send({
-                templateBase64: "e30=",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw=",
-                templatesOverrideBase64: "abc==5"
+                template: '{}',
+                srcData: validMessage,
+                templatesOverride: ['not', 'an', 'object']
             })
             .expect(400, {
                 error: {
-                    code: "BadRequest", message: "templatesOverride is not a base 64 encoded string."
+                    code: "BadRequest", message: "templatesOverride must be a JSON object."
                 }
             })
             .end(function (err) {
@@ -312,12 +334,11 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 400 Bad Request when given a payload with an invalid HL7 message', function (done) {
-        //This test passes a message with first segment "MSQ" (instead of MSH)
+        // This test passes a message with first segment "MSQ" (instead of MSH)
         supertest(app)
             .post("/api/v1/convert/hl7v2")
             .send({
-                templateBase64: "",
-                srcDataBase64: "TVNRfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw="
+                srcData: 'MSQ|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||'
             })
             .expect(400, {
                 error: {
@@ -335,12 +356,10 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 200 OK for valid message with an empty template', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
         supertest(app)
             .post("/api/v1/convert/hl7v2")
             .send({
-                templateBase64: "",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw="
+                srcData: validMessage
             })
             .expect(200)
             .expect(function (response) {
@@ -358,10 +377,9 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 200 OK for valid message without a template', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
         supertest(app)
             .post("/api/v1/convert/hl7v2")
-            .send({srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw="})
+            .send({srcData: validMessage})
             .expect(200)
             .expect(function (response) {
                 if (!Array.isArray(response.body.v2.data)) {
@@ -378,25 +396,17 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 200 OK with detailed report for valid message with valid template and report fields declaration', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
-        //Template: {}
         supertest(app)
             .post("/api/v1/convert/hl7v2?unusedSegments=true&invalidAccess=true")
             .send({
-                templateBase64: "e30=",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw=",
-                templatesOverrideBase64: "e30="
+                template: '{}',
+                srcData: validMessage,
+                templatesOverride: {}
             })
-            // Note: this fixture originally also expected an 'invalidAccess': [] key (the query
-            // string does pass invalidAccess=true), but invalidAccess has no upstream equivalent
-            // and is out of scope for this plan (see hl7v2AccessTracking.js's own doc comment and
-            // Step 8 of task-5-brief.md) -- getConversionResultMetadata() never populates that key,
-            // so it is correctly absent from the real response entirely, not merely empty.
-            // The unusedSegments field/component indices below were corrected against real,
-            // verified output: this rich field model is 1-indexed for Components (index 0 is null
-            // padding, matching upstream) and Fields[N] equals conventional HL7 field N (MSH-3
-            // "AccMgr" is Fields[3], not Fields[2] -- the original hardcoded values here predate
-            // this task and were never validated against actual output).
+            // unusedSegments field/component indices below were corrected against real,
+            // verified output: this rich field model is 1-indexed for Components (index 0
+            // is null padding, matching upstream) and Fields[N] equals conventional HL7
+            // field N (MSH-3 "AccMgr" is Fields[3], not Fields[2]).
             .expect(200, {
                 'fhirResource': {}, 'unusedSegments': [{
                     "field": [{
@@ -457,14 +467,12 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 200 OK without detailed report for valid message with valid template', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
-        //Template: {}
         supertest(app)
             .post("/api/v1/convert/hl7v2")
             .send({
-                templateBase64: "e30=",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw=",
-                templatesOverrideBase64: "e30="
+                template: '{}',
+                srcData: validMessage,
+                templatesOverride: {}
             })
             .expect(200, {
                 'fhirResource': {}
@@ -479,18 +487,13 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 200 OK with single detailed report(unusedSegments) for valid message with valid template and single report field declaration', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
-        //Template: {}
         supertest(app)
             .post("/api/v1/convert/hl7v2?unusedSegments=true")
             .send({
-                templateBase64: "e30=",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw=",
-                templatesOverrideBase64: "e30="
+                template: '{}',
+                srcData: validMessage,
+                templatesOverride: {}
             })
-            // Indices corrected against real, verified output -- see the comment on the combined
-            // detailed-report test above for the full explanation (1-indexed Components, Fields[N]
-            // == conventional HL7 field N).
             .expect(200, {
                 'fhirResource': {}, 'unusedSegments': [{
                     "field": [{
@@ -550,41 +553,21 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
             });
     });
 
-    // invalidAccess has no upstream equivalent (verified: zero occurrences in microsoft/FHIR-Converter) -- out of scope, see docs/superpowers/plans/2026-08-20-hl7v2-parser-filter-fidelity.md
-    it.skip('should return 200 OK with single detailed report(invalidAccess) for valid message with valid template and single report field declaration', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
-        //Template: {}
-        supertest(app)
-            .post("/api/v1/convert/hl7v2?invalidAccess=true")
-            .send({
-                templateBase64: "e30=",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw=",
-                templatesOverrideBase64: "e30="
-            })
-            .expect(200, {
-                'fhirResource': {}, 'invalidAccess': []
-            })
-            .end(function (err) {
-                if (err) {
-                    done(err);
-                } else {
-                    done();
-                }
-            });
-    });
-
     it('should return 400 Bad Request when given a payload with valid message but invalid template', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
-        //Template: invalid base64
+        // Template contains invalid Liquid syntax (unknown tag).
         supertest(app)
             .post("/api/v1/convert/hl7v2")
             .send({
-                templateBase64: "\\",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw="
+                template: '{% badtag %}',
+                srcData: validMessage
             })
-            .expect(400, {
-                error: {
-                    code: "BadRequest", message: "Template is not a base 64 encoded string."
+            .expect(400)
+            .expect(function (response) {
+                if (response.body.error.code !== "BadRequest") {
+                    throw("unexpected error code!");
+                }
+                if (!response.body.error.message.includes('tag "badtag" not found')) {
+                    throw("unexpected error message!");
                 }
             })
             .end(function (err) {
@@ -597,13 +580,12 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 200 OK when given a payload with valid message and template with extra commas', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
-        //Template: { , ,"a" : "1",,,,"b" : [, "c" , ,"d",,], ,}
+        // Template: { , ,"a" : "1",,,,"b" : [, "c" , ,"d",,], ,}
         supertest(app)
             .post("/api/v1/convert/hl7v2")
             .send({
-                templateBase64: "eyAsCiwKImEiIDogIjEiLCwsLAoiYiIgOiBbLCAiYyIgLCAsImQiLCxdLCAsCn0=",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw="
+                template: '{ , ,"a" : "1",,,,"b" : [, "c" , ,"d",,], ,}',
+                srcData: validMessage
             })
             .expect(200)
             .end(function (err) {
@@ -615,15 +597,15 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
             });
     });
 
-    it('should return 400 Bad Request when given a payload with invalid message but valid template', function (done) {
-        //Message: \
-        //Template: {}
+    it('should return 400 Bad Request when given a payload with an invalid HL7 srcData but valid template', function (done) {
+        // A lone backslash is not a valid HL7 message.
         supertest(app)
             .post("/api/v1/convert/hl7v2")
-            .send({templateBase64: "e30=", srcDataBase64: "\\"})
+            .send({template: '{}', srcData: '\\'})
             .expect(400, {
                 error: {
-                    code: "BadRequest", message: "srcData is not a base 64 encoded string."
+                    code: "BadRequest",
+                    message: "Unable to parse input data. Error: Invalid HL7 v2 message, first segment id = \\"
                 }
             })
             .end(function (err) {
@@ -636,13 +618,12 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
     });
 
     it('should return 400 Bad Request when given a payload that references a non existent include template', function (done) {
-        //Message: MSH|^~\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||
-        //Template: {% include 'nonExistentPartial' %}
+        // Template: {% include 'nonExistentPartial' %}
         supertest(app)
             .post("/api/v1/convert/hl7v2")
             .send({
-                templateBase64: "eyUgaW5jbHVkZSAnbm9uRXhpc3RlbnRQYXJ0aWFsJyAlfQ==",
-                srcDataBase64: "TVNIfF5+XCZ8QWNjTWdyfDF8fHwyMDA1MDExMDA0NTUwNHx8QURUXkEwMXw1OTkxMDJ8UHwyLjN8fHw="
+                template: "{% include 'nonExistentPartial' %}",
+                srcData: validMessage
             })
             .expect(400)
             .expect(function (response) {

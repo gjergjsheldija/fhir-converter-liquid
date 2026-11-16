@@ -26,8 +26,8 @@ describe('Liquid HL7v2 regression test - matches upstream expected output', () =
             const expectedPath = join(EXPECTED_LOCATION, testCase.template, testCase.expectedFile);
 
             const payload = {
-                templateBase64: Buffer.from(readFileSync(templatePath)).toString('base64'),
-                srcDataBase64: Buffer.from(readFileSync(dataPath)).toString('base64')
+                template: readFileSync(templatePath, 'utf8'),
+                srcData: readFileSync(dataPath, 'utf8')
             };
 
             supertest(app).post('/api/v1/convert/hl7v2').send(payload)

@@ -8,7 +8,7 @@ To convert data, use the POST endpoints:
 
 | Function | Syntax                    | Details                                         |
 |----------|---------------------------|-------------------------------------------------|
-|POST      |/api/convert/{srcDataType} |Takes data and templates as input, outputs FHIR data. Entry-point template passed base64-encoded in `templateBase64` parameter. Optional overriding templates passed in `templatesOverrideBase64`.|
+|POST      |/api/convert/{srcDataType} |Takes data and templates as input, outputs FHIR data. Entry-point template passed in the `template` parameter. Optional overriding templates passed as a JSON object in `templatesOverride`.|
 |POST      |/api/convert/{template}    |Converts data using a stored template.|
 
 ### Query Parameters
