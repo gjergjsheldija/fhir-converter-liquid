@@ -60,7 +60,7 @@ function changeTab(templateName) {
     }
 }
 
-function openLocalTemplate(templateName, text, dirty) {
+function openLocalTemplate(templateName, text, dirty, parentName) {
     var existing = openTemplates.find(template => template.name === templateName);
     if (existing) {
         existing.data = text;
@@ -70,9 +70,12 @@ function openLocalTemplate(templateName, text, dirty) {
     }
 
     currentTemplateReference[templateName] = dirty ? null : text;
+    var closeHtml = parentName
+        ? "<button type=\"button\" class=\"close\" onclick=\"closeTab('" + templateName + "')\"><span>&times;</span></button>"
+        : "";
     var tabs = $('#template-tabs');
-    tabs.append("<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + tabLabelHtml(templateName, "") + "</a>");
-    openTemplates.push({name: templateName, parent: null, data: text, active: true, marks: []});
+    tabs.append("<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + tabLabelHtml(templateName, closeHtml) + "</a>");
+    openTemplates.push({name: templateName, parent: parentName || null, data: text, active: true, marks: []});
     changeTab(templateName);
 }
 

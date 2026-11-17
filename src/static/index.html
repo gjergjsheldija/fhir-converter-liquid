@@ -125,7 +125,7 @@
                     <div class="split template-area">
                         <div class="pane-header">
                             <span>Template</span>
-                            <span id="template-open-name">untitled</span>
+                            <span id="template-open-name" class="sr-only">untitled</span>
                             <button class="btn btn-sm btn-outline-dark ml-auto" id="new-template-button" type="button">New</button>
                             <span id="new-template-form" hidden>
                                 <input id="new-template-name" class="form-control form-control-sm" type="text" placeholder="Name, .liquid optional" aria-label="Template name">
@@ -139,11 +139,17 @@
                             <div id="template-tabs" class="nav nav-tabs" role="tablist">
                                 <a class="nav-item nav-link font-weight-bold" onclick="changeTab('untitled')">untitled<span class="tab-dirty" hidden></span></a>
                             </div>
+                            <div id="includes-menu-wrap" hidden>
+                                <button type="button" id="includes-menu-button" class="btn btn-sm includes-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="includes-popover">
+                                    <span id="includes-menu-label">Includes (0)</span>
+                                    <span aria-hidden="true">▾</span>
+                                </button>
+                                <div id="includes-popover" role="region" aria-label="Included partials" hidden>
+                                    <input id="includes-filter" class="form-control form-control-sm" type="text" placeholder="Filter includes…" aria-label="Filter includes">
+                                    <div id="includes-groups"></div>
+                                </div>
+                            </div>
                         </nav>
-                        <div id="included-panel" hidden>
-                            <div id="included-heading">Included</div>
-                            <div id="included-list"></div>
-                        </div>
                         <div class="template-editor">
                             <textarea class="form-control" id="templatebox"></textarea>
                         </div>
