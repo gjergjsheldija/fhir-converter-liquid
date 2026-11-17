@@ -19,7 +19,7 @@ Implement `specs/web-ui/usability/` (`01` through `20`) before this folder, and 
 | Spec | Status | File | What it changes |
 | --- | --- | --- | --- |
 | 01 | Done | `01-color-tokens.md` | Names the light and dark colors as variables, removes Bootstrap `.bg-light` `!important` overrides, and points chrome, buttons, popovers, and autocomplete hints at the tokens. |
-| 02 | Not started | `02-editor-theme.md` | One CodeMirror theme (`fhir`) uses surface and rich syntax tokens ready for HL7v2, Liquid, and FHIR JSON. Eclipse and Blackboard are removed. |
+| 02 | Done | `02-editor-theme.md` | One CodeMirror theme (`fhir`) uses surface and rich syntax tokens ready for HL7v2, Liquid, and FHIR JSON. Eclipse and Blackboard are removed. |
 | 03 | Not started | `03-theme-control.md` | Light, Dark, and System. The choice applies immediately and on first paint. |
 | 04 | Not started | `04-icons.md` | Nine inline SVG symbols beside labels. The Font Awesome CDN stylesheet is removed. |
 

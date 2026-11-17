@@ -21,10 +21,6 @@ var transitionTime = 1000;
 // eslint-disable-next-line no-unused-vars
 var templateNames;
 
-// The chosen color schemes also need to have their stylesheets linked in the index.html file
-var darkMode = "blackboard";
-var lightMode = "eclipse";
-
 var currentEditorSettings = {
     darkMode: false,
     convertWhileTyping: true,
@@ -331,10 +327,6 @@ function setColorTheme(isDarkMode) {
 
     settingsModal.addClass("bg-" + addColor);
     settingsModal.addClass("text-" + removeColor);
-
-    dataEditor.setOption("theme", isDarkMode ? darkMode : lightMode);
-    outputCode.setOption("theme", isDarkMode ? darkMode : lightMode);
-    templateCodeEditor.setOption("theme", isDarkMode ? darkMode : lightMode);
 
     updateUnsavedDot();
 }
@@ -759,7 +751,7 @@ $(document).ready(function () {
         //readOnly: false,
         lineNumbers: true,
         lineWrapping: true,
-        theme: lightMode,
+        theme: "fhir",
         mode: {name: "default"},
         extraKeys: {
             "Ctrl-Q": function (cm) {
@@ -778,7 +770,7 @@ $(document).ready(function () {
         readOnly: true,
         lineNumbers: true,
         lineWrapping: true,
-        theme: lightMode,
+        theme: "fhir",
         mode: {name: "javascript"},
         extraKeys: {
             "Ctrl-Q": function (cm) {
@@ -796,7 +788,7 @@ $(document).ready(function () {
     };
 
     templateCodeEditor = CodeMirror.fromTextArea(document.getElementById("templatebox"), {
-        theme: lightMode,
+        theme: "fhir",
         lineNumbers: true,
         /*global hintExtraKeysObj*/
         extraKeys: Object.assign(extrakeysObj, hintExtraKeysObj),

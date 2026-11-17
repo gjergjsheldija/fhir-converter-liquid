@@ -1,0 +1,81 @@
+/* fhir CodeMirror theme: reads surface and syntax tokens from html[data-theme]. */
+
+.cm-s-fhir.CodeMirror {
+    background: var(--surface);
+    color: var(--text);
+}
+
+.cm-s-fhir .CodeMirror-gutters {
+    background: var(--surface);
+    color: var(--text-muted);
+    border-right: 1px solid var(--border-subtle);
+}
+
+.cm-s-fhir .CodeMirror-linenumber,
+.cm-s-fhir .CodeMirror-foldgutter-open,
+.cm-s-fhir .CodeMirror-foldgutter-folded {
+    color: var(--text-muted);
+}
+
+.cm-s-fhir .CodeMirror-cursor {
+    border-left: 1.5px solid var(--text);
+}
+
+.cm-s-fhir .CodeMirror-selected,
+.cm-s-fhir.CodeMirror-focused .CodeMirror-selected {
+    background: var(--selection);
+}
+
+.cm-s-fhir span.cm-keyword,
+.cm-s-fhir span.cm-tag {
+    color: var(--syntax-keyword);
+    font-weight: 600;
+}
+
+.cm-s-fhir span.cm-atom {
+    color: var(--syntax-keyword);
+    font-weight: 400;
+}
+
+.cm-s-fhir span.cm-property,
+.cm-s-fhir span.cm-builtin,
+.cm-s-fhir span.cm-qualifier {
+    color: var(--syntax-property);
+}
+
+.cm-s-fhir span.cm-string,
+.cm-s-fhir span.cm-string-2 {
+    color: var(--syntax-string);
+}
+
+.cm-s-fhir span.cm-number {
+    color: var(--syntax-number);
+}
+
+.cm-s-fhir span.cm-variable,
+.cm-s-fhir span.cm-variable-2,
+.cm-s-fhir span.cm-def {
+    color: var(--syntax-variable);
+}
+
+.cm-s-fhir span.cm-operator,
+.cm-s-fhir span.cm-meta,
+.cm-s-fhir span.cm-bracket {
+    color: var(--syntax-punctuation);
+}
+
+.cm-s-fhir span.cm-comment {
+    color: var(--syntax-comment);
+    font-style: italic;
+}
+
+.cm-s-fhir span.CodeMirror-matchingbracket {
+    color: inherit;
+    border-bottom: 2px solid var(--accent);
+}
+
+.cm-s-fhir .CodeMirror-foldmarker {
+    color: var(--accent);
+    text-shadow: none;
+    font-family: inherit;
+}
