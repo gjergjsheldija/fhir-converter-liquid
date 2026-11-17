@@ -10,6 +10,22 @@ var didOpenStartupExample = false;
 var cachedSamples = [];
 var openFolders = {};
 var suggestedTemplate = null;
+var openSections = { samples: true, templates: true, partials: true };
+(function hydrateOpenSections() {
+    var stored;
+    try {
+        stored = JSON.parse(localStorage.getItem('fhirConverterFileSections') || '{}');
+    } catch (storageError) {
+        stored = null;
+    }
+    if (stored && typeof stored === 'object') {
+        ['samples', 'templates', 'partials'].forEach(function (section) {
+            if (typeof stored[section] === 'boolean') {
+                openSections[section] = stored[section];
+            }
+        });
+    }
+})();
 
 function refreshFileBrowser() {
     $.ajax({url: getUrl('sample-data'), dataType: 'json', cache: false, success: function (sampleList) {
@@ -80,6 +96,14 @@ function highlightMatchingTemplate(text) {
     if (suggestedTemplate && filterValue && suggestedTemplate.toLowerCase().indexOf(filterValue) === -1) {
         $('#file-filter').val('');
     }
+    if (suggestedTemplate && openSections.templates === false) {
+        openSections.templates = true;
+        try {
+            localStorage.setItem('fhirConverterFileSections', JSON.stringify(openSections));
+        } catch (storageError) {
+            // storage unavailable; keep working without persistence
+        }
+    }
     renderFileBrowser(cachedSamples);
     if (suggestedTemplate) {
         var escaped = suggestedTemplate.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -138,6 +162,7 @@ function renderFileBrowser(messages) {
     });
 
     $('#samples-list').empty();
+    var renderedSamplesCount = 0;
     samples.forEach(function (sample) {
         if (filter && sample.label.toLowerCase().indexOf(filter) === -1) {
             return;
@@ -156,6 +181,7 @@ function renderFileBrowser(messages) {
             });
         });
         $('#samples-list').append(row);
+        renderedSamplesCount++;
     });
 
     var roots = [];
@@ -174,14 +200,17 @@ function renderFileBrowser(messages) {
     });
 
     $('#templates-list').empty();
+    var renderedRootsCount = 0;
     roots.forEach(function (name) {
         if (filter && name.toLowerCase().indexOf(filter) === -1) {
             return;
         }
         $('#templates-list').append(templateRow(name));
+        renderedRootsCount++;
     });
 
     $('#partials-list').empty();
+    var renderedPartialsFileCount = 0;
     Object.keys(folders).sort().forEach(function (folder) {
         var children = folders[folder].filter(function (name) {
             var label = name.substring(folder.length + 1);
@@ -225,9 +254,27 @@ function renderFileBrowser(messages) {
                 return;
             }
             childBox.append(templateRow(name, name.substring(name.lastIndexOf('/') + 1)));
+            renderedPartialsFileCount++;
         });
         block.append(heading, childBox);
         $('#partials-list').append(block);
+    });
+
+    $('#samples-heading-label').text('Samples (' + renderedSamplesCount + ')');
+    $('#templates-heading-label').text('Templates (' + renderedRootsCount + ')');
+    $('#partials-heading-label').text('Partials (' + renderedPartialsFileCount + ')');
+    var sectionCounts = {
+        samples: renderedSamplesCount,
+        templates: renderedRootsCount,
+        partials: renderedPartialsFileCount
+    };
+    ['samples', 'templates', 'partials'].forEach(function (section) {
+        var block = $('.file-browser-section[data-section="' + section + '"]');
+        var open = filter
+            ? sectionCounts[section] > 0
+            : openSections[section] !== false;
+        block.toggleClass('open', open);
+        block.children('.file-browser-section-toggle').attr('aria-expanded', open ? 'true' : 'false');
     });
     setFileRowTabOrder();
 }
@@ -368,6 +415,22 @@ $(document).ready(function () {
         if (browseSource === 'builtin') {
             renderFileBrowser(cachedSamples);
         }
+    });
+    $('#builtin-lists').on('click', '.file-browser-section-toggle', function () {
+        var block = $(this).closest('.file-browser-section');
+        var section = block.attr('data-section');
+        var open = !block.hasClass('open');
+        block.toggleClass('open', open);
+        $(this).attr('aria-expanded', open ? 'true' : 'false');
+        if (!($('#file-filter').val() || '')) {
+            openSections[section] = open;
+            try {
+                localStorage.setItem('fhirConverterFileSections', JSON.stringify(openSections));
+            } catch (storageError) {
+                // storage unavailable; keep working without persistence
+            }
+        }
+        setFileRowTabOrder();
     });
     $('#source-switch').on('click', 'button', function () {
         setBrowseSource($(this).data('source'));

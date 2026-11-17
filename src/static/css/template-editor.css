@@ -540,6 +540,42 @@ body {
     content: "▾";
 }
 
+button.file-browser-section-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 2px 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+}
+
+button.file-browser-section-toggle:hover {
+    background: #f2f6fb;
+}
+
+button.file-browser-section-toggle:focus {
+    outline: 2px solid #1f6feb;
+    outline-offset: -2px;
+}
+
+.file-browser-section > .file-browser-section-toggle .file-browser-chevron::before {
+    content: "▸";
+}
+
+.file-browser-section.open > .file-browser-section-toggle .file-browser-chevron::before {
+    content: "▾";
+}
+
+.file-browser-section:not(.open) > .file-browser-section-body {
+    display: none;
+}
+
 #file-browser-resizer {
     flex: 0 0 6px;
     width: 6px;

@@ -84,12 +84,27 @@
                 </div>
                 <input id="file-filter" class="form-control form-control-sm" type="text" placeholder="Filter">
                 <div id="builtin-lists">
-                    <div class="file-browser-heading">Samples</div>
-                    <div id="samples-list"></div>
-                    <div class="file-browser-heading">Templates</div>
-                    <div id="templates-list"></div>
-                    <div class="file-browser-heading">Partials</div>
-                    <div id="partials-list"></div>
+                    <div class="file-browser-section open" data-section="samples">
+                        <button type="button" class="file-browser-heading file-browser-section-toggle" aria-expanded="true" aria-controls="samples-list">
+                            <span class="file-browser-chevron" aria-hidden="true"></span>
+                            <span class="file-browser-section-label" id="samples-heading-label">Samples</span>
+                        </button>
+                        <div id="samples-list" class="file-browser-section-body"></div>
+                    </div>
+                    <div class="file-browser-section open" data-section="templates">
+                        <button type="button" class="file-browser-heading file-browser-section-toggle" aria-expanded="true" aria-controls="templates-list">
+                            <span class="file-browser-chevron" aria-hidden="true"></span>
+                            <span class="file-browser-section-label" id="templates-heading-label">Templates</span>
+                        </button>
+                        <div id="templates-list" class="file-browser-section-body"></div>
+                    </div>
+                    <div class="file-browser-section open" data-section="partials">
+                        <button type="button" class="file-browser-heading file-browser-section-toggle" aria-expanded="true" aria-controls="partials-list">
+                            <span class="file-browser-chevron" aria-hidden="true"></span>
+                            <span class="file-browser-section-label" id="partials-heading-label">Partials</span>
+                        </button>
+                        <div id="partials-list" class="file-browser-section-body"></div>
+                    </div>
                 </div>
                 <div id="external-browser" hidden>
                     <div id="external-path" class="file-browser-heading"></div>
