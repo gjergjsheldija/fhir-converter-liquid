@@ -87,6 +87,14 @@ function hideConversionError() {
     $('#conversion-error').text('').attr('hidden', true);
 }
 
+function setUnusedLegend(visible) {
+    if (visible) {
+        $('#unused-legend').removeAttr('hidden');
+    } else {
+        $('#unused-legend').attr('hidden', true);
+    }
+}
+
 function updateUnsavedDot() {
     if (!activeTemplate || unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
         $('#unsaved-dot').attr('hidden', true);
@@ -115,6 +123,7 @@ function convertData(force) {
             return;
         }
 
+        setUnusedLegend(false);
         $('#conversion-status').text('Converting…');
 
         var topTemplate = openTemplates.find(template => template.parent === null);
@@ -151,6 +160,7 @@ function convertData(force) {
                     outputCode.setValue(outputLines.join('\n'));
                     $('#conversion-status').text('Converted');
                     hideConversionError();
+                    setUnusedLegend(false);
                     refreshEditors();
 
                     // Makes the unused line marking asyc to help performance.
@@ -167,43 +177,52 @@ function convertData(force) {
                                 // Removes all the old highlighting
                                 dataDoc.getAllMarks().forEach((mark) => mark.clear());
 
-                                unusedReport.forEach((line) => {
-                                    // MSH (always line 0) is field-numbered specially: MSH-1 (the field
-                                    // separator character) occupies no pipe-delimited token of its own, so
-                                    // every conventional field number after it is shifted back by one
-                                    // relative to its raw pipe-split token position. Non-MSH segments have
-                                    // no such shift -- field N is directly the Nth pipe-delimited token.
-                                    var isHeaderSegment = line.line === 0;
-                                    var fieldIndexOffset = isHeaderSegment ? 1 : 0;
-                                    line.field.forEach((field) => {
-                                        if (field && field.index !== 0 && field.component.length > 0) {
-                                            field.component.forEach((component) => {
-                                                var lineText = dataDoc.getLine(line.line);
-                                                var startFieldIndex = indexOfX(lineText, fieldSeparator, field.index - 1 - fieldIndexOffset) + 1;
-                                                var endFieldIndex = indexOfX(lineText, fieldSeparator, field.index - fieldIndexOffset);
-                                                if (endFieldIndex === -1) {
-                                                    endFieldIndex = lineText.length;
-                                                }
+                                if (unusedReport) {
+                                    unusedReport.forEach((line) => {
+                                        // MSH (always line 0) is field-numbered specially: MSH-1 (the field
+                                        // separator character) occupies no pipe-delimited token of its own, so
+                                        // every conventional field number after it is shifted back by one
+                                        // relative to its raw pipe-split token position. Non-MSH segments have
+                                        // no such shift -- field N is directly the Nth pipe-delimited token.
+                                        var isHeaderSegment = line.line === 0;
+                                        var fieldIndexOffset = isHeaderSegment ? 1 : 0;
+                                        line.field.forEach((field) => {
+                                            if (field && field.index !== 0 && field.component.length > 0) {
+                                                field.component.forEach((component) => {
+                                                    var lineText = dataDoc.getLine(line.line);
+                                                    var startFieldIndex = indexOfX(lineText, fieldSeparator, field.index - 1 - fieldIndexOffset) + 1;
+                                                    var endFieldIndex = indexOfX(lineText, fieldSeparator, field.index - fieldIndexOffset);
+                                                    if (endFieldIndex === -1) {
+                                                        endFieldIndex = lineText.length;
+                                                    }
 
-                                                // Components are 1-indexed with index 0 reserved as null
-                                                // padding (matching upstream), so the real component at
-                                                // report index N is the (N-1)th token in a 0-indexed split --
-                                                // and locating the start of that token needs the (N-2)th
-                                                // separator occurrence (indexOfX returns -1 for N<2, which
-                                                // correctly resolves to "no separator before it" for N=1).
-                                                var startComponentIndex = indexOfX(lineText.substring(startFieldIndex, endFieldIndex), componentSeparator, component.index - 2) + startFieldIndex + 1;
-                                                var endComponentIndex = startComponentIndex + component.value.length;
-                                                dataDoc.markText({
-                                                    line: line.line,
-                                                    ch: startComponentIndex
-                                                }, {
-                                                    line: line.line,
-                                                    ch: endComponentIndex
-                                                }, {className: 'unused-segment'});
-                                            });
-                                        }
+                                                    // Components are 1-indexed with index 0 reserved as null
+                                                    // padding (matching upstream), so the real component at
+                                                    // report index N is the (N-1)th token in a 0-indexed split --
+                                                    // and locating the start of that token needs the (N-2)th
+                                                    // separator occurrence (indexOfX returns -1 for N<2, which
+                                                    // correctly resolves to "no separator before it" for N=1).
+                                                    var startComponentIndex = indexOfX(lineText.substring(startFieldIndex, endFieldIndex), componentSeparator, component.index - 2) + startFieldIndex + 1;
+                                                    var endComponentIndex = startComponentIndex + component.value.length;
+                                                    dataDoc.markText({
+                                                        line: line.line,
+                                                        ch: startComponentIndex
+                                                    }, {
+                                                        line: line.line,
+                                                        ch: endComponentIndex
+                                                    }, {className: 'unused-segment'});
+                                                });
+                                            }
+                                        });
                                     });
-                                });
+                                }
+
+                                var unusedMarkCount = dataDoc.getAllMarks().filter((mark) => mark.className === 'unused-segment').length;
+                                if (unusedMarkCount > 0) {
+                                    setUnusedLegend(true);
+                                } else {
+                                    setUnusedLegend(false);
+                                }
                             }
                         }, 0);
                 }
@@ -224,6 +243,7 @@ function convertData(force) {
                     message = 'Conversion failed.';
                 }
                 showConversionError(message);
+                setUnusedLegend(false);
                 refreshEditors();
             }
         });

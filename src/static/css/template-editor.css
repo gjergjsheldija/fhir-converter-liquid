@@ -228,6 +228,10 @@ body {
     font-size: 0.85rem;
 }
 
+#unused-legend[hidden] {
+    display: none;
+}
+
 #unsaved-dot {
     width: 8px;
     height: 8px;
