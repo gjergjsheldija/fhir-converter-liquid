@@ -9,6 +9,7 @@ var selectedTemplate = null;
 var didOpenStartupExample = false;
 var cachedSamples = [];
 var openFolders = {};
+var suggestedTemplate = null;
 
 function refreshFileBrowser() {
     $.ajax({url: getUrl('sample-data'), dataType: 'json', cache: false, success: function (sampleList) {
@@ -38,6 +39,57 @@ function refreshFileBrowser() {
     }});
 }
 
+function matchTemplateForSample(text) {
+    if (typeof text !== 'string' || text.length === 0) {
+        return null;
+    }
+    var line = text.split(/\r\n|\n|\r/)[0];
+    if (line.charAt(line.length - 1) === '\r') {
+        line = line.substring(0, line.length - 1);
+    }
+    if (line.indexOf('MSH') !== 0) {
+        return null;
+    }
+    if (line.length < 5) {
+        return null;
+    }
+    var fieldSeparator = line.charAt(3);
+    var componentSeparator = line.charAt(4);
+    var parts = line.split(fieldSeparator);
+    if (parts.length < 9 || parts[8] === '') {
+        return null;
+    }
+    var components = parts[8].split(componentSeparator);
+    var type = components[0];
+    var event = components[1];
+    if (!type || !event
+        || type.indexOf('/') !== -1 || type.indexOf('\\') !== -1 || type.indexOf('..') !== -1
+        || event.indexOf('/') !== -1 || event.indexOf('\\') !== -1 || event.indexOf('..') !== -1) {
+        return null;
+    }
+    var candidate = type + '_' + event + '.liquid';
+    if (Array.isArray(templateNames) && templateNames.indexOf(candidate) !== -1) {
+        return candidate;
+    }
+    return null;
+}
+
+function highlightMatchingTemplate(text) {
+    suggestedTemplate = matchTemplateForSample(text);
+    var filterValue = ($('#file-filter').val() || '').toLowerCase();
+    if (suggestedTemplate && filterValue && suggestedTemplate.toLowerCase().indexOf(filterValue) === -1) {
+        $('#file-filter').val('');
+    }
+    renderFileBrowser(cachedSamples);
+    if (suggestedTemplate) {
+        var escaped = suggestedTemplate.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        var row = $('[data-template-name="' + escaped + '"]');
+        if (row.length) {
+            row[0].scrollIntoView({block: 'nearest'});
+        }
+    }
+}
+
 function renderFileBrowser(messages) {
     var filter = ($('#file-filter').val() || '').toLowerCase();
     var samples = messages.filter(function (item) {
@@ -63,7 +115,9 @@ function renderFileBrowser(messages) {
             selectedSample = sample.full;
             $('#samples-list .file-browser-row').removeClass('is-selected');
             row.addClass('is-selected');
-            loadData(sample.full);
+            loadData(sample.full, function (text) {
+                highlightMatchingTemplate(text);
+            });
         });
         $('#samples-list').append(row);
     });
@@ -143,8 +197,12 @@ function templateRow(fullName, label) {
     var text = label || fullName;
     var row = $('<div class="file-browser-row"></div>').text(text);
     row.attr('title', text);
+    row.attr('data-template-name', fullName);
     if (fullName === selectedTemplate) {
         row.addClass('is-selected');
+    }
+    if (fullName === suggestedTemplate) {
+        row.addClass('is-suggested');
     }
     row.on('click', function (event) {
         event.stopPropagation();

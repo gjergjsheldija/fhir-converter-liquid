@@ -439,4 +439,8 @@ body {
 #file-browser-resizer.is-dragging {
     background: #e3e8ef;
 }
+
+.file-browser-row.is-suggested {
+    box-shadow: inset 0 0 0 1px #1f6feb;
+}
   

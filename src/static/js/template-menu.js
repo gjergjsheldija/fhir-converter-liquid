@@ -4,12 +4,15 @@
 // -------------------------------------------------------------------------------------------------
 /* eslint-disable no-undef, no-unused-vars */
 
-function loadData(dataFile) {
+function loadData(dataFile, done) {
     $.get(getUrl('sample-data', dataFile), function (data) {
         dataEditor.setValue(data);
         var slash = dataFile.indexOf('/');
         $('#message-name').text(slash === -1 ? dataFile : dataFile.substring(slash + 1));
         convertData(true);
+        if (typeof done === 'function') {
+            done(data);
+        }
     });
 }
 
