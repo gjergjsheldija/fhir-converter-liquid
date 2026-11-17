@@ -46,6 +46,20 @@ describe("GET /api/v1/helpers", function () {
                 if (!Array.isArray(response.body.helpers)) {
                     throw new Error('Response is not array');
                 }
+                var helpers = response.body.helpers;
+                if (!helpers.some(function (helper) {
+                    return helper.name === 'get_segment_lists';
+                })) {
+                    throw new Error('Missing get_segment_lists helper');
+                }
+                helpers.forEach(function (helper) {
+                    if (typeof helper.name !== 'string' || typeof helper.description !== 'string') {
+                        throw new Error('Helper name and description must be strings');
+                    }
+                    if ('func' in helper) {
+                        throw new Error('Helper must not include func');
+                    }
+                });
             })
             .end(function (err) {
                 if (err) {

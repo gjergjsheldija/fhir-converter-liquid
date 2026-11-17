@@ -28,6 +28,7 @@ import {fileURLToPath} from "url";
 import {readFileSync} from "fs";
 import {mkdir, writeFile} from "fs/promises";
 import {dirname, join} from "path";
+import {external as libraryFilters} from "./lib/liquid-converter/liquid-helpers.js";
 import {convertInlineHl7v2} from "./lib/workers/worker.js";
 import {listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
 import {sendResource} from "./lib/fhir/sendResource.js";
@@ -93,18 +94,24 @@ export default function (app) {
      * @swagger
      * /api/v1/helpers:
      *   get:
-     *     description: Lists available template helpers
+     *     description: Lists the filters registered by this server
      *     produces:
      *       - application/json
      *     responses:
      *       200:
-     *         description: List of available template helpers
+     *         description: Array of {name, description} objects for the filters registered by this server
      *       401:
      *         description: Unauthorized
      */
     app.get("/api/v1/helpers", function (req, res) {
-        res.json({helpers: [], note: "This converter uses Liquid templates. See liquidjs.com/filters for available filters."});
-        res.status(200);
+        res.status(200).json({
+            helpers: libraryFilters.map(function (filter) {
+                return {
+                    name: filter.name,
+                    description: filter.description || ""
+                };
+            })
+        });
     });
 
     /**

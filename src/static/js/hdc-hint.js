@@ -2,9 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
+/* eslint-disable no-unused-vars */
 
 // Liquid template keywords
-const liquidBlockKeywords = ['if', 'elsif', 'else', 'endif', 'unless', 'endunless', 'case', 'when', 'endcase', 'for', 'endfor', 'tablerow', 'endtablerow', 'capture', 'endcapture', 'assign', 'increment', 'decrement', 'include', 'render', 'comment', 'endcomment', 'raw', 'endraw']; 
+const liquidBlockKeywords = ['if', 'elsif', 'else', 'endif', 'unless', 'endunless', 'case', 'when', 'endcase', 'for', 'endfor', 'tablerow', 'endtablerow', 'capture', 'endcapture', 'assign', 'increment', 'decrement', 'include', 'render', 'comment', 'endcomment', 'raw', 'endraw', 'evaluate'];
 const liquidLoopKeywords = ['forloop.index', 'forloop.index0', 'forloop.first', 'forloop.last', 'forloop.length', 'forloop.rindex', 'forloop.rindex0']; 
 const liquidFilterKeywords = ['abs', 'append', 'at_least', 'at_most', 'capitalize', 'ceil', 'compact', 'concat', 'date', 'default', 'divided_by', 'downcase', 'escape', 'first', 'floor', 'join', 'last', 'lstrip', 'map', 'minus', 'modulo', 'newline_to_br', 'plus', 'prepend', 'remove', 'remove_first', 'replace', 'replace_first', 'reverse', 'round', 'rstrip', 'size', 'slice', 'sort', 'split', 'strip', 'strip_html', 'strip_newlines', 'times', 'truncate', 'truncatewords', 'uniq', 'upcase', 'url_decode', 'url_encode', 'where'];
 const varNameRegexp = /as\s+\|(\w+)\||'(\w\w\w)'/g;
@@ -13,6 +14,7 @@ const tagHintRegexp = /{%\s*$/;
 const varNamesHintRegexp = /{%\s*(if|unless|for)\s$/;
 const templatesHintRegexp = /{%\s*(include|render)\s$/;
 const filterHintRegexp = /\|\s*$/;
+var libraryFilterKeywords = [];
 var hintAfterChars = {};
 var hintExtraKeysObj = {};
 
@@ -64,6 +66,25 @@ function completeAfter(cm, pred) {
     return CodeMirror.Pass;
 }
 
+function loadLibraryFilters() {
+    $.getJSON('/api/v1/helpers').done(function (data) {
+        if (Array.isArray(data.helpers)) {
+            libraryFilterKeywords = data.helpers
+                .filter(function (helper) {
+                    return typeof helper.name === 'string' && helper.name.length > 0;
+                })
+                .map(function (helper) {
+                    return {
+                        text: helper.name,
+                        displayText: helper.description && helper.description !== 'tbd' ? helper.name + ' — ' + helper.description : helper.name
+                    };
+                });
+        }
+    }).fail(function () {
+        libraryFilterKeywords = [];
+    });
+}
+
 (function (mod) {
     mod(CodeMirror);
 })(function (CodeMirror) {
@@ -87,6 +108,7 @@ function completeAfter(cm, pred) {
             // After a pipe character, suggest Liquid filters
             filterHintRegexp.lastIndex = 0;
             candidates.push(...liquidFilterKeywords);
+            candidates.push(...libraryFilterKeywords);
         }
         else if (tagHintRegexp.test(slice)) {
             // After {% , suggest Liquid tag keywords
@@ -111,16 +133,31 @@ function completeAfter(cm, pred) {
             templateNames.forEach(x => candidates.push(x));
         }
 
-        // dedup
-        candidates = Array.from(new Set(candidates));
+        function comparableText(item) {
+            return typeof item === "string" ? item : item.text;
+        }
+
+        // dedup by comparable text, first occurrence wins
+        var seen = {};
+        var unique = [];
+        candidates.forEach(function (item) {
+            var key = comparableText(item);
+            if (!seen[key]) {
+                seen[key] = true;
+                unique.push(item);
+            }
+        });
+        candidates = unique;
 
         // filter
         if (start < end) {
             var prefix = curLine.slice(start, end).toLowerCase();
-            candidates = candidates.filter(x => x.toLowerCase().indexOf(prefix) != -1);
+            candidates = candidates.filter(x => comparableText(x).toLowerCase().indexOf(prefix) != -1);
         }
 
-        candidates.sort();
+        candidates.sort(function (a, b) {
+            return comparableText(a).localeCompare(comparableText(b));
+        });
 
         return { list: candidates, from: CodeMirror.Pos(cur.line, start), to: CodeMirror.Pos(cur.line, end) };
     });

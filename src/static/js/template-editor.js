@@ -572,6 +572,9 @@ $(document).ready(function () {
         convertData();
     });
 
+    /*global loadLibraryFilters*/
+    loadLibraryFilters();
+
     $(document).on('keydown', function (event) {
         if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && (event.key === 's' || event.key === 'S')) {
             event.preventDefault();
