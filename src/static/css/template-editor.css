@@ -405,4 +405,38 @@ body {
     color: #344054;
     font-weight: 500;
 }
+
+.file-browser-row {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.file-browser-chevron {
+    display: inline-block;
+    width: 1em;
+}
+
+.file-browser-folder > .file-browser-row .file-browser-chevron::before {
+    content: "▸";
+}
+
+.file-browser-folder.open > .file-browser-row .file-browser-chevron::before {
+    content: "▾";
+}
+
+#file-browser-resizer {
+    flex: 0 0 6px;
+    width: 6px;
+    cursor: col-resize;
+    background: transparent;
+}
+
+#file-browser-resizer:hover,
+#file-browser-resizer.is-dragging {
+    background: #e3e8ef;
+}
   

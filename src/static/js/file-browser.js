@@ -7,12 +7,15 @@
 var selectedSample = null;
 var selectedTemplate = null;
 var didOpenStartupExample = false;
+var cachedSamples = [];
+var openFolders = {};
 
 function refreshFileBrowser() {
     $.ajax({url: getUrl('sample-data'), dataType: 'json', cache: false, success: function (sampleList) {
         $.ajax({url: getUrl('templates'), dataType: 'json', cache: false, success: function (templateList) {
             applyTemplateList(templateList.templates || []);
-            renderFileBrowser(sampleList.messages || []);
+            cachedSamples = sampleList.messages || [];
+            renderFileBrowser(cachedSamples);
             if (didOpenStartupExample) {
                 return;
             }
@@ -52,6 +55,7 @@ function renderFileBrowser(messages) {
             return;
         }
         var row = $('<div class="file-browser-row"></div>').text(sample.label);
+        row.attr('title', sample.label);
         if (sample.full === selectedSample) {
             row.addClass('is-selected');
         }
@@ -110,12 +114,17 @@ function renderFileBrowser(messages) {
             return;
         }
         var block = $('<div class="file-browser-folder"></div>');
-        if (filter) {
+        if (filter || openFolders[folder]) {
             block.addClass('open');
         }
-        var heading = $('<div class="file-browser-row"></div>').text(folder);
+        var headingText = folder + ' (' + shown.length + ')';
+        var heading = $('<div class="file-browser-row"></div>');
+        heading.append($('<span class="file-browser-chevron" aria-hidden="true"></span>'));
+        heading.append(document.createTextNode(headingText));
+        heading.attr('title', headingText);
         heading.on('click', function (event) {
             event.stopPropagation();
+            openFolders[folder] = !openFolders[folder];
             block.toggleClass('open');
         });
         var childBox = $('<div class="file-browser-children"></div>');
@@ -131,7 +140,9 @@ function renderFileBrowser(messages) {
 }
 
 function templateRow(fullName, label) {
-    var row = $('<div class="file-browser-row"></div>').text(label || fullName);
+    var text = label || fullName;
+    var row = $('<div class="file-browser-row"></div>').text(text);
+    row.attr('title', text);
     if (fullName === selectedTemplate) {
         row.addClass('is-selected');
     }
@@ -168,6 +179,7 @@ function renderExternalEntries(payload) {
     list.empty();
     if (externalPath) {
         var up = $('<div class="file-browser-row"></div>').text('..');
+        up.attr('title', '..');
         up.on('click', function () {
             var parent = externalPath.split('/').slice(0, -1).join('/');
             if (browseSource === 'folder') {
@@ -178,7 +190,9 @@ function renderExternalEntries(payload) {
         list.append(up);
     }
     (payload.entries || []).forEach(function (entry) {
-        var row = $('<div class="file-browser-row"></div>').text((entry.type === 'dir' ? '▸ ' : '') + entry.name);
+        var label = (entry.type === 'dir' ? '▸ ' : '') + entry.name;
+        var row = $('<div class="file-browser-row"></div>').text(label);
+        row.attr('title', label);
         row.on('click', function () {
             if (entry.type === 'dir') {
                 loadExternal(entry.path);
@@ -254,7 +268,7 @@ function openExternalFile(entry) {
 $(document).ready(function () {
     $('#file-filter').on('input', function () {
         if (browseSource === 'builtin') {
-            refreshFileBrowser();
+            renderFileBrowser(cachedSamples);
         }
     });
     $('#source-switch').on('click', 'button', function () {
@@ -267,6 +281,33 @@ $(document).ready(function () {
     $('#folder-list').on('click', function () {
         externalPath = '';
         loadExternal($('#folder-path').val());
+    });
+    var fileBrowser = $('#file-browser');
+    var resizer = $('#file-browser-resizer');
+    var storedWidth = parseFloat(localStorage.getItem('fhirConverterFileBrowserWidth'));
+    if (isFinite(storedWidth) && storedWidth >= 180 && storedWidth <= 480) {
+        fileBrowser.css({width: storedWidth + 'px', 'flex-basis': storedWidth + 'px'});
+    }
+    resizer.on('mousedown', function (event) {
+        if (event.button !== 0) {
+            return;
+        }
+        event.preventDefault();
+        resizer.addClass('is-dragging');
+        function onMouseMove(moveEvent) {
+            var left = fileBrowser[0].getBoundingClientRect().left;
+            var width = Math.max(180, Math.min(480, moveEvent.clientX - left));
+            fileBrowser.css({width: width + 'px', 'flex-basis': width + 'px'});
+        }
+        function onMouseUp() {
+            $(document).off('mousemove', onMouseMove).off('mouseup', onMouseUp);
+            resizer.removeClass('is-dragging');
+            localStorage.setItem('fhirConverterFileBrowserWidth', String(parseInt(fileBrowser.css('width'), 10)));
+            if (typeof refreshEditors === 'function') {
+                refreshEditors();
+            }
+        }
+        $(document).on('mousemove', onMouseMove).on('mouseup', onMouseUp);
     });
     refreshFileBrowser();
 });
