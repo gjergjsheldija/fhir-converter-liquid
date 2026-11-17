@@ -51,6 +51,7 @@
             <span class="navbar-brand mb-0">FHIR Converter</span>
             <button class="btn btn-dark navbar-btn ml-auto" id="convert-button" type="button">Convert</button>
             <button class="btn btn-dark navbar-btn ml-2" id="settings-open" type="button" data-toggle="modal" data-target="#settings-modal">Settings</button>
+            <a class="btn btn-outline-dark navbar-btn ml-2" id="api-docs-link" href="/api-docs">API docs</a>
         </nav>
 
         <div id="banner" class="alert" role="alert" style="display: none">
@@ -145,48 +146,53 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="settings-dark-mode">
-                            <label class="form-check-label" for="settings-dark-mode">Dark mode</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="settings-convert-while-typing" checked>
-                            <label class="form-check-label" for="settings-convert-while-typing">Convert while typing</label>
-                        </div>
-                        <div class="form-group mt-3">
-                            <label for="settings-timezone">Timezone</label>
-                            <input type="text" class="form-control" id="settings-timezone" placeholder="+0000">
-                        </div>
-                        <hr>
-                        <h5>FHIR server</h5>
-                        <div class="form-group">
-                            <label for="settings-fhir-url">Base URL</label>
-                            <input type="text" class="form-control" id="settings-fhir-url" placeholder="https://hapi.fhir.org/baseR4">
-                        </div>
-                        <div class="form-group">
-                            <label for="settings-fhir-auth">Authentication</label>
-                            <select class="form-control" id="settings-fhir-auth">
-                                <option value="none">None</option>
-                                <option value="bearer">Bearer token</option>
-                                <option value="basic">Basic</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="settings-fhir-token-row">
-                            <label for="settings-fhir-token">Token</label>
-                            <input type="password" class="form-control" id="settings-fhir-token" autocomplete="off">
-                        </div>
-                        <div class="form-group" id="settings-fhir-user-row">
-                            <label for="settings-fhir-username">Username</label>
-                            <input type="text" class="form-control" id="settings-fhir-username" autocomplete="off">
-                        </div>
-                        <div class="form-group" id="settings-fhir-password-row">
-                            <label for="settings-fhir-password">Password</label>
-                            <input type="password" class="form-control" id="settings-fhir-password" autocomplete="off">
-                        </div>
-                        <a href="/api-docs">API docs</a>
+                        <fieldset class="settings-group">
+                            <legend>Editor</legend>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="settings-dark-mode">
+                                <label class="form-check-label" for="settings-dark-mode">Dark mode</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="settings-convert-while-typing" checked>
+                                <label class="form-check-label" for="settings-convert-while-typing">Convert while typing</label>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label for="settings-timezone">Timezone</label>
+                                <input type="text" class="form-control" id="settings-timezone" placeholder="+0000">
+                                <small class="form-text text-muted" id="settings-timezone-help">Offset sent with each conversion. Example: +0200. Leave empty to use the server default.</small>
+                            </div>
+                        </fieldset>
+                        <fieldset class="settings-group">
+                            <legend>FHIR server</legend>
+                            <small class="form-text text-muted" id="settings-fhir-help">Used only when you click Send. Stored in this browser.</small>
+                            <div class="form-group">
+                                <label for="settings-fhir-url">Base URL</label>
+                                <input type="text" class="form-control" id="settings-fhir-url" placeholder="https://hapi.fhir.org/baseR4">
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-fhir-auth">Authentication</label>
+                                <select class="form-control" id="settings-fhir-auth">
+                                    <option value="none">None</option>
+                                    <option value="bearer">Bearer token</option>
+                                    <option value="basic">Basic</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="settings-fhir-token-row">
+                                <label for="settings-fhir-token">Token</label>
+                                <input type="password" class="form-control" id="settings-fhir-token" autocomplete="off">
+                            </div>
+                            <div class="form-group" id="settings-fhir-user-row">
+                                <label for="settings-fhir-username">Username</label>
+                                <input type="text" class="form-control" id="settings-fhir-username" autocomplete="off">
+                            </div>
+                            <div class="form-group" id="settings-fhir-password-row">
+                                <label for="settings-fhir-password">Password</label>
+                                <input type="password" class="form-control" id="settings-fhir-password" autocomplete="off">
+                            </div>
+                        </fieldset>
                     </div>
                     <div class="modal-footer">
-                        <button id="settings-save-button" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+                        <button id="settings-save-button" type="button" class="btn btn-dark" data-dismiss="modal">Save</button>
                     </div>
                 </div>
             </div>

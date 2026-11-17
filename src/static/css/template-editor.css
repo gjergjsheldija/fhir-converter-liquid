@@ -275,6 +275,19 @@ body {
     width: 180px;
 }
 
+.settings-group {
+    border: 0;
+    padding: 0;
+    margin: 0 0 16px;
+}
+
+.settings-group legend {
+    font-size: 14px;
+    font-weight: 650;
+    margin: 0 0 8px;
+    padding: 0;
+}
+
 #conversion-error {
     flex: 0 0 auto;
     margin-top: 6px;
