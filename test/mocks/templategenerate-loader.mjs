@@ -9,13 +9,11 @@
 // independent copies of the mock. A test that drives `stub.__resetState()` therefore
 // controls exactly what the handler's provider call sees.
 import { pathToFileURL } from 'url';
-import { appendFileSync } from 'fs';
 
 const root = process.cwd();
 const stubUrl = pathToFileURL(`${root}/test/mocks/templategenerate-stub.mjs`).href;
-const log = '/tmp/loader_log.txt';
 
-export async function resolve(specifier, context, nextResolve) {
+export function resolve(specifier, context, nextResolve) {
     if (specifier.endsWith('lib/ai/generateTemplate.js')) {
         // Remap to the stub URL; the load hook below then loads stub source for it.
         return nextResolve(stubUrl, context);
@@ -23,7 +21,7 @@ export async function resolve(specifier, context, nextResolve) {
     return nextResolve(specifier, context);
 }
 
-export async function load(url, context, nextLoad) {
+export function load(url, context, nextLoad) {
     if (url === stubUrl) {
         // Nothing to rewrite: the stub file is already being loaded.
         return nextLoad(url, context);

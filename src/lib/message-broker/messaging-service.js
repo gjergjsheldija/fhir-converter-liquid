@@ -8,7 +8,7 @@ let logger = logging();
 export default function (nconf) {
     const workerPool = new WorkerPool(
         "./src/lib/workers/worker.js",
-        os.cpus().length
+        Math.max(1, os.cpus().length)
     );
 
     let sender;

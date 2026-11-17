@@ -44,7 +44,7 @@ const __filename = fileURLToPath(import.meta.url);
 export default function (app) {
     const workerPool = new WorkerPool(
         "./src/lib/workers/worker.js",
-        os.cpus().length
+        Math.max(1, os.cpus().length)
     );
     let templateCache = new fileSystemCache(TEMPLATE_FILES_LOCATION);
     templateCache.init();

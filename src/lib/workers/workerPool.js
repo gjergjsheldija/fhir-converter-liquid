@@ -23,7 +23,8 @@ export default class WorkerPool {
         this._workers = [];
         this._filename = filename;
         this._rrIndex = 0;
-        for (var i = 0; i < size; i++) {
+        const workerCount = Math.max(1, Math.floor(Number(size)) || 1);
+        for (var i = 0; i < workerCount; i++) {
             this._workers.push(this._createSingleWorker(i));
         }
     }

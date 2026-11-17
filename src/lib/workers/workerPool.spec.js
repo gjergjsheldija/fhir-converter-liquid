@@ -43,5 +43,13 @@ describe('workerPool', function () {
         deepEqual(resArr, ['b', 'c', 'b', 'c', 'b', 'c']);
         pool.destroy();
     });
+
+    it('should default to a single worker when size is 0.', async () => {
+        const pool = new WorkerPool(testWorkerFileName, 0);
+        equal(pool._workers.length, 1);
+        const result = await pool.exec({TestOnly : 'msg1'});
+        equal(result, 'b');
+        pool.destroy();
+    });
 });
 

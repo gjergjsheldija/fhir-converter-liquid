@@ -766,18 +766,20 @@ describe("GET /version", function () {
 //
 // The generate route calls stubbable `callExternalAI` from src/lib/ai/generateTemplate.js.
 // routes.js imports that module by a static name, which ESM cannot spy on. This suite
-// therefore runs mocha with test/mocks/templategenerate-loader.mjs (an --experimental-loader
-// resolve hook that redirects generateTemplate.js to test/mocks/templategenerate-stub.mjs).
+// therefore runs mocha with --import ./test/mocks/register-templategenerate-loader.mjs
+// (a module.registerHooks() hook that loads test/mocks/templategenerate-loader.mjs and redirects
+// generateTemplate.js to test/mocks/templategenerate-stub.mjs).
 // The stub is driven directly, so no API key or network call is required.
 //
 // The provider is made "configured" by exposing the configured environment key (AI_OPENAI_API_KEY)
 // in the test process; no real key value is needed.
 // -------------------------------------------------------------------------------------------------
 
-// Import the stub by static specifier so the ESM `--experimental-loader` hook (active
-// in this suite only) has a hook point to redirect it at load time. Routes.js performs
-// the same static named import, so the loader maps both to the in-process stub and no
-// real API key or network call is required.
+// Import the stub by static specifier so the ESM loader hook (active in this suite
+// only via --import ./test/mocks/register-templategenerate-loader.mjs) has a hook
+// point to redirect it at load time. Routes.js performs the same static named import,
+// so the loader maps both to the in-process stub and no real API key or network call
+// is required.
 import { __getState as templategenerateStubState } from '../test/mocks/templategenerate-stub.mjs';
 
 describe('POST /api/v1/templategenerate', function () {
