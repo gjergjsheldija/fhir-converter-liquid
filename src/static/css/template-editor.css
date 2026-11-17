@@ -159,6 +159,13 @@ body {
     width: calc(100%);
 }
 
+.CodeMirror,
+.CodeMirror-hints {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
 #editor-wrapper {
     flex-direction: row;
     flex: 1 1 auto;
