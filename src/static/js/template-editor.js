@@ -446,6 +446,7 @@ $(document).ready(function () {
     dataEditor = CodeMirror.fromTextArea(document.getElementById("databox"), {
         //readOnly: false,
         lineNumbers: true,
+        lineWrapping: true,
         theme: lightMode,
         mode: {name: "default"},
         extraKeys: {
@@ -464,6 +465,7 @@ $(document).ready(function () {
     outputCode = CodeMirror.fromTextArea(document.getElementById("resultbox"), {
         readOnly: true,
         lineNumbers: true,
+        lineWrapping: true,
         theme: lightMode,
         mode: {name: "javascript"},
         extraKeys: {
