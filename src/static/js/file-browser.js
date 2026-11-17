@@ -90,6 +90,42 @@ function highlightMatchingTemplate(text) {
     }
 }
 
+function setFileRowTabOrder() {
+    var rows = $('#file-browser .file-browser-row');
+    rows.attr('tabindex', '-1');
+    var target = null;
+    var firstVisible = null;
+    rows.each(function () {
+        if (!$(this).is(':visible')) {
+            return;
+        }
+        if (firstVisible === null) {
+            firstVisible = $(this);
+        }
+        if ($(this).hasClass('is-selected')) {
+            target = $(this);
+            return false;
+        }
+    });
+    if (target === null) {
+        target = firstVisible;
+    }
+    if (target) {
+        target.attr('tabindex', '0');
+    }
+}
+
+function folderNameFromHeading(heading) {
+    var stored = heading.attr('data-folder-name');
+    if (stored) {
+        return stored;
+    }
+    var text = heading.text();
+    text = text.replace(/^[▸▾] ?/, '');
+    text = text.replace(/ \(\d+\)$/, '');
+    return text;
+}
+
 function renderFileBrowser(messages) {
     var filter = ($('#file-filter').val() || '').toLowerCase();
     var samples = messages.filter(function (item) {
@@ -106,7 +142,7 @@ function renderFileBrowser(messages) {
         if (filter && sample.label.toLowerCase().indexOf(filter) === -1) {
             return;
         }
-        var row = $('<div class="file-browser-row"></div>').text(sample.label);
+        var row = $('<button type="button" class="file-browser-row"></button>').text(sample.label);
         row.attr('title', sample.label);
         if (sample.full === selectedSample) {
             row.addClass('is-selected');
@@ -172,14 +208,16 @@ function renderFileBrowser(messages) {
             block.addClass('open');
         }
         var headingText = folder + ' (' + shown.length + ')';
-        var heading = $('<div class="file-browser-row"></div>');
+        var heading = $('<button type="button" class="file-browser-row"></button>');
         heading.append($('<span class="file-browser-chevron" aria-hidden="true"></span>'));
         heading.append(document.createTextNode(headingText));
         heading.attr('title', headingText);
+        heading.attr('data-folder-name', folder);
         heading.on('click', function (event) {
             event.stopPropagation();
             openFolders[folder] = !openFolders[folder];
             block.toggleClass('open');
+            setFileRowTabOrder();
         });
         var childBox = $('<div class="file-browser-children"></div>');
         shown.forEach(function (name) {
@@ -191,11 +229,12 @@ function renderFileBrowser(messages) {
         block.append(heading, childBox);
         $('#partials-list').append(block);
     });
+    setFileRowTabOrder();
 }
 
 function templateRow(fullName, label) {
     var text = label || fullName;
-    var row = $('<div class="file-browser-row"></div>').text(text);
+    var row = $('<button type="button" class="file-browser-row"></button>').text(text);
     row.attr('title', text);
     row.attr('data-template-name', fullName);
     if (fullName === selectedTemplate) {
@@ -236,7 +275,7 @@ function renderExternalEntries(payload) {
     var list = $('#external-list');
     list.empty();
     if (externalPath) {
-        var up = $('<div class="file-browser-row"></div>').text('..');
+        var up = $('<button type="button" class="file-browser-row"></button>').text('..');
         up.attr('title', '..');
         up.on('click', function () {
             var parent = externalPath.split('/').slice(0, -1).join('/');
@@ -249,7 +288,7 @@ function renderExternalEntries(payload) {
     }
     (payload.entries || []).forEach(function (entry) {
         var label = (entry.type === 'dir' ? '▸ ' : '') + entry.name;
-        var row = $('<div class="file-browser-row"></div>').text(label);
+        var row = $('<button type="button" class="file-browser-row"></button>').text(label);
         row.attr('title', label);
         row.on('click', function () {
             if (entry.type === 'dir') {
@@ -260,6 +299,7 @@ function renderExternalEntries(payload) {
         });
         list.append(row);
     });
+    setFileRowTabOrder();
 }
 
 function loadExternal(path) {
@@ -339,6 +379,61 @@ $(document).ready(function () {
     $('#folder-list').on('click', function () {
         externalPath = '';
         loadExternal($('#folder-path').val());
+    });
+    $('#file-browser').on('keydown', function (event) {
+        var target = event.target;
+        var $target = $(target);
+        if (!$target.hasClass('file-browser-row')) {
+            return;
+        }
+        var visibleRows = $('#file-browser .file-browser-row').filter(function () {
+            return $(this).is(':visible');
+        }).toArray();
+        var index = visibleRows.indexOf(target);
+        if (index === -1) {
+            return;
+        }
+        function focusRow(row) {
+            $(visibleRows[index]).attr('tabindex', '-1');
+            $(row).attr('tabindex', '0');
+            $(row).focus();
+        }
+        var folder = $target.parent();
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (index < visibleRows.length - 1) {
+                focusRow(visibleRows[index + 1]);
+            }
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (index > 0) {
+                focusRow(visibleRows[index - 1]);
+            }
+        } else if (event.key === 'Home') {
+            event.preventDefault();
+            focusRow(visibleRows[0]);
+        } else if (event.key === 'End') {
+            event.preventDefault();
+            focusRow(visibleRows[visibleRows.length - 1]);
+        } else if (event.key === 'ArrowRight') {
+            if (folder.hasClass('file-browser-folder') && !folder.hasClass('open')) {
+                event.preventDefault();
+                folder.addClass('open');
+                openFolders[folderNameFromHeading($target)] = true;
+                setFileRowTabOrder();
+            }
+        } else if (event.key === 'ArrowLeft') {
+            if (folder.hasClass('file-browser-folder') && folder.hasClass('open')) {
+                event.preventDefault();
+                folder.removeClass('open');
+                openFolders[folderNameFromHeading($target)] = false;
+                setFileRowTabOrder();
+            } else if ($target.closest('.file-browser-children').length) {
+                event.preventDefault();
+                var heading = $target.closest('.file-browser-folder').children('.file-browser-row').first();
+                focusRow(heading[0]);
+            }
+        }
     });
     var fileBrowser = $('#file-browser');
     var resizer = $('#file-browser-resizer');
