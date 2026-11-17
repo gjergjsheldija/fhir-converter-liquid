@@ -68,11 +68,13 @@
                     <button type="button" data-source="folder">Folder</button>
                 </div>
                 <div id="source-github" class="source-panel" hidden>
+                    <p class="source-help" id="github-help">Repository as owner/name. The token is optional. It is sent to this app so it can list private files. It is not stored on the server.</p>
                     <input id="github-repo" class="form-control form-control-sm" type="text" placeholder="owner/repo">
                     <input id="github-token" class="form-control form-control-sm" type="password" placeholder="Token, optional" autocomplete="off">
                     <button id="github-list" class="btn btn-sm btn-primary" type="button">List</button>
                 </div>
                 <div id="source-folder" class="source-panel" hidden>
+                    <p class="source-help" id="folder-help">Path on the machine running this server. In Docker that is the path inside the container, not the path on your computer.</p>
                     <input id="folder-path" class="form-control form-control-sm" type="text" placeholder="/path/to/folder">
                     <button id="folder-list" class="btn btn-sm btn-primary" type="button">List</button>
                 </div>

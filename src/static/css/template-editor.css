@@ -288,6 +288,12 @@ body {
     padding: 0;
 }
 
+.source-help {
+    font-size: 12px;
+    color: #667085;
+    margin: 0;
+}
+
 #conversion-error {
     flex: 0 0 auto;
     margin-top: 6px;
