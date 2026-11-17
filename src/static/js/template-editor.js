@@ -607,7 +607,24 @@ $(document).ready(function () {
     });
 
     $('#new-template-button').on('click', function () {
+        openNewTemplateForm();
+    });
+
+    $('#new-template-create').on('click', function () {
         createNewTemplate();
+    });
+
+    $('#new-template-cancel').on('click', function () {
+        cancelNewTemplateForm();
+    });
+
+    $('#new-template-name').on('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            createNewTemplate();
+        } else if (event.key === 'Escape') {
+            cancelNewTemplateForm();
+        }
     });
 
     $('#copy-result-button').on('click', function () {
@@ -687,12 +704,28 @@ $(document).ready(function () {
     changeDataType('HL7V2');
 });
 
-function createNewTemplate() {
-    var raw = window.prompt('Template name');
-    if (raw === null) {
-        return;
+function openNewTemplateForm() {
+    $('#new-template-button').attr('hidden', true);
+    $('#new-template-form').removeAttr('hidden');
+    $('#new-template-name').val('').focus();
+}
+
+function closeNewTemplateForm() {
+    $('#new-template-form').attr('hidden', true);
+    $('#new-template-name').val('');
+    $('#new-template-button').removeAttr('hidden');
+}
+
+function cancelNewTemplateForm() {
+    closeNewTemplateForm();
+    var errorText = $('#conversion-error').text();
+    if (errorText === 'Enter a template name.' || errorText === 'Invalid template name.' || errorText === 'A template with that name already exists.') {
+        hideConversionError();
     }
-    var name = raw.trim();
+}
+
+function createNewTemplate() {
+    var name = $('#new-template-name').val().trim();
     if (!name) {
         showConversionError('Enter a template name.');
         return;
@@ -710,6 +743,7 @@ function createNewTemplate() {
     }
     hideConversionError();
     openLocalTemplate(name, '', true);
+    closeNewTemplateForm();
 }
 
 function nextGeneratedName() {

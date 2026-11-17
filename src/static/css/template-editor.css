@@ -261,6 +261,20 @@ body {
     display: none;
 }
 
+#new-template-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#new-template-form[hidden] {
+    display: none;
+}
+
+#new-template-name {
+    width: 180px;
+}
+
 #conversion-error {
     flex: 0 0 auto;
     margin-top: 6px;
