@@ -441,6 +441,61 @@ $(document).ready(function () {
     if (isFinite(storedWidth) && storedWidth >= 180 && storedWidth <= 480) {
         fileBrowser.css({width: storedWidth + 'px', 'flex-basis': storedWidth + 'px'});
     }
+    function setFileBrowserCollapsed(collapsed, options) {
+        var opts = options || {};
+        var collapseBtn = $('#file-browser-collapse');
+        var expandBtn = $('#file-browser-expand');
+        if (collapsed) {
+            fileBrowser.prop('hidden', true);
+            resizer.prop('hidden', true);
+            expandBtn.prop('hidden', false);
+        } else {
+            expandBtn.prop('hidden', true);
+            fileBrowser.prop('hidden', false);
+            resizer.prop('hidden', false);
+        }
+        collapseBtn.attr('aria-expanded', collapsed ? 'false' : 'true');
+        expandBtn.attr('aria-expanded', collapsed ? 'false' : 'true');
+        if (opts.persist !== false) {
+            try {
+                localStorage.setItem('fhirConverterFileBrowserCollapsed', collapsed ? 'true' : 'false');
+            } catch (storageError) {
+                // storage unavailable; keep working without persistence
+            }
+        }
+        if (typeof refreshEditors === 'function') {
+            refreshEditors();
+        }
+        if (opts.moveFocus === true) {
+            (collapsed ? expandBtn : collapseBtn).focus();
+        }
+    }
+    var storedCollapsed;
+    try {
+        storedCollapsed = localStorage.getItem('fhirConverterFileBrowserCollapsed') === 'true';
+    } catch (storageError) {
+        storedCollapsed = false;
+    }
+    setFileBrowserCollapsed(storedCollapsed, {persist: false, moveFocus: false});
+    $('#file-browser-collapse').on('click', function () {
+        setFileBrowserCollapsed(true, {moveFocus: true});
+    });
+    $('#file-browser-expand').on('click', function () {
+        setFileBrowserCollapsed(false, {moveFocus: true});
+    });
+    $(document).on('keydown', function (event) {
+        if (!((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey)) {
+            return;
+        }
+        if (event.key !== 'b' && event.key !== 'B') {
+            return;
+        }
+        if ($('.modal.show').length) {
+            return;
+        }
+        event.preventDefault();
+        setFileBrowserCollapsed(!fileBrowser.prop('hidden'), {moveFocus: false});
+    });
     resizer.on('mousedown', function (event) {
         if (event.button !== 0) {
             return;
