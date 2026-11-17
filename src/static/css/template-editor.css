@@ -232,6 +232,21 @@ body {
     display: none;
 }
 
+#result-error {
+    flex: 0 0 auto;
+    max-height: 72px;
+    overflow: auto;
+    margin: 0;
+    padding: 6px 8px;
+    color: #842029;
+    background: #f8d7da;
+    white-space: pre-wrap;
+}
+
+#result-error[hidden] {
+    display: none;
+}
+
 #unsaved-dot {
     width: 8px;
     height: 8px;

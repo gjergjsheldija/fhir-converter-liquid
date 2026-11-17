@@ -95,6 +95,14 @@ function setUnusedLegend(visible) {
     }
 }
 
+function showResultError(message) {
+    $('#result-error').text(message).removeAttr('hidden');
+}
+
+function hideResultError() {
+    $('#result-error').text('').attr('hidden', true);
+}
+
 function updateUnsavedDot() {
     if (!activeTemplate || unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
         $('#unsaved-dot').attr('hidden', true);
@@ -123,6 +131,7 @@ function convertData(force) {
             return;
         }
 
+        hideResultError();
         setUnusedLegend(false);
         $('#conversion-status').text('Converting…');
 
@@ -158,6 +167,7 @@ function convertData(force) {
                     outputLines = JSON.stringify(data.fhirResource, null, 2).replace(/(?:\r\n|\r|\n)/g, '\n').split('\n');
 
                     outputCode.setValue(outputLines.join('\n'));
+                    hideResultError();
                     $('#conversion-status').text('Converted');
                     hideConversionError();
                     setUnusedLegend(false);
@@ -232,7 +242,6 @@ function convertData(force) {
                 if (latestRequest !== requestNumber) {
                     return;
                 }
-                $('#conversion-status').text('Failed');
                 var message = 'Conversion failed.';
                 try {
                     var errObj = JSON.parse(err.responseText);
@@ -242,9 +251,15 @@ function convertData(force) {
                 } catch (ex) {
                     message = 'Conversion failed.';
                 }
-                showConversionError(message);
-                setUnusedLegend(false);
-                refreshEditors();
+                outputCode.setValue('');
+                $('#conversion-status').text('Failed');
+                showResultError(message);
+                if (typeof refreshEditors === 'function') {
+                    refreshEditors();
+                }
+                if (typeof setUnusedLegend === 'function') {
+                    setUnusedLegend(false);
+                }
             }
         });
     }, waitForTypingTimeout);
