@@ -10,7 +10,8 @@ import {
     CODE_MIRROR_LOCATION,
     SAMPLE_DATA_LOCATION,
     STATIC_LOCATION,
-    TEMPLATE_FILES_LOCATION
+    TEMPLATE_FILES_LOCATION,
+    USER_SAMPLE_DATA_LOCATION
 } from "./lib/constants/constants.js";
 import dataHandlerFactory from "./lib/dataHandler/dataHandlerFactory.js";
 import cookieParser from "cookie-parser";
@@ -26,7 +27,7 @@ import express from "express";
 import os from "os";
 import {fileURLToPath} from "url";
 import {readFileSync} from "fs";
-import {mkdir, writeFile} from "fs/promises";
+import {access, mkdir, readFile, readdir, unlink, writeFile} from "fs/promises";
 import {dirname, join} from "path";
 import {external as libraryFilters} from "./lib/liquid-converter/liquid-helpers.js";
 import {convertInlineHl7v2} from "./lib/workers/worker.js";
@@ -48,7 +49,9 @@ export default function (app) {
     );
     let templateCache = new fileSystemCache(TEMPLATE_FILES_LOCATION);
     templateCache.init();
-    let messageCache = new fileSystemCache(SAMPLE_DATA_LOCATION);
+    let sampleDataLocation = SAMPLE_DATA_LOCATION;
+    let userSampleDataLocation = USER_SAMPLE_DATA_LOCATION;
+    let messageCache = new fileSystemCache(sampleDataLocation);
     messageCache.init();
 
     app.use(metricsMiddleware);
@@ -66,7 +69,9 @@ export default function (app) {
     // access function for constants  (test instrumentation)
     app.setConstants = function (c) {
         templateCache = new fileSystemCache(c.TEMPLATE_FILES_LOCATION);
-        messageCache = new fileSystemCache(c.SAMPLE_DATA_LOCATION);
+        sampleDataLocation = c.SAMPLE_DATA_LOCATION;
+        userSampleDataLocation = c.USER_SAMPLE_DATA_LOCATION;
+        messageCache = new fileSystemCache(sampleDataLocation);
         workerPool.broadcast({type: "constantsUpdated", data: JSON.stringify(c)});
     };
 
@@ -154,13 +159,33 @@ export default function (app) {
     app.get("/api/v1/sample-data", function (req, res) {
         messageCache
             .keys()
-            .then((files) =>
-                res.json({
-                    messages: files.map((f) => {
-                        return {messageName: f};
-                    }),
-                })
-            )
+            .then(async (files) => {
+                const entries = files.map((f) => {
+                    return {messageName: f, source: "builtin"};
+                });
+                const byName = {};
+                entries.forEach((entry) => {
+                    byName[entry.messageName] = entry;
+                });
+                try {
+                    const userFiles = await readdir(join(userSampleDataLocation, "hl7v2"));
+                    userFiles
+                        .filter((f) => !f.startsWith("."))
+                        .forEach((f) => {
+                            const name = "hl7v2/" + f;
+                            if (byName[name]) {
+                                byName[name].source = "user";
+                            } else {
+                                const entry = {messageName: name, source: "user"};
+                                entries.push(entry);
+                                byName[name] = entry;
+                            }
+                        });
+                } catch (userDirError) {
+                    // user sample directory does not exist yet; bundled samples only
+                }
+                res.json({messages: entries});
+            })
             .catch(() => {
                 res.status(404);
                 res.json(
@@ -191,13 +216,97 @@ export default function (app) {
      *       401:
      *         description: Unauthorized
      */
-    app.get("/api/v1/sample-data/:file(*)", function (req, res) {
-        messageCache
-            .get(req.params.file)
+    app.get("/api/v1/sample-data/:type/:file", function (req, res) {
+        const type = req.params.type;
+        const file = req.params.file;
+        if (type !== "hl7v2" || !/^[A-Za-z0-9._-]+$/.test(file)) {
+            res.status(404);
+            res.json(errorMessage(errorCodes.NotFound, "Sample data not found"));
+            return;
+        }
+        const key = type + "/" + file;
+        access(join(userSampleDataLocation, key))
+            .then(() => readFile(join(userSampleDataLocation, key)))
+            .catch(() => messageCache.get(key))
             .then((content) => res.end(content.toString()))
             .catch(() => {
                 res.status(404);
                 res.json(errorMessage(errorCodes.NotFound, "Sample data not found"));
+            });
+    });
+
+    app.put("/api/v1/sample-data/hl7v2/:file", function (req, res) {
+        let fileName = req.params.file;
+        if (!fileName || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Invalid sample file name."));
+            return;
+        }
+        if (!/\.(hl7|txt|msg)$/.test(fileName)) {
+            if (/\.[A-Za-z0-9]+$/.test(fileName)) {
+                res.status(400);
+                res.json(errorMessage(errorCodes.BadRequest, "Sample file must end in .hl7, .txt, or .msg."));
+                return;
+            }
+            fileName += ".hl7";
+        }
+        const body = typeof req.body === "string" ? req.body : "";
+        if (!body.trim()) {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Sample message cannot be empty."));
+            return;
+        }
+        if (Buffer.byteLength(body, "utf8") > 2000000) {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Sample message is too large."));
+            return;
+        }
+        access(join(sampleDataLocation, "hl7v2", fileName))
+            .then(() => {
+                throw Object.assign(new Error("Built-in sample exists"), {isBuiltinConflict: true});
+            })
+            .catch((builtinError) => {
+                if (builtinError && builtinError.isBuiltinConflict) {
+                    res.status(409);
+                    res.json(errorMessage(errorCodes.Conflict, "Cannot overwrite a built-in sample. Save under a new file name."));
+                    return;
+                }
+                mkdir(join(userSampleDataLocation, "hl7v2"), {recursive: true})
+                    .then(() => writeFile(join(userSampleDataLocation, "hl7v2", fileName), body, "utf8"))
+                    .then(() =>
+                        res.status(200).json({ok: true, messageName: "hl7v2/" + fileName, source: "user"})
+                    )
+                    .catch(() => {
+                        res.status(500);
+                        res.json(errorMessage(errorCodes.WriteError, "Unable to save sample message."));
+                    });
+            });
+    });
+
+    app.delete("/api/v1/sample-data/hl7v2/:file", function (req, res) {
+        const fileName = req.params.file;
+        if (!fileName || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Invalid sample file name."));
+            return;
+        }
+        unlink(join(userSampleDataLocation, "hl7v2", fileName))
+            .then(() => res.status(200).json({ok: true, messageName: "hl7v2/" + fileName}))
+            .catch((deleteError) => {
+                if (!deleteError || deleteError.code !== "ENOENT") {
+                    res.status(500);
+                    res.json(errorMessage(errorCodes.WriteError, "Unable to delete sample message."));
+                    return;
+                }
+                access(join(sampleDataLocation, "hl7v2", fileName))
+                    .then(() => {
+                        res.status(403);
+                        res.json(errorMessage(errorCodes.Unauthorized, "Built-in samples cannot be deleted."));
+                    })
+                    .catch(() => {
+                        res.status(404);
+                        res.json(errorMessage(errorCodes.NotFound, "Sample data not found"));
+                    });
             });
     });
 

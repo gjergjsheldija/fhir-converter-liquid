@@ -164,10 +164,188 @@ describe("GET /api/v1/sample-data/:file", function () {
 
     it("should return status code 404 when getting foobar.hl7", function (done) {
         supertest(app)
-            .get("/api/v1/sample-data/foobar.hl7")
+            .get("/api/v1/sample-data/hl7v2/foobar.hl7")
             .expect(404, {
                 error: {
                     code: "NotFound", message: "Sample data not found"
+                }
+            })
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+});
+
+describe("/api/v1/sample-data user samples (temporary USER_SAMPLE_DATA_LOCATION)", function () {
+    let userSampleDir;
+
+    before(async function () {
+        userSampleDir = await mkdtemp(join(tmpdir(), 'fhir-user-samples-'));
+        var myConstants = JSON.parse(JSON.stringify(app.getConstants()));
+        myConstants.USER_SAMPLE_DATA_LOCATION = userSampleDir;
+        app.setConstants(myConstants);
+    });
+
+    after(async function () {
+        app.setConstants(constants);
+        await rm(userSampleDir, {recursive: true, force: true});
+    });
+
+    it("PUT then list and read a user sample", function (done) {
+        supertest(app)
+            .put("/api/v1/sample-data/hl7v2/custom-adt.hl7")
+            .send("MSH|^~\\&|SEND|RECV|FAC|DEST|20240101120000||ADT^A04^ADT_A04|MSG00001|P|2.5")
+            .type("text/plain")
+            .expect(200, {ok: true, messageName: "hl7v2/custom-adt.hl7", source: "user"})
+            .expect(function () {
+                supertest(app)
+                    .get("/api/v1/sample-data")
+                    .expect(200)
+                    .expect(function (listResponse) {
+                        var userEntry = listResponse.body.messages.filter(function (item) {
+                            return item.messageName === "hl7v2/custom-adt.hl7";
+                        })[0];
+                        if (!userEntry || userEntry.source !== "user") {
+                            throw new Error("User sample missing from list or missing source: user");
+                        }
+                        supertest(app)
+                            .get("/api/v1/sample-data/hl7v2/custom-adt.hl7")
+                            .expect(200)
+                            .end(function (readErr, readResponse) {
+                                if (readErr) {
+                                    done(readErr);
+                                    return;
+                                }
+                                if (readResponse.text.indexOf("MSH|^~\\&|") === -1) {
+                                    done(new Error("User sample content mismatch"));
+                                    return;
+                                }
+                                done();
+                            });
+                    })
+                    .end(function (listErr) {
+                        if (listErr) {
+                            done(listErr);
+                        }
+                    });
+            })
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                }
+            });
+    });
+
+    it("PUT over a built-in sample returns 409", function (done) {
+        supertest(app)
+            .put("/api/v1/sample-data/hl7v2/ADT04-23.hl7")
+            .send("MSH|^~\\&|")
+            .type("text/plain")
+            .expect(409, {
+                error: {
+                    code: "Conflict", message: "Cannot overwrite a built-in sample. Save under a new file name."
+                }
+            })
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+
+    it("PUT with a path-escaping file name returns 400", function (done) {
+        supertest(app)
+            .put("/api/v1/sample-data/hl7v2/..%2Fescape.hl7")
+            .send("MSH|^~\\&|")
+            .type("text/plain")
+            .expect(400)
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+
+    it("PUT with an unsupported extension returns 400", function (done) {
+        supertest(app)
+            .put("/api/v1/sample-data/hl7v2/custom.hl7json")
+            .send("MSH|^~\\&|")
+            .type("text/plain")
+            .expect(400, {
+                error: {
+                    code: "BadRequest", message: "Sample file must end in .hl7, .txt, or .msg."
+                }
+            })
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+
+    it("PUT with an empty body returns 400", function (done) {
+        supertest(app)
+            .put("/api/v1/sample-data/hl7v2/custom-adt.hl7")
+            .send("   ")
+            .type("text/plain")
+            .expect(400, {
+                error: {
+                    code: "BadRequest", message: "Sample message cannot be empty."
+                }
+            })
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+
+    it("PUT with a bare file name appends .hl7", function (done) {
+        supertest(app)
+            .put("/api/v1/sample-data/hl7v2/bare-sample")
+            .send("MSH|^~\\&|")
+            .type("text/plain")
+            .expect(200, {ok: true, messageName: "hl7v2/bare-sample.hl7", source: "user"})
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+
+    it("DELETE on a user sample returns 200", function (done) {
+        supertest(app)
+            .delete("/api/v1/sample-data/hl7v2/custom-adt.hl7")
+            .expect(200)
+            .end(function (err) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+
+    it("DELETE on a built-in sample returns 403", function (done) {
+        supertest(app)
+            .delete("/api/v1/sample-data/hl7v2/ADT04-23.hl7")
+            .expect(403, {
+                error: {
+                    code: "Unauthorized", message: "Built-in samples cannot be deleted."
                 }
             })
             .end(function (err) {

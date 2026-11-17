@@ -11,11 +11,13 @@ const __dirname = path.dirname(__filename);
 
 let serviceTemplateFolder = "../../service-templates";
 let sampleDataFolder = "../../sample-data";
+let userSampleDataFolder = "../../service-samples";
 
 export const AVAILABLE_PARSERS = join(__dirname, "../parsers");
 export const BASE_TEMPLATE_FILES_LOCATION = join(__dirname, "../../templates/");
 export const TEMPLATE_FILES_LOCATION = join(__dirname, serviceTemplateFolder);
 export const SAMPLE_DATA_LOCATION = join(__dirname, sampleDataFolder);
+export const USER_SAMPLE_DATA_LOCATION = join(__dirname, userSampleDataFolder);
 export const STATIC_LOCATION = join(__dirname, "../../static");
 export const CODE_MIRROR_LOCATION = join(
     __dirname,
@@ -37,6 +39,6 @@ export const CLS_NAMESPACE = "conversionRequest";
 export const CLS_KEY_TEMPLATE_LOCATION = "templateLocation";
 export const TIMEZONE = "TIMEZONE";
 
-export let constants = [AVAILABLE_PARSERS, BASE_TEMPLATE_FILES_LOCATION, TEMPLATE_FILES_LOCATION, SAMPLE_DATA_LOCATION,
+export let constants = [AVAILABLE_PARSERS, BASE_TEMPLATE_FILES_LOCATION, TEMPLATE_FILES_LOCATION, SAMPLE_DATA_LOCATION, USER_SAMPLE_DATA_LOCATION,
     STATIC_LOCATION, CODE_MIRROR_LOCATION, MOVE_TO_GLOBAL_KEY_NAME, HL7V2_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION, HL7V2_DATA_LOCATION,
     CLS_NAMESPACE, CLS_KEY_TEMPLATE_LOCATION, TIMEZONE];

@@ -573,6 +573,35 @@ body {
     border-radius: 8px;
 }
 
+.is-drop-target {
+    outline: 2px dashed #1f6feb;
+    outline-offset: -2px;
+    background: #dbe7ff;
+}
+
+.sample-remove {
+    float: right;
+    margin: 0 4px 0 8px;
+    padding: 0 2px;
+    color: #667085;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.1s ease, color 0.1s ease;
+}
+
+.file-browser-row:hover .sample-remove,
+.file-browser-row:focus .sample-remove,
+.sample-remove:focus {
+    opacity: 1;
+}
+
+.sample-remove:hover,
+.sample-remove:focus {
+    color: #b42318;
+    outline: none;
+}
+
 #conversion-status {
     color: #667085;
     font-weight: 500;

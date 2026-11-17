@@ -70,6 +70,7 @@ typings/
 # app runtime data
 service-templates
 tmp/
+src/service-samples/
 
 *.iml
 

@@ -117,6 +117,15 @@
                     <div class="pane-header">
                         <span>Message</span>
                         <span id="message-name">No sample</span>
+                        <button class="btn btn-sm btn-outline-dark ml-auto" id="new-sample-button" type="button">New sample</button>
+                        <button class="btn btn-sm btn-outline-dark" id="import-sample-button" type="button">Import…</button>
+                        <input id="import-sample-input" type="file" accept=".hl7,.txt,.msg" multiple hidden>
+                        <button class="btn btn-sm btn-outline-dark" id="save-sample-button" type="button">Save sample</button>
+                        <span id="save-sample-form" hidden>
+                            <input id="save-sample-name" class="form-control form-control-sm" type="text" placeholder="Name, .hl7 optional" aria-label="Sample name">
+                            <button type="button" class="btn btn-sm btn-dark" id="save-sample-create">Save</button>
+                            <button type="button" class="btn btn-sm btn-outline-dark" id="save-sample-cancel">Cancel</button>
+                        </span>
                     </div>
                     <textarea id="databox"></textarea>
                     <div id="unused-legend" class="pane-legend" hidden>Underlined in red: this field is not read by the template.</div>

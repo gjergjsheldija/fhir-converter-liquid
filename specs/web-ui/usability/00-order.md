@@ -37,7 +37,7 @@ Specs 01–16 are implemented. Do not re-implement them. Implement specs 17–20
 | 17 | Done | `17-collapse-files-pane.md` | Collapse and expand the left Files pane with a header toggle, a collapsed left rail, and Cmd/Ctrl-B. |
 | 18 | Done | `18-fold-samples-templates-and-partials.md` | Fold and unfold the `Samples`, `Templates`, and `Partials` sidebar sections with counts and persisted state. |
 | 19 | Done | `19-includes-popover-and-create-include.md` | Replace the multi-row Included chip tray with a grouped `Includes (N) ▾` tab-bar popover and one-click creation of missing includes. |
-| 20 | Not started | `20-add-and-import-hl7v2-samples.md` | Add synthetic HL7v2 starters, drag-and-drop / multi-file sample import, and `Save sample` into gitignored `src/service-samples/`. |
+| 20 | Done | `20-add-and-import-hl7v2-samples.md` | Add synthetic HL7v2 starters, drag-and-drop / multi-file sample import, and `Save sample` into gitignored `src/service-samples/`. |
 
 ## Required check on every spec
 

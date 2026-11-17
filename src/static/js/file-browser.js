@@ -114,6 +114,26 @@ function highlightMatchingTemplate(text) {
     }
 }
 
+function removeUserSample(sample) {
+    if (!window.confirm('Delete sample "' + sample.label + '"?')) {
+        return;
+    }
+    $.ajax({
+        url: getUrl('sample-data', 'hl7v2/' + sample.label),
+        type: 'DELETE',
+        dataType: 'json'
+    }).done(function () {
+        if (selectedSample === sample.full) {
+            selectedSample = null;
+        }
+        refreshFileBrowser();
+    }).fail(function (xhr) {
+        var body = (xhr && xhr.responseJSON) || {};
+        var message = (body.error && typeof body.error.message === 'string') ? body.error.message : 'Could not delete sample.';
+        showConversionError(message);
+    });
+}
+
 function setFileRowTabOrder() {
     var rows = $('#file-browser .file-browser-row');
     rows.attr('tabindex', '-1');
@@ -157,7 +177,8 @@ function renderFileBrowser(messages) {
     }).map(function (item) {
         return {
             full: item.messageName,
-            label: item.messageName.substring(item.messageName.indexOf('/') + 1)
+            label: item.messageName.substring(item.messageName.indexOf('/') + 1),
+            source: item.source
         };
     });
 
@@ -168,6 +189,21 @@ function renderFileBrowser(messages) {
             return;
         }
         var row = $('<button type="button" class="file-browser-row"></button>').text(sample.label);
+        if (sample.source === 'user') {
+            var remove = $('<span class="sample-remove" role="button" tabindex="0" aria-label="Remove ' + sample.label + '">×</span>');
+            remove.on('click', function (event) {
+                event.stopPropagation();
+                removeUserSample(sample);
+            });
+            remove.on('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    removeUserSample(sample);
+                }
+            });
+            row.append(remove);
+        }
         row.attr('title', sample.label);
         if (sample.full === selectedSample) {
             row.addClass('is-selected');
