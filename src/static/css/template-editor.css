@@ -595,6 +595,15 @@ body {
     background: var(--accent);
 }
 
+#template-save-button .tab-dirty {
+    margin-left: 0;
+    margin-right: 6px;
+}
+
+#template-save-button.is-dirty .tab-dirty {
+    display: inline-block;
+}
+
 #editor-wrapper {
     gap: 12px;
     padding: 12px;
@@ -625,6 +634,10 @@ body {
 
 .source-switch button {
     flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     border: 0;
     background: transparent;
     border-radius: 6px;
@@ -732,12 +745,32 @@ body {
 }
 
 .file-browser-row {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     max-width: 100%;
+    text-align: left;
+}
+
+.file-browser-row svg,
+.source-switch svg,
+.pane-header svg {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+}
+
+.file-browser-row.is-selected svg {
+    color: var(--text);
+}
+
+.file-browser-label {
+    flex: 1 1 auto;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: left;
 }
 
 .file-browser-chevron {

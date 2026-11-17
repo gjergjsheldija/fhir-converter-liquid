@@ -188,7 +188,9 @@ function renderFileBrowser(messages) {
         if (filter && sample.label.toLowerCase().indexOf(filter) === -1) {
             return;
         }
-        var row = $('<button type="button" class="file-browser-row"></button>').text(sample.label);
+        var row = $('<button type="button" class="file-browser-row"></button>');
+        row.append(icon('icon-message'));
+        row.append($('<span class="file-browser-label"></span>').text(sample.label));
         if (sample.source === 'user') {
             var remove = $('<span class="sample-remove" role="button" tabindex="0" aria-label="Remove ' + sample.label + '">×</span>');
             remove.on('click', function (event) {
@@ -275,7 +277,7 @@ function renderFileBrowser(messages) {
         var headingText = folder + ' (' + shown.length + ')';
         var heading = $('<button type="button" class="file-browser-row"></button>');
         heading.append($('<span class="file-browser-chevron" aria-hidden="true"></span>'));
-        heading.append(document.createTextNode(headingText));
+        heading.append($('<span class="file-browser-label"></span>').text(headingText));
         heading.attr('title', headingText);
         heading.attr('data-folder-name', folder);
         heading.on('click', function (event) {
@@ -315,9 +317,24 @@ function renderFileBrowser(messages) {
     setFileRowTabOrder();
 }
 
+function iconIdForTemplate(fullName) {
+    if (fullName.indexOf('/') === -1) {
+        return /\.liquid$/i.test(fullName) ? 'icon-template' : null;
+    }
+    if (/\.json$/i.test(fullName)) {
+        return 'icon-json';
+    }
+    return 'icon-partial';
+}
+
 function templateRow(fullName, label) {
     var text = label || fullName;
-    var row = $('<button type="button" class="file-browser-row"></button>').text(text);
+    var row = $('<button type="button" class="file-browser-row"></button>');
+    var iconId = iconIdForTemplate(fullName);
+    if (iconId) {
+        row.append(icon(iconId));
+    }
+    row.append($('<span class="file-browser-label"></span>').text(text));
     row.attr('title', text);
     row.attr('data-template-name', fullName);
     if (fullName === selectedTemplate) {
@@ -358,7 +375,8 @@ function renderExternalEntries(payload) {
     var list = $('#external-list');
     list.empty();
     if (externalPath) {
-        var up = $('<button type="button" class="file-browser-row"></button>').text('..');
+        var up = $('<button type="button" class="file-browser-row"></button>');
+        up.append($('<span class="file-browser-label"></span>').text('..'));
         up.attr('title', '..');
         up.on('click', function () {
             var parent = externalPath.split('/').slice(0, -1).join('/');
@@ -371,7 +389,8 @@ function renderExternalEntries(payload) {
     }
     (payload.entries || []).forEach(function (entry) {
         var label = (entry.type === 'dir' ? '▸ ' : '') + entry.name;
-        var row = $('<button type="button" class="file-browser-row"></button>').text(label);
+        var row = $('<button type="button" class="file-browser-row"></button>');
+        row.append($('<span class="file-browser-label"></span>').text(label));
         row.attr('title', label);
         row.on('click', function () {
             if (entry.type === 'dir') {
