@@ -1,5 +1,33 @@
 ﻿<!DOCTYPE html>
 <html data-theme="light">
+<script>
+    (function () {
+        // Sets the theme before first paint. May only read localStorage and set data-theme.
+        var choice = null;
+        try {
+            var raw = localStorage.getItem('fhirConverterSettings');
+            var stored = raw ? JSON.parse(raw) : null;
+            if (stored && typeof stored === 'object') {
+                if (stored.theme === 'light' || stored.theme === 'dark' || stored.theme === 'system') {
+                    choice = stored.theme;
+                } else if (stored.darkMode === true) {
+                    choice = 'dark';
+                } else {
+                    choice = 'light';
+                }
+            }
+        } catch (ex) {
+            return; // Leave data-theme as light when localStorage cannot be read.
+        }
+        if (choice === null) {
+            choice = 'system';
+        }
+        if (choice === 'system') {
+            choice = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = choice;
+    })();
+</script>
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -187,10 +215,21 @@
                     <div class="modal-body">
                         <fieldset class="settings-group">
                             <legend>Editor</legend>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="settings-dark-mode">
-                                <label class="form-check-label" for="settings-dark-mode">Dark mode</label>
-                            </div>
+                            <fieldset class="settings-group">
+                                <legend>Theme</legend>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="settings-theme" id="settings-theme-light" value="light">
+                                    <label class="form-check-label" for="settings-theme-light">Light</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="settings-theme" id="settings-theme-dark" value="dark">
+                                    <label class="form-check-label" for="settings-theme-dark">Dark</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="settings-theme" id="settings-theme-system" value="system">
+                                    <label class="form-check-label" for="settings-theme-system">System</label>
+                                </div>
+                            </fieldset>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="settings-convert-while-typing" checked>
                                 <label class="form-check-label" for="settings-convert-while-typing">Convert while typing</label>

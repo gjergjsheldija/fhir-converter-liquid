@@ -575,6 +575,26 @@ body {
     color: var(--accent);
 }
 
+#template-save-button {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+#template-save-button:hover {
+    background: var(--hover);
+}
+
+#template-save-button.is-dirty {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+
+#template-save-button.is-dirty:hover {
+    background: var(--accent);
+}
+
 #editor-wrapper {
     gap: 12px;
     padding: 12px;

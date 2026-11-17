@@ -59,6 +59,40 @@ function setSettings(settings) {
     }
 }
 
+var themePreference = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+function resolveStoredTheme() {
+    try {
+        var raw = localStorage.getItem('fhirConverterSettings');
+        var stored = raw ? JSON.parse(raw) : null;
+        if (stored && typeof stored === 'object') {
+            if (stored.theme === 'light' || stored.theme === 'dark' || stored.theme === 'system') {
+                return stored.theme;
+            }
+            return stored.darkMode === true ? 'dark' : 'light';
+        }
+    } catch (ex) {
+        return 'system';
+    }
+    return 'system';
+}
+
+function applyTheme(choice) {
+    if (choice === 'system') {
+        choice = themePreference && themePreference.matches ? 'dark' : 'light';
+    }
+    document.documentElement.dataset.theme = choice;
+}
+
+var currentThemeChoice = resolveStoredTheme();
+if (themePreference) {
+    themePreference.addEventListener('change', function () {
+        if (currentThemeChoice === 'system') {
+            applyTheme('system');
+        }
+    });
+}
+
 function showFhirAuthFields() {
     var auth = $('#settings-fhir-auth').val();
     $('#settings-fhir-token-row').toggle(auth === 'bearer');
@@ -125,9 +159,9 @@ function updateUnsavedDot() {
         }
     });
     if (activeTemplate && !unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
-        $('#template-save-button').removeClass('btn-outline-dark').addClass('btn-dark');
+        $('#template-save-button').addClass('is-dirty');
     } else {
-        $('#template-save-button').removeClass('btn-dark').addClass('btn-outline-dark');
+        $('#template-save-button').removeClass('is-dirty');
     }
 }
 
@@ -293,42 +327,6 @@ function indexOfX(source, target, number, offset = 0) {
     }
 
     return indexOfX(source, target, number - 1, source.indexOf(target, offset) + 1);
-}
-
-function setColorTheme(isDarkMode) {
-    var addColor = isDarkMode ? "dark" : "light";
-    var removeColor = isDarkMode ? "light" : "dark";
-
-    var body = $('body');
-    body.removeClass("bg-" + removeColor);
-    body.addClass("bg-" + addColor);
-
-    var navbar = $('#navbar');
-    navbar.removeClass("bg-" + removeColor);
-    navbar.removeClass("navbar-" + removeColor);
-
-    navbar.addClass("bg-" + addColor);
-    navbar.addClass("navbar-" + addColor);
-
-    var templateTabs = $('#template-tabs');
-    templateTabs.removeClass("bg-" + removeColor);
-    navbar.addClass("bg-" + addColor);
-
-    var buttons = [$('#convert-button'), $('#settings-save-button'), $('#copy-result-button')];
-    buttons.forEach((btn) => {
-        // buttons are inverted to stand out
-        btn.removeClass("btn-" + addColor);
-        btn.addClass("btn-" + removeColor);
-    });
-
-    var settingsModal = $('#settings-modal-content');
-    settingsModal.removeClass("bg-" + removeColor);
-    settingsModal.removeClass("text-" + addColor);
-
-    settingsModal.addClass("bg-" + addColor);
-    settingsModal.addClass("text-" + removeColor);
-
-    updateUnsavedDot();
 }
 
 function displayBanner(message, cssClass) {
@@ -747,6 +745,8 @@ function refreshEditors() {
 }
 
 $(document).ready(function () {
+    applyTheme(currentThemeChoice);
+
     dataEditor = CodeMirror.fromTextArea(document.getElementById("databox"), {
         //readOnly: false,
         lineNumbers: true,
@@ -1008,7 +1008,8 @@ $(document).ready(function () {
 
     $("#settings-modal").on('show.bs.modal', function () {
         var settings = getSettings();
-        $('#settings-dark-mode').prop('checked', settings.darkMode);
+        var themeChoice = resolveStoredTheme();
+        $('input[name="settings-theme"][value="' + themeChoice + '"]').prop('checked', true);
         $('#settings-convert-while-typing').prop('checked', settings.convertWhileTyping !== false);
         $('#settings-timezone').val(settings.timezone || '');
         $('#settings-fhir-url').val(settings.fhirBaseUrl || '');
@@ -1019,12 +1020,18 @@ $(document).ready(function () {
         showFhirAuthFields();
     });
 
+    $('input[name="settings-theme"]').on('change', function () {
+        var settings = getSettings();
+        currentThemeChoice = settings.theme = $(this).val();
+        setSettings(settings);
+        applyTheme(currentThemeChoice);
+    });
+
     $('#settings-fhir-auth').on('change', showFhirAuthFields);
 
     $('#settings-save-button').on('click', function () {
         var settings = getSettings();
-        var changesColorTheme = settings.darkMode != $('#settings-dark-mode').prop('checked');
-        settings.darkMode = $('#settings-dark-mode').prop('checked');
+        settings.theme = $('input[name="settings-theme"]:checked').val() || settings.theme || 'light';
         settings.convertWhileTyping = $('#settings-convert-while-typing').prop('checked');
         settings.timezone = $('#settings-timezone').val();
         settings.fhirBaseUrl = $('#settings-fhir-url').val().trim();
@@ -1033,9 +1040,6 @@ $(document).ready(function () {
         settings.fhirUsername = $('#settings-fhir-username').val();
         settings.fhirPassword = $('#settings-fhir-password').val();
         setSettings(settings);
-        if (changesColorTheme) {
-            setColorTheme(settings.darkMode);
-        }
     });
 
     $('#send-fhir-button').on('click', function () {
