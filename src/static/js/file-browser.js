@@ -6,12 +6,31 @@
 
 var selectedSample = null;
 var selectedTemplate = null;
+var didOpenStartupExample = false;
 
 function refreshFileBrowser() {
     $.ajax({url: getUrl('sample-data'), dataType: 'json', cache: false, success: function (sampleList) {
         $.ajax({url: getUrl('templates'), dataType: 'json', cache: false, success: function (templateList) {
             applyTemplateList(templateList.templates || []);
             renderFileBrowser(sampleList.messages || []);
+            if (didOpenStartupExample) {
+                return;
+            }
+            didOpenStartupExample = true;
+            var hasStartupSample = (sampleList.messages || []).some(function (item) {
+                return item.messageName === 'hl7v2/ADT04-23.hl7';
+            });
+            var hasStartupTemplate = Array.isArray(templateNames) && templateNames.indexOf('ADT_A04.liquid') !== -1;
+            var startupEditorsEmpty = dataEditor && dataEditor.getValue() === ''
+                && activeTemplate && activeTemplate.name === 'untitled' && activeTemplate.data === ''
+                && openTemplates.length === 1;
+            if (startupEditorsEmpty && hasStartupSample && hasStartupTemplate) {
+                selectedSample = 'hl7v2/ADT04-23.hl7';
+                selectedTemplate = 'ADT_A04.liquid';
+                renderFileBrowser(sampleList.messages || []);
+                loadData('hl7v2/ADT04-23.hl7');
+                loadTemplate('ADT_A04.liquid');
+            }
         }});
     }});
 }
