@@ -104,14 +104,13 @@
                         <div class="pane-header">
                             <span>Template</span>
                             <span id="template-open-name">untitled</span>
-                            <span id="unsaved-dot" hidden></span>
                             <button class="btn btn-sm btn-outline-dark ml-auto" id="new-template-button" type="button">New</button>
                             <button class="btn btn-sm btn-outline-dark" id="generate-template-button" type="button">Generate</button>
-                            <button class="btn btn-sm btn-dark" id="template-save-button" type="button">Save</button>
+                            <button class="btn btn-sm btn-outline-dark" id="template-save-button" type="button">Save</button>
                         </div>
                         <nav class="template-tabs">
                             <div id="template-tabs" class="nav nav-tabs" role="tablist">
-                                <a class="nav-item nav-link font-weight-bold" onclick="changeTab('untitled')">untitled</a>
+                                <a class="nav-item nav-link font-weight-bold" onclick="changeTab('untitled')">untitled<span class="tab-dirty" hidden></span></a>
                             </div>
                         </nav>
                         <div class="template-editor">

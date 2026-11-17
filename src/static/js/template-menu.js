@@ -57,10 +57,9 @@ function closeAllTemplates(openDefault = false) {
             openTemplates = [activeTemplate];
             currentTemplateReference = {untitled: ''};
             templateCodeEditor.setValue('');
-            $('#template-tabs').html("<a class=\"nav-item nav-link font-weight-bold\" onclick=\"changeTab('untitled')\">untitled</a>");
+            $('#template-tabs').html("<a class=\"nav-item nav-link font-weight-bold\" onclick=\"changeTab('untitled')\">" + tabLabelHtml('untitled', "") + "</a>");
             $('#template-open-name').text('untitled');
             $('#message-name').text('No sample');
-            $('#unsaved-dot').attr('hidden', true);
         }
     }
 

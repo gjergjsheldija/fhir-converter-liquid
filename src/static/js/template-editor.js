@@ -117,10 +117,21 @@ function conversionStatusLabel(resource) {
 }
 
 function updateUnsavedDot() {
-    if (!activeTemplate || unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
-        $('#unsaved-dot').attr('hidden', true);
+    openTemplates.forEach(function (template) {
+        var tab = getTab(template.name);
+        if (!tab) {
+            return;
+        }
+        if (unchangedFromReference(template.name, template.data)) {
+            tab.find('.tab-dirty').attr('hidden', true);
+        } else {
+            tab.find('.tab-dirty').removeAttr('hidden');
+        }
+    });
+    if (activeTemplate && !unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
+        $('#template-save-button').removeClass('btn-outline-dark').addClass('btn-dark');
     } else {
-        $('#unsaved-dot').removeAttr('hidden');
+        $('#template-save-button').removeClass('btn-dark').addClass('btn-outline-dark');
     }
 }
 
@@ -307,7 +318,7 @@ function setColorTheme(isDarkMode) {
     templateTabs.removeClass("bg-" + removeColor);
     navbar.addClass("bg-" + addColor);
 
-    var buttons = [$('#template-save-button'), $('#convert-button'), $('#settings-save-button'), $('#copy-result-button')];
+    var buttons = [$('#convert-button'), $('#settings-save-button'), $('#copy-result-button')];
     buttons.forEach((btn) => {
         // buttons are inverted to stand out
         btn.removeClass("btn-" + addColor);
@@ -324,6 +335,8 @@ function setColorTheme(isDarkMode) {
     dataEditor.setOption("theme", isDarkMode ? darkMode : lightMode);
     outputCode.setOption("theme", isDarkMode ? darkMode : lightMode);
     templateCodeEditor.setOption("theme", isDarkMode ? darkMode : lightMode);
+
+    updateUnsavedDot();
 }
 
 function displayBanner(message, cssClass) {
@@ -557,6 +570,15 @@ $(document).ready(function () {
             updateUnsavedDot();
         }
         convertData();
+    });
+
+    $(document).on('keydown', function (event) {
+        if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && (event.key === 's' || event.key === 'S')) {
+            event.preventDefault();
+            if (activeTemplate && !unchangedFromReference(activeTemplate.name, templateCodeEditor.getValue())) {
+                saveTemplate();
+            }
+        }
     });
 
     templateCodeEditor.on('dblclick', function () {

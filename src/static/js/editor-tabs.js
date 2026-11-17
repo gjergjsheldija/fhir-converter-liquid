@@ -3,17 +3,20 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 /* eslint-disable no-undef, no-unused-vars */
+function tabLabelHtml(templateName, closeHtml) {
+    return templateName + "<span class=\"tab-dirty\" hidden></span>" + closeHtml;
+}
+
 function addTab(templateName, parentName) {
     if (!openTemplates.reduce((isOpen, template) => template.name === templateName ? true : isOpen, false)) {
         $.get(templateFileUrl(templateName), function (data) {
             currentTemplateReference[templateName] = data;
 
             var tabs = $('#template-tabs');
-            var tabHtml = "<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + templateName;
-            if (parentName) {
-                tabHtml += "<button type=\"button\" class=\"close\" onclick=\"closeTab('" + templateName + "')\"><span>&times;</span></button>";
-            }
-            tabHtml += "</a>";
+            var closeHtml = parentName
+                ? "<button type=\"button\" class=\"close\" onclick=\"closeTab('" + templateName + "')\"><span>&times;</span></button>"
+                : "";
+            var tabHtml = "<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + tabLabelHtml(templateName, closeHtml) + "</a>";
             tabs.append(tabHtml);
 
             openTemplates.push({ name: templateName, parent: parentName, data: data, active: true, marks: [] });
@@ -65,7 +68,7 @@ function openLocalTemplate(templateName, text, dirty) {
 
     currentTemplateReference[templateName] = dirty ? null : text;
     var tabs = $('#template-tabs');
-    tabs.append("<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + templateName + "</a>");
+    tabs.append("<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + tabLabelHtml(templateName, "") + "</a>");
     openTemplates.push({name: templateName, parent: null, data: text, active: true, marks: []});
     changeTab(templateName);
 }
