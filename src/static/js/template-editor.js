@@ -103,6 +103,19 @@ function hideResultError() {
     $('#result-error').text('').attr('hidden', true);
 }
 
+function conversionStatusLabel(resource) {
+    if (resource && typeof resource === 'object' && resource.resourceType === 'Bundle' && Array.isArray(resource.entry)) {
+        if (resource.entry.length === 1) {
+            return 'Converted · Bundle · 1 resource';
+        }
+        return 'Converted · Bundle · ' + resource.entry.length + ' resources';
+    }
+    if (resource && typeof resource === 'object' && typeof resource.resourceType === 'string' && resource.resourceType.length > 0) {
+        return 'Converted · ' + resource.resourceType;
+    }
+    return 'Converted';
+}
+
 function updateUnsavedDot() {
     if (!activeTemplate || unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
         $('#unsaved-dot').attr('hidden', true);
@@ -168,7 +181,7 @@ function convertData(force) {
 
                     outputCode.setValue(outputLines.join('\n'));
                     hideResultError();
-                    $('#conversion-status').text('Converted');
+                    $('#conversion-status').text(conversionStatusLabel(data.fhirResource));
                     hideConversionError();
                     setUnusedLegend(false);
                     refreshEditors();
@@ -581,7 +594,15 @@ $(document).ready(function () {
             showConversionError('Could not copy the result.');
             return;
         }
-        navigator.clipboard.writeText(text).catch(function () {
+        navigator.clipboard.writeText(text).then(function () {
+            var previous = $('#conversion-status').text();
+            $('#conversion-status').text('Copied');
+            setTimeout(function () {
+                if ($('#conversion-status').text() === 'Copied') {
+                    $('#conversion-status').text(previous);
+                }
+            }, 2000);
+        }).catch(function () {
             showConversionError('Could not copy the result.');
         });
     });
@@ -810,8 +831,10 @@ function runGenerateTemplate() {
             openLocalTemplate(nextGeneratedName(), data.generated || '', true);
             if (data.fhirResource !== undefined) {
                 outputCode.setValue(JSON.stringify(data.fhirResource, null, 2));
+                $('#conversion-status').text(conversionStatusLabel(data.fhirResource));
+            } else {
+                $('#conversion-status').text('Converted');
             }
-            $('#conversion-status').text('Converted');
             hideConversionError();
         },
         error: function (err) {
