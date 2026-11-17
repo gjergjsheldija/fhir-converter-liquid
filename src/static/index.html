@@ -48,50 +48,9 @@
     <div class="container-fluid h-100">
 
         <nav class="navbar navbar-expand-sm bg-light navbar-light" id="navbar">
-            <div class="dropdown">
-                <a class="navbar-brand dropdown-toggle" href="#" id="data-type-dropdown-button" role="button"
-                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    FHIR Converter
-                </a>
-                <div id="data-type-dropdown" class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">HL7V2</a>
-                    <a class="dropdown-item" href="#">CDA</a>
-                </div>
-            </div>
-
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" id="nav-patients" href="/api-docs">API</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="nav-settings" data-toggle="modal" data-target="#settings-modal" href="#">Settings</a>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="data-dropdown-button" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Load data
-                    </a>
-                    <div id="data-load-dropdown" class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="template-dropdown-button" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Load template
-                    </a>
-                    <div id="template-load-dropdown" class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <input id="template-name-input" type="text" class="form-control" placeholder="template">
-                </li>
-                <li class="nav-item">
-                    <button class="btn btn-dark navbar-btn" id="template-save-button">Save</button>
-                </li>
-            </ul>
-
-            <button class="btn btn-dark navbar-btn" id="refresh-button">Refresh</button>
+            <span class="navbar-brand mb-0">FHIR Converter</span>
+            <button class="btn btn-dark navbar-btn ml-auto" id="convert-button" type="button">Convert</button>
+            <button class="btn btn-dark navbar-btn ml-2" id="settings-open" type="button" data-toggle="modal" data-target="#settings-modal">Settings</button>
         </nav>
 
         <div id="banner" class="alert" role="alert" style="display: none">
@@ -99,33 +58,81 @@
             <span id="banner-message"></span>
         </div>
 
-        <!-- Split layout for editors -->
         <div class="editor-content" id="editor-wrapper">
-            <div class="content split msg-area">
-                <textarea id="databox"></textarea>
-            </div>
-            <div class="content split editor-area">
-                <div class="split template-area">
-                    <nav class="template-tabs">
-                        <div id="template-tabs" class="nav nav-tabs" role="tablist">
-                            <a class="nav-item nav-link font-weight-bold" onclick="changeTab('untitled')">untitled</a>
-                        </div>
-                    </nav>
-                    <div class="template-editor">
-                        <textarea class="form-control" id="templatebox">{}</textarea>
-                    </div>
+            <div id="file-browser">
+                <div class="file-browser-title">Files</div>
+                <div class="source-switch" id="source-switch">
+                    <button type="button" data-source="builtin" class="is-active">Built-in</button>
+                    <button type="button" data-source="github">GitHub</button>
+                    <button type="button" data-source="folder">Folder</button>
                 </div>
-                <div class="split output-area">
-                    <textarea class="form-control" id="resultbox">{}</textarea>
+                <div id="source-github" class="source-panel" hidden>
+                    <input id="github-repo" class="form-control form-control-sm" type="text" placeholder="owner/repo">
+                    <input id="github-token" class="form-control form-control-sm" type="password" placeholder="Token, optional" autocomplete="off">
+                    <button id="github-list" class="btn btn-sm btn-primary" type="button">List</button>
+                </div>
+                <div id="source-folder" class="source-panel" hidden>
+                    <input id="folder-path" class="form-control form-control-sm" type="text" placeholder="/path/to/folder">
+                    <button id="folder-list" class="btn btn-sm btn-primary" type="button">List</button>
+                </div>
+                <input id="file-filter" class="form-control form-control-sm" type="text" placeholder="Filter">
+                <div id="builtin-lists">
+                    <div class="file-browser-heading">Samples</div>
+                    <div id="samples-list"></div>
+                    <div class="file-browser-heading">Templates</div>
+                    <div id="templates-list"></div>
+                    <div class="file-browser-heading">Partials</div>
+                    <div id="partials-list"></div>
+                </div>
+                <div id="external-browser" hidden>
+                    <div id="external-path" class="file-browser-heading"></div>
+                    <div id="external-list"></div>
+                </div>
+            </div>
+            <div id="editor-main">
+                <div class="content split msg-area">
+                    <div class="pane-header">
+                        <span>Message</span>
+                        <span id="message-name">No sample</span>
+                    </div>
+                    <textarea id="databox"></textarea>
+                    <div class="pane-legend">Red dots: this field is not read by the template.</div>
+                </div>
+                <div class="content split editor-area">
+                    <div class="split template-area">
+                        <div class="pane-header">
+                            <span>Template</span>
+                            <span id="template-open-name">untitled</span>
+                            <span id="unsaved-dot" hidden></span>
+                            <button class="btn btn-sm btn-outline-dark ml-auto" id="new-template-button" type="button">New</button>
+                            <button class="btn btn-sm btn-outline-dark" id="generate-template-button" type="button">Generate</button>
+                            <button class="btn btn-sm btn-dark" id="template-save-button" type="button">Save</button>
+                        </div>
+                        <nav class="template-tabs">
+                            <div id="template-tabs" class="nav nav-tabs" role="tablist">
+                                <a class="nav-item nav-link font-weight-bold" onclick="changeTab('untitled')">untitled</a>
+                            </div>
+                        </nav>
+                        <div class="template-editor">
+                            <textarea class="form-control" id="templatebox"></textarea>
+                        </div>
+                    </div>
+                    <div class="split output-area">
+                        <div class="pane-header">
+                            <span>FHIR result</span>
+                            <span id="conversion-status"></span>
+                            <button class="btn btn-sm btn-outline-primary ml-auto" id="send-fhir-button" type="button">Send</button>
+                            <button class="btn btn-sm btn-outline-dark" id="copy-result-button" type="button">Copy</button>
+                        </div>
+                        <textarea class="form-control" id="resultbox"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
+        <div id="conversion-error" hidden></div>
 
-        <!-- Modal for settings -->
         <div id="settings-modal" class="modal fade" role="dialog">
             <div class="modal-dialog">
-
-                <!-- Modal content-->
                 <div id="settings-modal-content" class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title">Settings</h4>
@@ -133,55 +140,87 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="settings-dark-mode">
+                            <input class="form-check-input" type="checkbox" id="settings-dark-mode">
                             <label class="form-check-label" for="settings-dark-mode">Dark mode</label>
                         </div>
-                        <div class="form-group">
-                            <label id="api-key-input-label" for="api-key-input">API Key:</label>
-                            <input type="text" class="form-control" id="api-key-input" placeholder="Enter key here">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="settings-convert-while-typing" checked>
+                            <label class="form-check-label" for="settings-convert-while-typing">Convert while typing</label>
                         </div>
+                        <div class="form-group mt-3">
+                            <label for="settings-timezone">Timezone</label>
+                            <input type="text" class="form-control" id="settings-timezone" placeholder="+0000">
+                        </div>
+                        <hr>
+                        <h5>FHIR server</h5>
+                        <div class="form-group">
+                            <label for="settings-fhir-url">Base URL</label>
+                            <input type="text" class="form-control" id="settings-fhir-url" placeholder="https://hapi.fhir.org/baseR4">
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-fhir-auth">Authentication</label>
+                            <select class="form-control" id="settings-fhir-auth">
+                                <option value="none">None</option>
+                                <option value="bearer">Bearer token</option>
+                                <option value="basic">Basic</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="settings-fhir-token-row">
+                            <label for="settings-fhir-token">Token</label>
+                            <input type="password" class="form-control" id="settings-fhir-token" autocomplete="off">
+                        </div>
+                        <div class="form-group" id="settings-fhir-user-row">
+                            <label for="settings-fhir-username">Username</label>
+                            <input type="text" class="form-control" id="settings-fhir-username" autocomplete="off">
+                        </div>
+                        <div class="form-group" id="settings-fhir-password-row">
+                            <label for="settings-fhir-password">Password</label>
+                            <input type="password" class="form-control" id="settings-fhir-password" autocomplete="off">
+                        </div>
+                        <a href="/api-docs">API docs</a>
                     </div>
                     <div class="modal-footer">
-                        <div id="settings-modal-alert" class="alert alert-danger collapse">
-                        </div>
-                        <button id="settings-save-button" type="button" class="btn btn-default">Save</button>
+                        <button id="settings-save-button" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
-
-        <!-- Modal for new branch -->
-        <div id="new-branch-modal" class="modal fade" role="dialog">
+        <div id="generate-modal" class="modal fade" role="dialog">
             <div class="modal-dialog">
-
-                <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">New Branch</h4>
+                        <h4 class="modal-title">Generate template</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
+                        <p id="generate-empty" hidden>No AI provider is configured. Enter a base URL and API key, or set AI_OPENAI_API_KEY.</p>
                         <div class="form-group">
-                            <label for="branchNameInput">Branch name:</label>
-                            <input type="text" class="form-control" id="branch-name-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="base-branch-select">Base branch:</label>
-                            <select class="form-control" id="base-branch-select">
-                                <option>master</option>
+                            <label for="generate-provider">Provider</label>
+                            <select class="form-control" id="generate-provider">
+                                <option value="custom">Custom</option>
                             </select>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="checkout-new-branch" checked>
-                            <label class="form-check-label" for="checkout-new-branch">
-                                Checkout new branch
-                            </label>
+                        <div class="form-group">
+                            <label for="generate-base-url">Base URL</label>
+                            <input type="text" class="form-control" id="generate-base-url" placeholder="https://api.openai.com/v1">
+                        </div>
+                        <div class="form-group">
+                            <label for="generate-model">Model</label>
+                            <input type="text" class="form-control" id="generate-model" placeholder="gpt-4o-mini" list="generate-model-list">
+                            <datalist id="generate-model-list"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label for="generate-api-key">API key</label>
+                            <input type="password" class="form-control" id="generate-api-key" placeholder="Saved in this browser" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="generate-prompt">Guidance</label>
+                            <textarea class="form-control" id="generate-prompt" rows="3" placeholder="Optional guidance"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button id="new-branch-create-button" type="button" class="btn btn-default">Create</button>
+                        <button id="generate-run-button" type="button" class="btn btn-dark">Generate</button>
                     </div>
                 </div>
             </div>
@@ -192,6 +231,7 @@
     <script type="text/javascript" src="/js/scroll-sync.js"></script>
     <script type="text/javascript" src="/js/template-menu.js"></script>
     <script type="text/javascript" src="/js/template-editor.js"></script>
+    <script type="text/javascript" src="/js/file-browser.js"></script>
     <script type="text/javascript" src="/js/hdc-hint.js"></script>
 </body>
 </html>

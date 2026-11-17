@@ -6,6 +6,7 @@
 import * as constants from "./lib/constants/constants.js";
 import {
     AVAILABLE_PARSERS,
+    BASE_TEMPLATE_FILES_LOCATION,
     CODE_MIRROR_LOCATION,
     SAMPLE_DATA_LOCATION,
     STATIC_LOCATION,
@@ -24,6 +25,12 @@ import promMid from "express-prom-bundle";
 import express from "express";
 import os from "os";
 import {fileURLToPath} from "url";
+import {readFileSync} from "fs";
+import {mkdir, writeFile} from "fs/promises";
+import {dirname, join} from "path";
+import {convertInlineHl7v2} from "./lib/workers/worker.js";
+import {listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
+import {sendResource} from "./lib/fhir/sendResource.js";
 
 const {json, text} = bodyparser;
 
@@ -244,6 +251,270 @@ export default function (app) {
      *       404:
      *         description: Not found
      */
+    function readAiConfig() {
+        try {
+            const cfg = JSON.parse(readFileSync(new URL("../config/default.json", import.meta.url), "utf8"));
+            return cfg.ai || {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function configuredProviderNames(ai) {
+        const providers = (ai && ai.providers) || {};
+        return Object.keys(providers).filter((name) => {
+            const provider = providers[name];
+            return provider && provider.baseUrl && provider.apiKeyEnv && process.env[provider.apiKeyEnv] && Array.isArray(provider.models);
+        });
+    }
+
+    /**
+     * @swagger
+     * /api/v1/templates/{file}:
+     *   put:
+     *     description: Writes a Liquid template
+     *     consumes:
+     *       - text/plain
+     */
+    app.put("/api/v1/templates/:file(*)", function (req, res) {
+        const key = req.params.file;
+        if (!key || key.includes("..") || !key.endsWith(".liquid")) {
+            res.status(400).json(errorMessage(errorCodes.BadRequest, "Invalid template name."));
+            return;
+        }
+        const text = typeof req.body === "string" ? req.body : "";
+        templateCache.set(key, text)
+            .then(() => {
+                const dest = join(BASE_TEMPLATE_FILES_LOCATION, key);
+                return mkdir(dirname(dest), {recursive: true}).then(() => writeFile(dest, text));
+            })
+            .then(() => {
+                res.status(200).json({ok: true});
+            })
+            .catch(() => {
+                res.status(400).json(errorMessage(errorCodes.WriteError, "Unable to write template"));
+            });
+    });
+
+    /**
+     * @swagger
+     * /api/v1/ai/providers:
+     *   get:
+     *     description: Lists AI providers that have a base URL, models, and an environment API key
+     */
+    app.get("/api/v1/ai/providers", function (req, res) {
+        const ai = readAiConfig();
+        const configured = configuredProviderNames(ai);
+        const providers = ai.providers || {};
+        res.json({
+            providers: configured,
+            available: Object.keys(providers).map((name) => ({
+                name,
+                baseUrl: providers[name].baseUrl || "",
+                models: Array.isArray(providers[name].models) ? providers[name].models : [],
+                configured: configured.includes(name)
+            }))
+        });
+    });
+
+    /**
+     * @swagger
+     * /api/v1/ai/models:
+     *   get:
+     *     description: Lists models configured for a provider
+     *     parameters:
+     *       - name: provider
+     *         in: query
+     *         type: string
+     */
+    app.get("/api/v1/ai/models", function (req, res) {
+        const ai = readAiConfig();
+        const provider = ai.providers && ai.providers[req.query.provider];
+        if (!provider) {
+            res.status(400).json(errorMessage(errorCodes.BadRequest, `AI provider '${req.query.provider}' is not configured.`));
+            return;
+        }
+        res.json({models: Array.isArray(provider.models) ? provider.models : []});
+    });
+
+    /**
+     * @swagger
+     * /api/v1/templategenerate:
+     *   post:
+     *     description: Asks a configured AI provider for a Liquid template and renders it with this converter
+     *     consumes:
+     *       - application/json
+     */
+    app.post("/api/v1/templategenerate", function (req, res) {
+        const body = req.body || {};
+        const ai = readAiConfig();
+        const maxIters = Number(body.maxIters) || ai.defaultMaxIters || 4;
+        const temperature = ai.defaultTemperature != null ? ai.defaultTemperature : 0;
+
+        const finish = (status, payload) => {
+            res.status(status).json(payload);
+        };
+
+        const resolveMessage = () => {
+            if (body.messageName) {
+                return messageCache.get(body.messageName).then((content) => content.toString());
+            }
+            if (typeof body.sampleDataInline === "string" && body.sampleDataInline.length > 0) {
+                return Promise.resolve(body.sampleDataInline);
+            }
+            const error = new Error("No message provided (neither messageName nor sampleDataInline).");
+            error.status = 400;
+            return Promise.reject(error);
+        };
+
+        resolveMessage()
+            .then((message) => {
+                if (body.confirmedExternalSend !== true) {
+                    const error = new Error("External send was not confirmed.");
+                    error.status = 400;
+                    throw error;
+                }
+                const providerName = body.provider || (body.baseUrl ? "custom" : ai.defaultProvider);
+                const providers = ai.providers || {};
+                const configured = configuredProviderNames(ai).includes(providerName);
+                let apiKey = "";
+                let baseUrl = "";
+                if (typeof body.baseUrl === "string" && body.baseUrl && typeof body.apiKey === "string" && body.apiKey) {
+                    apiKey = body.apiKey;
+                    baseUrl = body.baseUrl;
+                } else if (configured) {
+                    apiKey = process.env[providers[providerName].apiKeyEnv];
+                    baseUrl = providers[providerName].baseUrl;
+                } else {
+                    const error = new Error(`AI provider '${providerName}' is not configured.`);
+                    error.status = 400;
+                    throw error;
+                }
+                return import("./lib/ai/generateTemplate.js").then((aiModule) => {
+                    return runGenerateLoop(aiModule, {
+                        message,
+                        providerName,
+                        apiKey,
+                        baseUrl,
+                        model: body.model,
+                        prompt: body.prompt,
+                        timezone: body.timezone,
+                        maxIters,
+                        temperature
+                    });
+                });
+            })
+            .then((payload) => finish(200, payload))
+            .catch((err) => {
+                if (err && err.error && err.error.code === errorCodes.NotFound) {
+                    finish(404, errorMessage(errorCodes.NotFound, "Sample data not found."));
+                    return;
+                }
+                const message = err && err.message ? err.message : "Conversion failed.";
+                const payload = errorMessage(errorCodes.BadRequest, message);
+                if (err && err.iterations) {
+                    payload.iterations = err.iterations;
+                }
+                finish(400, payload);
+            });
+
+        function runGenerateLoop(aiModule, options) {
+            let currentTemplate = "";
+            let lastError = "";
+            const step = (i) => {
+                const prompt = i === 1
+                    ? aiModule.buildInitialPrompt(options.message, options.prompt)
+                    : aiModule.buildFixPrompt(currentTemplate, lastError, "");
+                return aiModule.callExternalAI({
+                    provider: options.providerName,
+                    model: options.model,
+                    apiKey: options.apiKey,
+                    baseUrl: options.baseUrl,
+                    temperature: options.temperature,
+                    prompt: prompt
+                }).then((template) => {
+                    currentTemplate = template;
+                    return convertInlineHl7v2({
+                        srcDataType: "hl7v2",
+                        srcData: options.message,
+                        template: template,
+                        templatesOverride: {},
+                        timezone: options.timezone
+                    }).then((result) => {
+                        const bodyResult = result.resultMsg || {};
+                        return {
+                            generated: template,
+                            fhirResource: bodyResult.fhirResource,
+                            unusedSegments: Array.isArray(bodyResult.unusedSegments) ? bodyResult.unusedSegments : [],
+                            iterations: i,
+                            provider: options.providerName,
+                            model: options.model,
+                            temperature: options.temperature
+                        };
+                    });
+                }).catch((err) => {
+                    if (err && err.resultMsg && err.resultMsg.error) {
+                        lastError = err.resultMsg.error.message;
+                    } else if (err instanceof Error) {
+                        lastError = err.message.startsWith("AI provider request failed")
+                            ? err.message
+                            : `AI provider request failed: ${err.message}`;
+                    } else {
+                        lastError = "Conversion failed.";
+                    }
+                    if (i >= options.maxIters) {
+                        const done = new Error(lastError);
+                        done.status = 400;
+                        done.iterations = options.maxIters;
+                        throw done;
+                    }
+                    return step(i + 1);
+                });
+            };
+            return step(1);
+        }
+    });
+
+    function browseError(res, err) {
+        const status = err && err.status ? err.status : 400;
+        const payload = errorMessage(status === 404 ? errorCodes.NotFound : errorCodes.BadRequest, err && err.message ? err.message : "Browse failed.");
+        if (err && err.detail) {
+            payload.detail = err.detail;
+        }
+        res.status(status).json(payload);
+    }
+
+    app.post("/api/v1/browse/github", function (req, res) {
+        const body = req.body || {};
+        const action = body.file ? readGithubFile(body.repo, body.path, body.token) : listGithub(body.repo, body.path, body.token);
+        action.then((result) => {
+            if (typeof result === "string") {
+                res.type("text/plain").send(result);
+                return;
+            }
+            res.json(result);
+        }).catch((err) => browseError(res, err));
+    });
+
+    app.post("/api/v1/browse/folder", function (req, res) {
+        const body = req.body || {};
+        const action = body.file ? readFolderFile(body.path) : listFolder(body.path);
+        action.then((result) => {
+            if (typeof result === "string") {
+                res.type("text/plain").send(result);
+                return;
+            }
+            res.json(result);
+        }).catch((err) => browseError(res, err));
+    });
+
+    app.post("/api/v1/fhir/send", function (req, res) {
+        const body = req.body || {};
+        sendResource(body.baseUrl, body.resource, body)
+            .then((result) => res.json(result))
+            .catch((err) => browseError(res, err));
+    });
+
     app.get("/api/v1/templates/:file(*)", function (req, res) {
         templateCache
             .get(req.params.file)

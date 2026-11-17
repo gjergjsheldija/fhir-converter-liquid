@@ -15,6 +15,7 @@ import {
 import {errorCodes, errorMessage} from '../error/error.js';
 import {instance as _liquidInstance} from '../liquid-converter/liquid-converter.js';
 import {HL7V2_LIQUID_TEMPLATE_LOCATION} from '../constants/constants.js';
+import {parentPort} from 'worker_threads';
 import {workerTaskProcessor} from './workerUtils.js';
 import dataHandlerFactory from '../dataHandler/dataHandlerFactory.js';
 import pkg2 from 'cls-hooked';
@@ -39,65 +40,169 @@ function expireCache() {
     clear();
 }
 
-workerTaskProcessor((msg) => {
+export function convertInlineHl7v2(msg) {
     return new Promise((fulfill, reject) => {
         session.run(() => {
-            switch (msg.type) {
-                case '/api/convert/:srcDataType': {
-                    try {
-                        var s = msg.srcData;
+            try {
+                var s = msg.srcData;
 
-                        if (typeof s !== 'string') {
+                if (typeof s !== 'string') {
+                    reject({
+                        'status': 400,
+                        'resultMsg': errorMessage(errorCodes.BadRequest, "srcData must be a string.")
+                    });
+                    return;
+                }
+
+                var templateString = "";
+                if (msg.template) {
+                    templateString = msg.template;
+                }
+
+                var templatesMap = undefined;
+                if (msg.templatesOverride) {
+                    if (msg.templatesOverride.constructor !== Object) {
+                        reject({
+                            'status': 400,
+                            'resultMsg': errorMessage(errorCodes.BadRequest, "templatesOverride must be a JSON object.")
+                        });
+                        return;
+                    }
+                    templatesMap = msg.templatesOverride;
+                }
+
+                var dataTypeHandler = dataHandlerFactory.createDataHandler(msg.srcDataType);
+
+                if (dataTypeHandler.dataType === 'hl7v2') {
+                    let liquidInstance = GetLiquidInstance(dataTypeHandler, templatesMap);
+                    session.set(TIMEZONE, msg.timezone);
+
+                    dataTypeHandler.parseSrcData(s)
+                        .then((parsedData) => {
+                            var dataContext = {msg: parsedData, hl7v2Data: parsedData.v2};
+                            if (templateString == null || templateString.length == 0) {
+                                var result = Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), JSON.parse(JSON.stringify(dataContext.msg)));
+                                fulfill({'status': 200, 'resultMsg': result});
+                                return;
+                            }
+                            liquidInstance.parseAndRender(dataTypeHandler.preProcessTemplate(templateString), dataContext)
+                                .then((rendered) => {
+                                    try {
+                                        var result = dataTypeHandler.postProcessResult(rendered);
+                                        fulfill({
+                                            'status': 200,
+                                            'resultMsg': Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), {'fhirResource': result})
+                                        });
+                                    } catch (err) {
+                                        reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString())});
+                                    }
+                                })
+                                .catch((err) => {
+                                    reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString())});
+                                });
+                        })
+                        .catch(err => {
                             reject({
                                 'status': 400,
-                                'resultMsg': errorMessage(errorCodes.BadRequest, "srcData must be a string.")
+                                'resultMsg': errorMessage(errorCodes.BadRequest, `Unable to parse input data. ${err.toString()}`)
+                            });
+                        });
+                } else {
+                    reject({
+                        'status': 400,
+                        'resultMsg': errorMessage(errorCodes.BadRequest, `Data type '${dataTypeHandler.dataType}' is not supported. This converter only supports HL7v2.`)
+                    });
+                }
+            } catch (err) {
+                reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, `${err.toString()}`)});
+            }
+        });
+    });
+}
+
+if (parentPort) {
+    workerTaskProcessor((msg) => {
+        return new Promise((fulfill, reject) => {
+            session.run(() => {
+                switch (msg.type) {
+                    case '/api/convert/:srcDataType': {
+                        convertInlineHl7v2(msg).then(fulfill, reject);
+                    }
+                        break;
+
+                    case '/api/convert/:srcDataType/:template': {
+                        let srcData = msg.srcData;
+                        let templateName = msg.templateName;
+                        let srcDataType = msg.srcDataType;
+                        let dataTypeHandler = dataHandlerFactory.createDataHandler(srcDataType);
+
+                        if (!srcData || srcData.length == 0) {
+                            reject({
+                                'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "No srcData provided.")
                             });
                         }
 
-                        var templateString = "";
-                        if (msg.template) {
-                            templateString = msg.template;
-                        }
-
-                        var templatesMap = undefined;
-                        if (msg.templatesOverride) {
-                            if (msg.templatesOverride.constructor !== Object) {
-                                reject({
-                                    'status': 400,
-                                    'resultMsg': errorMessage(errorCodes.BadRequest, "templatesOverride must be a JSON object.")
-                                });
-                            }
-                            templatesMap = msg.templatesOverride;
-                        }
-
-                        var dataTypeHandler = dataHandlerFactory.createDataHandler(msg.srcDataType);
-
                         if (dataTypeHandler.dataType === 'hl7v2') {
-                            let liquidInstance = GetLiquidInstance(dataTypeHandler, templatesMap);
+                            let liquidInstance = GetLiquidInstance(dataTypeHandler);
                             session.set(TIMEZONE, msg.timezone);
 
-                            dataTypeHandler.parseSrcData(s)
+                            const getLiquidTemplate = (templateName) => {
+                                return new Promise((fulfill, reject) => {
+                                    var template = get(templateName);
+                                    if (!template) {
+                                        readFile(join(HL7V2_LIQUID_TEMPLATE_LOCATION, templateName), (err, templateContent) => {
+                                            if (err) {
+                                                reject({
+                                                    'status': 404,
+                                                    'resultMsg': errorMessage(errorCodes.NotFound, "Template not found")
+                                                });
+                                            } else {
+                                                try {
+                                                    template = dataTypeHandler.preProcessTemplate(templateContent.toString());
+                                                    put(templateName, template);
+                                                    fulfill(template);
+                                                } catch (convertErr) {
+                                                    reject({
+                                                        'status': 400,
+                                                        'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template compilation. " + convertErr.toString())
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        fulfill(template);
+                                    }
+                                });
+                            };
+
+                            dataTypeHandler.parseSrcData(srcData)
                                 .then((parsedData) => {
                                     var dataContext = {msg: parsedData, hl7v2Data: parsedData.v2};
-                                    if (templateString == null || templateString.length == 0) {
-                                        var result = Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), JSON.parse(JSON.stringify(dataContext.msg)));
-                                        fulfill({'status': 200, 'resultMsg': result});
-                                        return;
-                                    }
-                                    liquidInstance.parseAndRender(dataTypeHandler.preProcessTemplate(templateString), dataContext)
-                                        .then((rendered) => {
-                                            try {
-                                                var result = dataTypeHandler.postProcessResult(rendered);
-                                                fulfill({
-                                                    'status': 200,
-                                                    'resultMsg': Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), {'fhirResource': result})
+                                    getLiquidTemplate(templateName)
+                                        .then((preProcessedTemplate) => {
+                                            liquidInstance.parseAndRender(preProcessedTemplate, dataContext)
+                                                .then((rendered) => {
+                                                    try {
+                                                        var result = dataTypeHandler.postProcessResult(rendered);
+                                                        fulfill({
+                                                            'status': 200,
+                                                            'resultMsg': Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), {'fhirResource': result})
+                                                        });
+                                                    } catch (convertErr) {
+                                                        reject({
+                                                            'status': 400,
+                                                            'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template evaluation. " + convertErr.toString())
+                                                        });
+                                                    }
+                                                })
+                                                .catch((err) => {
+                                                    reject({
+                                                        'status': 400,
+                                                        'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template evaluation. " + err.toString())
+                                                    });
                                                 });
-                                            } catch (err) {
-                                                reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString())});
-                                            }
-                                        })
-                                        .catch((err) => {
-                                            reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString())});
+                                        }, (err) => {
+                                            reject(err);
                                         });
                                 })
                                 .catch(err => {
@@ -112,115 +217,23 @@ workerTaskProcessor((msg) => {
                                 'resultMsg': errorMessage(errorCodes.BadRequest, `Data type '${dataTypeHandler.dataType}' is not supported. This converter only supports HL7v2.`)
                             });
                         }
-                    } catch (err) {
-                        reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, `${err.toString()}`)});
                     }
-                }
-                    break;
+                        break;
 
-                case '/api/convert/:srcDataType/:template': {
-                    let srcData = msg.srcData;
-                    let templateName = msg.templateName;
-                    let srcDataType = msg.srcDataType;
-                    let dataTypeHandler = dataHandlerFactory.createDataHandler(srcDataType);
-
-                    if (!srcData || srcData.length == 0) {
-                        reject({
-                            'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "No srcData provided.")
-                        });
+                    case 'templatesUpdated': {
+                        expireCache();
+                        fulfill();
                     }
+                        break;
 
-                    if (dataTypeHandler.dataType === 'hl7v2') {
-                        let liquidInstance = GetLiquidInstance(dataTypeHandler);
-                        session.set(TIMEZONE, msg.timezone);
-
-                        const getLiquidTemplate = (templateName) => {
-                            return new Promise((fulfill, reject) => {
-                                var template = get(templateName);
-                                if (!template) {
-                                    readFile(join(HL7V2_LIQUID_TEMPLATE_LOCATION, templateName), (err, templateContent) => {
-                                        if (err) {
-                                            reject({
-                                                'status': 404,
-                                                'resultMsg': errorMessage(errorCodes.NotFound, "Template not found")
-                                            });
-                                        } else {
-                                            try {
-                                                template = dataTypeHandler.preProcessTemplate(templateContent.toString());
-                                                put(templateName, template);
-                                                fulfill(template);
-                                            } catch (convertErr) {
-                                                reject({
-                                                    'status': 400,
-                                                    'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template compilation. " + convertErr.toString())
-                                                });
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    fulfill(template);
-                                }
-                            });
-                        };
-
-                        dataTypeHandler.parseSrcData(srcData)
-                            .then((parsedData) => {
-                                var dataContext = {msg: parsedData, hl7v2Data: parsedData.v2};
-                                getLiquidTemplate(templateName)
-                                    .then((preProcessedTemplate) => {
-                                        liquidInstance.parseAndRender(preProcessedTemplate, dataContext)
-                                            .then((rendered) => {
-                                                try {
-                                                    var result = dataTypeHandler.postProcessResult(rendered);
-                                                    fulfill({
-                                                        'status': 200,
-                                                        'resultMsg': Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), {'fhirResource': result})
-                                                    });
-                                                } catch (convertErr) {
-                                                    reject({
-                                                        'status': 400,
-                                                        'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template evaluation. " + convertErr.toString())
-                                                    });
-                                                }
-                                            })
-                                            .catch((err) => {
-                                                reject({
-                                                    'status': 400,
-                                                    'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template evaluation. " + err.toString())
-                                                });
-                                            });
-                                    }, (err) => {
-                                        reject(err);
-                                    });
-                            })
-                            .catch(err => {
-                                reject({
-                                    'status': 400,
-                                    'resultMsg': errorMessage(errorCodes.BadRequest, `Unable to parse input data. ${err.toString()}`)
-                                });
-                            });
-                    } else {
-                        reject({
-                            'status': 400,
-                            'resultMsg': errorMessage(errorCodes.BadRequest, `Data type '${dataTypeHandler.dataType}' is not supported. This converter only supports HL7v2.`)
-                        });
+                    case 'constantsUpdated': {
+                        JSON.parse(msg.data);
+                        expireCache();
+                        fulfill();
                     }
+                        break;
                 }
-                    break;
-
-                case 'templatesUpdated': {
-                    expireCache();
-                    fulfill();
-                }
-                    break;
-
-                case 'constantsUpdated': {
-                    JSON.parse(msg.data);
-                    expireCache();
-                    fulfill();
-                }
-                    break;
-            }
+            });
         });
     });
-});
+}

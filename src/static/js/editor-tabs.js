@@ -5,7 +5,7 @@
 /* eslint-disable no-undef, no-unused-vars */
 function addTab(templateName, parentName) {
     if (!openTemplates.reduce((isOpen, template) => template.name === templateName ? true : isOpen, false)) {
-        $.get(getDataTypeSpecificUrl('templates', templateName), function (data) {
+        $.get(templateFileUrl(templateName), function (data) {
             currentTemplateReference[templateName] = data;
 
             var tabs = $('#template-tabs');
@@ -43,10 +43,31 @@ function changeTab(templateName) {
         // TODO: This can be made more efficent. It shouldn't be nessisary to recheck the whole document after every load.
         underlinePartialTemplateNames(templateCodeEditor.getDoc());
 
-        $('#template-name-input').val(templateName);
-
-        getTab(templateName).addClass('font-weight-bold');
+        $('#template-open-name').text(templateName);
+        var tab = getTab(templateName);
+        if (tab) {
+            tab.addClass('font-weight-bold');
+        }
+        if (typeof updateUnsavedDot === 'function') {
+            updateUnsavedDot();
+        }
     }
+}
+
+function openLocalTemplate(templateName, text, dirty) {
+    var existing = openTemplates.find(template => template.name === templateName);
+    if (existing) {
+        existing.data = text;
+        currentTemplateReference[templateName] = dirty ? null : text;
+        changeTab(templateName);
+        return;
+    }
+
+    currentTemplateReference[templateName] = dirty ? null : text;
+    var tabs = $('#template-tabs');
+    tabs.append("<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + templateName + "</a>");
+    openTemplates.push({name: templateName, parent: null, data: text, active: true, marks: []});
+    changeTab(templateName);
 }
 
 function closeTab(templateName, force = false) {

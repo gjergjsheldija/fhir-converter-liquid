@@ -9,7 +9,7 @@ var dataEditor;
 var templateCodeEditor;
 var outputCode;
 var lineMapping = []; // Mapping source (template) to destination (output) lines
-var defaultTemplate = {name: 'untitled', parent: null, data: '{}', active: true, marks: []};
+var defaultTemplate = {name: 'untitled', parent: null, data: '', active: true, marks: []};
 var activeTemplate = defaultTemplate;
 var openTemplates = [activeTemplate];
 var currentTemplateReference = {[activeTemplate.name]: activeTemplate.data}; // This is what we set the template to initially
@@ -25,9 +25,25 @@ var templateNames;
 var darkMode = "blackboard";
 var lightMode = "eclipse";
 
-var currentEditorSettings = {darkMode: false};
-var apiKey = '';
-var maskedApiKey = '***********';
+var currentEditorSettings = {
+    darkMode: false,
+    convertWhileTyping: true,
+    timezone: '',
+    fhirBaseUrl: '',
+    fhirAuth: 'none',
+    fhirToken: '',
+    fhirUsername: '',
+    fhirPassword: '',
+    aiProvider: 'openai',
+    aiBaseUrl: 'https://api.openai.com/v1',
+    aiModel: 'gpt-4o-mini',
+    aiApiKey: ''
+};
+try {
+    currentEditorSettings = Object.assign(currentEditorSettings, JSON.parse(localStorage.getItem('fhirConverterSettings') || '{}'));
+} catch (ex) {
+    // Keep the defaults when stored settings are not JSON.
+}
 var hasSuccessfulCallBeenMade = false;
 
 var currentDataType;
@@ -40,6 +56,18 @@ function getSettings() {
 
 function setSettings(settings) {
     currentEditorSettings = settings;
+    try {
+        localStorage.setItem('fhirConverterSettings', JSON.stringify(settings));
+    } catch (ex) {
+        return;
+    }
+}
+
+function showFhirAuthFields() {
+    var auth = $('#settings-fhir-auth').val();
+    $('#settings-fhir-token-row').toggle(auth === 'bearer');
+    $('#settings-fhir-user-row').toggle(auth === 'basic');
+    $('#settings-fhir-password-row').toggle(auth === 'basic');
 }
 
 function getUrl(endpoint, fileName) {
@@ -51,7 +79,27 @@ function getDataTypeSpecificUrl(endpoint, fileName) {
     return `${baseUrl}?unusedSegments=true&invalidAccess=true`;
 }
 
-function convertData() {
+function showConversionError(message) {
+    $('#conversion-error').text(message).removeAttr('hidden');
+}
+
+function hideConversionError() {
+    $('#conversion-error').text('').attr('hidden', true);
+}
+
+function updateUnsavedDot() {
+    if (!activeTemplate || unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
+        $('#unsaved-dot').attr('hidden', true);
+    } else {
+        $('#unsaved-dot').removeAttr('hidden');
+    }
+}
+
+function convertData(force) {
+    if (!force && currentEditorSettings.convertWhileTyping === false) {
+        return;
+    }
+
     if (nextRequestCall) {
         clearTimeout(nextRequestCall);
     }
@@ -66,6 +114,8 @@ function convertData() {
         } else {
             return;
         }
+
+        $('#conversion-status').text('Converting…');
 
         var topTemplate = openTemplates.find(template => template.parent === null);
         if (topTemplate) {
@@ -82,17 +132,26 @@ function convertData() {
 
         latestRequest++;
         const requestNumber = latestRequest;
+        var headers = {};
+        if (currentEditorSettings.timezone) {
+            headers.timezone = currentEditorSettings.timezone;
+        }
         $.ajax(getDataTypeSpecificUrl('convert'), {
             'data': JSON.stringify(reqBody),
             'type': 'POST',
             'processData': false,
             'contentType': 'application/json',
+            'headers': headers,
             'success': function (data) {
                 if (latestRequest === requestNumber) {
+                    hasSuccessfulCallBeenMade = true;
                     // Formatting output and splitting on line breaks (taking platform variations into consideration)
                     outputLines = JSON.stringify(data.fhirResource, null, 2).replace(/(?:\r\n|\r|\n)/g, '\n').split('\n');
 
                     outputCode.setValue(outputLines.join('\n'));
+                    $('#conversion-status').text('Converted');
+                    hideConversionError();
+                    refreshEditors();
 
                     // Makes the unused line marking asyc to help performance.
                     if (currentDataType === 'hl7v2')
@@ -151,12 +210,21 @@ function convertData() {
 
             },
             'error': function (err) {
+                if (latestRequest !== requestNumber) {
+                    return;
+                }
+                $('#conversion-status').text('Failed');
+                var message = 'Conversion failed.';
                 try {
                     var errObj = JSON.parse(err.responseText);
-                    outputCode.setValue(`{${errObj.error.code}: ${errObj.error.message}}`);
+                    if (errObj.error && errObj.error.message) {
+                        message = errObj.error.message;
+                    }
                 } catch (ex) {
-                    outputCode.setValue('Unable to convert: ' + JSON.stringify(err));
+                    message = 'Conversion failed.';
                 }
+                showConversionError(message);
+                refreshEditors();
             }
         });
     }, waitForTypingTimeout);
@@ -191,7 +259,7 @@ function setColorTheme(isDarkMode) {
     templateTabs.removeClass("bg-" + removeColor);
     navbar.addClass("bg-" + addColor);
 
-    var buttons = [$('#template-save-button'), $('#refresh-button'), $('#settings-save-button')];
+    var buttons = [$('#template-save-button'), $('#convert-button'), $('#settings-save-button'), $('#copy-result-button')];
     buttons.forEach((btn) => {
         // buttons are inverted to stand out
         btn.removeClass("btn-" + addColor);
@@ -293,8 +361,12 @@ function getPartialTemplateNameLocation(lineText) {
 
 function unchangedFromReference(templateName, templateData) {
     var newLineRegex = /(?:\r\n|\r|\n)/g;
+    var reference = currentTemplateReference[templateName];
+    if (reference == null || templateData == null) {
+        return false;
+    }
 
-    return templateData.replace(newLineRegex, '\n') === currentTemplateReference[templateName].replace(newLineRegex, '\n');
+    return templateData.replace(newLineRegex, '\n') === reference.replace(newLineRegex, '\n');
 }
 
 function changeDataType(dataType) {
@@ -303,7 +375,6 @@ function changeDataType(dataType) {
         dataEditor.setValue("");
         outputCode.setValue("");
 
-        $('#data-type-dropdown-button').text('FHIR Converter: ' + dataType);
         currentDataType = dataType.toLowerCase();
 
         if (templateOutputSplit) {
@@ -315,39 +386,59 @@ function changeDataType(dataType) {
 
         switch (dataType) {
             case 'HL7V2':
-                $('#editor-wrapper').addClass('vertical-content');
+                $('#editor-main').addClass('vertical-content');
 
                 // Create splits for editor areas
                 templateOutputSplit = Split(['.template-area', '.output-area'], {
                     gutterSize: 5,
-                    sizes: [50, 50]
+                    sizes: [50, 50],
+                    onDrag: refreshEditors,
+                    onDragEnd: refreshEditors
                 });
 
                 dataTemplateSplit = Split(['.msg-area', '.editor-area'], {
                     gutterSize: 5,
                     sizes: [30, 70],
-                    direction: 'vertical'
+                    direction: 'vertical',
+                    onDrag: refreshEditors,
+                    onDragEnd: refreshEditors
                 });
 
                 dataEditor.setOption("mode", "default");
                 break;
             case 'CDA':
-                $('#editor-wrapper').removeClass('vertical-content');
+                $('#editor-main').removeClass('vertical-content');
 
                 // Create splits for editor areas
                 templateOutputSplit = Split(['.template-area', '.output-area'], {
                     gutterSize: 5,
-                    sizes: [50, 50]
+                    sizes: [50, 50],
+                    onDrag: refreshEditors,
+                    onDragEnd: refreshEditors
                 });
 
                 dataTemplateSplit = Split(['.msg-area', '.editor-area'], {
                     gutterSize: 5,
-                    sizes: [30, 70]
+                    sizes: [30, 70],
+                    onDrag: refreshEditors,
+                    onDragEnd: refreshEditors
                 });
 
                 dataEditor.setOption("mode", "text/html");
                 break;
         }
+    }
+}
+
+function refreshEditors() {
+    if (dataEditor) {
+        dataEditor.refresh();
+    }
+    if (templateCodeEditor) {
+        templateCodeEditor.refresh();
+    }
+    if (outputCode) {
+        outputCode.refresh();
     }
 }
 
@@ -405,11 +496,15 @@ $(document).ready(function () {
             activeTemplate.data = templateCodeEditor.getValue();
             underlinePartialTemplateNames(templateCodeEditor.getDoc(), changeObj);
 
-            if (unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
-                getTab(activeTemplate.name).removeClass("font-italic");
-            } else {
-                getTab(activeTemplate.name).addClass("font-italic");
+            var tab = getTab(activeTemplate.name);
+            if (tab) {
+                if (unchangedFromReference(activeTemplate.name, activeTemplate.data)) {
+                    tab.removeClass("font-italic");
+                } else {
+                    tab.addClass("font-italic");
+                }
             }
+            updateUnsavedDot();
         }
         convertData();
     });
@@ -429,17 +524,29 @@ $(document).ready(function () {
     //     changeDataType($(this).text());
     // });
 
-    $('#template-dropdown-button').on('click', function () {
-        loadTemplateOptions();
+    $('#convert-button').on('click', function () {
+        convertData(true);
     });
 
-    $('#data-dropdown-button').on('click', function () {
-        loadDataOptions();
-    });
+    $(window).on('resize', refreshEditors);
 
-    //Template save button
     $('#template-save-button').on('click', function () {
         saveTemplate();
+    });
+
+    $('#new-template-button').on('click', function () {
+        createNewTemplate();
+    });
+
+    $('#copy-result-button').on('click', function () {
+        var text = outputCode.getValue();
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+            showConversionError('Could not copy the result.');
+            return;
+        }
+        navigator.clipboard.writeText(text).catch(function () {
+            showConversionError('Could not copy the result.');
+        });
     });
 
     $('#banner-close').on('click', function () {
@@ -449,42 +556,233 @@ $(document).ready(function () {
     });
 
     $("#settings-modal").on('show.bs.modal', function () {
-        $('#settings-dark-mode').prop('checked', getSettings().darkMode);
+        var settings = getSettings();
+        $('#settings-dark-mode').prop('checked', settings.darkMode);
+        $('#settings-convert-while-typing').prop('checked', settings.convertWhileTyping !== false);
+        $('#settings-timezone').val(settings.timezone || '');
+        $('#settings-fhir-url').val(settings.fhirBaseUrl || '');
+        $('#settings-fhir-auth').val(settings.fhirAuth || 'none');
+        $('#settings-fhir-token').val(settings.fhirToken || '');
+        $('#settings-fhir-username').val(settings.fhirUsername || '');
+        $('#settings-fhir-password').val(settings.fhirPassword || '');
+        showFhirAuthFields();
     });
 
-    // save button
+    $('#settings-fhir-auth').on('change', showFhirAuthFields);
+
     $('#settings-save-button').on('click', function () {
         var settings = getSettings();
-        var changesColorTheme = false;
-
-        if (settings.darkMode != $('#settings-dark-mode').prop('checked')) {
-            changesColorTheme = true;
-        }
-
+        var changesColorTheme = settings.darkMode != $('#settings-dark-mode').prop('checked');
         settings.darkMode = $('#settings-dark-mode').prop('checked');
-
+        settings.convertWhileTyping = $('#settings-convert-while-typing').prop('checked');
+        settings.timezone = $('#settings-timezone').val();
+        settings.fhirBaseUrl = $('#settings-fhir-url').val().trim();
+        settings.fhirAuth = $('#settings-fhir-auth').val();
+        settings.fhirToken = $('#settings-fhir-token').val();
+        settings.fhirUsername = $('#settings-fhir-username').val();
+        settings.fhirPassword = $('#settings-fhir-password').val();
         setSettings(settings);
-
         if (changesColorTheme) {
             setColorTheme(settings.darkMode);
         }
     });
 
-    $('#refresh-button').on('click', function () {
-        convertData();
+    $('#send-fhir-button').on('click', function () {
+        sendToFhir();
     });
 
-    $("#new-branch-modal").on('show.bs.modal', function () {
-        loadBaseBranches();
+    $('#generate-template-button').on('click', function () {
+        $('#generate-modal').modal('show');
+        loadGenerateProviders();
     });
 
-    // New branch save button 
-    $('#new-branch-create-button').on('click', function () {
-        createBranch($('#branch-name-input').val(), $('#base-branch-select').val(), $("#checkout-new-branch").prop("checked") == true);
+    $('#generate-provider').on('change', function () {
+        loadGenerateModels();
+    });
+
+    $('#generate-run-button').on('click', function () {
+        runGenerateTemplate();
     });
 
     changeDataType('HL7V2');
-
-    // load available parsers
-    loadParsersOptions();
 });
+
+function createNewTemplate() {
+    var raw = window.prompt('Template name');
+    if (raw === null) {
+        return;
+    }
+    var name = raw.trim();
+    if (!name) {
+        showConversionError('Enter a template name.');
+        return;
+    }
+    if (!name.endsWith('.liquid')) {
+        name += '.liquid';
+    }
+    if (name.indexOf('..') !== -1 || name.indexOf('\\') !== -1 || name.charAt(0) === '/') {
+        showConversionError('Invalid template name.');
+        return;
+    }
+    if ((templateNames || []).indexOf(name) !== -1 || openTemplates.some(template => template.name === name)) {
+        showConversionError('A template with that name already exists.');
+        return;
+    }
+    hideConversionError();
+    openLocalTemplate(name, '', true);
+}
+
+function nextGeneratedName() {
+    var name = 'generated.liquid';
+    var taken = function (candidate) {
+        return (templateNames || []).indexOf(candidate) !== -1 || openTemplates.some(template => template.name === candidate);
+    };
+    if (!taken(name)) {
+        return name;
+    }
+    var n = 2;
+    while (taken('generated-' + n + '.liquid')) {
+        n += 1;
+    }
+    return 'generated-' + n + '.liquid';
+}
+
+function loadGenerateProviders() {
+    var settings = getSettings();
+    $('#generate-base-url').val(settings.aiBaseUrl || 'https://api.openai.com/v1');
+    $('#generate-model').val(settings.aiModel || 'gpt-4o-mini');
+    $('#generate-api-key').val(settings.aiApiKey || '');
+    $.getJSON('/api/v1/ai/providers', function (data) {
+        var select = $('#generate-provider');
+        var available = data.available || [];
+        select.empty();
+        select.append($('<option>').val('custom').text('Custom'));
+        available.forEach(function (item) {
+            var label = item.configured ? item.name : item.name + ' (needs a key)';
+            select.append($('<option>').val(item.name).text(label).data('provider', item));
+        });
+        if (settings.aiProvider && select.find('option[value="' + settings.aiProvider + '"]').length) {
+            select.val(settings.aiProvider);
+        } else if (available.length) {
+            select.val(available[0].name);
+        }
+        applyGenerateProvider();
+        if (!available.length) {
+            $('#generate-empty').removeAttr('hidden');
+        } else {
+            $('#generate-empty').attr('hidden', true);
+        }
+        $('#generate-run-button').prop('disabled', false);
+    });
+}
+
+function applyGenerateProvider() {
+    var item = $('#generate-provider option:selected').data('provider');
+    var list = $('#generate-model-list');
+    list.empty();
+    if (!item) {
+        return;
+    }
+    if (item.baseUrl) {
+        $('#generate-base-url').val(item.baseUrl);
+    }
+    (item.models || []).forEach(function (name) {
+        list.append($('<option>').val(name));
+    });
+    if (item.models && item.models.length) {
+        $('#generate-model').val(item.models[0]);
+    }
+}
+
+function loadGenerateModels() {
+    applyGenerateProvider();
+}
+
+function sendToFhir() {
+    var settings = getSettings();
+    if (!settings.fhirBaseUrl) {
+        showConversionError('Set a FHIR server in Settings.');
+        return;
+    }
+    var resource;
+    try {
+        resource = JSON.parse(outputCode.getValue());
+    } catch (ex) {
+        showConversionError('The result is not JSON.');
+        return;
+    }
+    if (!window.confirm('Send the current FHIR result to ' + settings.fhirBaseUrl + '?')) {
+        return;
+    }
+    $('#conversion-status').text('Sending…');
+    $.ajax('/api/v1/fhir/send', {
+        data: JSON.stringify({
+            baseUrl: settings.fhirBaseUrl,
+            resource: resource,
+            auth: settings.fhirAuth,
+            token: settings.fhirToken,
+            username: settings.fhirUsername,
+            password: settings.fhirPassword
+        }),
+        type: 'POST',
+        processData: false,
+        contentType: 'application/json',
+        success: function () {
+            $('#conversion-status').text('Sent');
+            hideConversionError();
+        },
+        error: function (err) {
+            $('#conversion-status').text('Failed');
+            var message = 'FHIR server request failed.';
+            if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message) {
+                message = err.responseJSON.error.message;
+            }
+            showConversionError(message);
+        }
+    });
+}
+
+function runGenerateTemplate() {
+    if (!window.confirm('Send the current HL7 message to the selected AI provider?')) {
+        return;
+    }
+    var settings = getSettings();
+    settings.aiProvider = $('#generate-provider').val();
+    settings.aiBaseUrl = $('#generate-base-url').val().trim();
+    settings.aiModel = $('#generate-model').val().trim();
+    settings.aiApiKey = $('#generate-api-key').val();
+    setSettings(settings);
+    var payload = {
+        sampleDataInline: dataEditor.getValue(),
+        provider: settings.aiProvider,
+        model: settings.aiModel,
+        prompt: $('#generate-prompt').val(),
+        confirmedExternalSend: true
+    };
+    if (settings.aiApiKey) {
+        payload.baseUrl = settings.aiBaseUrl;
+        payload.apiKey = settings.aiApiKey;
+    }
+    $.ajax('/api/v1/templategenerate', {
+        data: JSON.stringify(payload),
+        type: 'POST',
+        processData: false,
+        contentType: 'application/json',
+        success: function (data) {
+            $('#generate-modal').modal('hide');
+            openLocalTemplate(nextGeneratedName(), data.generated || '', true);
+            if (data.fhirResource !== undefined) {
+                outputCode.setValue(JSON.stringify(data.fhirResource, null, 2));
+            }
+            $('#conversion-status').text('Converted');
+            hideConversionError();
+        },
+        error: function (err) {
+            var message = 'Conversion failed.';
+            if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message) {
+                message = err.responseJSON.error.message;
+            }
+            showConversionError(message);
+        }
+    });
+}

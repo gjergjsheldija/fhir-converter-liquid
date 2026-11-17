@@ -3,10 +3,13 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-import {constants} from './lib/constants/constants.js';
+import {constants, BASE_TEMPLATE_FILES_LOCATION, TEMPLATE_FILES_LOCATION} from './lib/constants/constants.js';
 import supertest from 'supertest';
 import express from 'express';
 import routes from './routes.js';
+import {mkdtemp, rm, unlink, writeFile} from 'fs/promises';
+import {join} from 'path';
+import {tmpdir} from 'os';
 
 const app = routes(express());
 
@@ -923,5 +926,162 @@ describe('POST /api/v1/templategenerate', function () {
                 }
                 done();
             });
+    });
+
+    it('accepts a base URL and API key when the named provider has no env key', function (done) {
+        stubState.calls = 0;
+        stubState.candidates = ['{% assign firstSegments = hl7v2Data | get_first_segments: "MSH" -%}{% evaluate bundleID using \'ID/Bundle\' Data: firstSegments.MSH.10 -%}BUNDLE'];
+        stubState.errors = [];
+        supertest(app)
+            .post('/api/v1/templategenerate')
+            .send({
+                sampleDataInline: validMessage,
+                confirmedExternalSend: true,
+                provider: 'custom',
+                model: 'local-model',
+                baseUrl: 'http://127.0.0.1:9/v1',
+                apiKey: 'browser-key'
+            })
+            .expect(200)
+            .end(function (err, res) {
+                if (err) {
+                    return done(err);
+                }
+                if (!res.body || res.body.iterations !== 1) {
+                    return done(new Error('expected the typed provider to be used'));
+                }
+                if (!stubState.sentInput || stubState.sentInput.apiKey !== 'browser-key') {
+                    return done(new Error('expected the request API key to be sent to the provider'));
+                }
+                done();
+            });
+    });
+});
+
+describe('PUT /api/v1/templates', function () {
+    let createdKey;
+
+    after(function () {
+        if (!createdKey) {
+            return;
+        }
+        return Promise.all([
+            unlink(join(BASE_TEMPLATE_FILES_LOCATION, createdKey)).catch(() => {}),
+            unlink(join(TEMPLATE_FILES_LOCATION, createdKey)).catch(() => {})
+        ]);
+    });
+
+    it('writes a new liquid file and reads the same text back', function (done) {
+        supertest(app)
+            .get('/api/v1/templates')
+            .expect(200)
+            .end(function (err, res) {
+                if (err) {
+                    return done(err);
+                }
+                const sample = res.body.templates[0].templateName;
+                const prefix = sample.slice(0, sample.indexOf('/') + 1);
+                createdKey = prefix + 'ZZZ_spec_new_template.liquid';
+                const text = '{% comment %}spec new template{% endcomment %}\n';
+                supertest(app)
+                    .put('/api/v1/templates/' + createdKey)
+                    .set('Content-Type', 'text/plain')
+                    .send(text)
+                    .expect(200)
+                    .end(function (putErr, putRes) {
+                        if (putErr) {
+                            return done(putErr);
+                        }
+                        if (!putRes.body || putRes.body.ok !== true) {
+                            return done(new Error('expected {ok:true}'));
+                        }
+                        supertest(app)
+                            .get('/api/v1/templates/' + createdKey)
+                            .expect(200)
+                            .end(function (getErr, getRes) {
+                                if (getErr) {
+                                    return done(getErr);
+                                }
+                                if (getRes.text !== text) {
+                                    return done(new Error('saved template text did not match'));
+                                }
+                                done();
+                            });
+                    });
+            });
+    });
+});
+
+describe('browse and FHIR send', function () {
+    let folder;
+
+    before(async function () {
+        folder = await mkdtemp(join(tmpdir(), 'fhir-browse-'));
+        await writeFile(join(folder, 'note.hl7'), 'MSH|^~\\&|');
+    });
+
+    after(function () {
+        return rm(folder, {recursive: true, force: true});
+    });
+
+    it('rejects a GitHub repo that is not owner/repo', function (done) {
+        supertest(app)
+            .post('/api/v1/browse/github')
+            .send({repo: 'not a repo'})
+            .expect(400)
+            .end(done);
+    });
+
+    it('lists a local folder and reads a text file', function (done) {
+        supertest(app)
+            .post('/api/v1/browse/folder')
+            .send({path: folder})
+            .expect(200)
+            .end(function (err, res) {
+                if (err) {
+                    return done(err);
+                }
+                const names = (res.body.entries || []).map((entry) => entry.name);
+                if (!names.includes('note.hl7')) {
+                    return done(new Error('expected note.hl7 in ' + names.join(',')));
+                }
+                supertest(app)
+                    .post('/api/v1/browse/folder')
+                    .send({path: join(folder, 'note.hl7'), file: true})
+                    .expect(200)
+                    .end(function (readErr, readRes) {
+                        if (readErr) {
+                            return done(readErr);
+                        }
+                        if (readRes.text !== 'MSH|^~\\&|') {
+                            return done(new Error('file text did not match'));
+                        }
+                        done();
+                    });
+            });
+    });
+
+    it('returns 404 for a missing folder', function (done) {
+        supertest(app)
+            .post('/api/v1/browse/folder')
+            .send({path: join(folder, 'missing')})
+            .expect(404)
+            .end(done);
+    });
+
+    it('returns 400 when the FHIR server URL is missing', function (done) {
+        supertest(app)
+            .post('/api/v1/fhir/send')
+            .send({resource: {resourceType: 'Patient'}})
+            .expect(400)
+            .end(done);
+    });
+
+    it('returns 400 for a FHIR URL that is not http', function (done) {
+        supertest(app)
+            .post('/api/v1/fhir/send')
+            .send({baseUrl: 'file:///tmp/fhir', resource: {resourceType: 'Patient'}})
+            .expect(400)
+            .end(done);
     });
 });

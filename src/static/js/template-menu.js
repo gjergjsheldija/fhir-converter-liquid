@@ -7,7 +7,9 @@
 function loadData(dataFile) {
     $.get(getUrl('sample-data', dataFile), function (data) {
         dataEditor.setValue(data);
-        convertData();
+        var slash = dataFile.indexOf('/');
+        $('#message-name').text(slash === -1 ? dataFile : dataFile.substring(slash + 1));
+        convertData(true);
     });
 }
 
@@ -47,13 +49,15 @@ function closeAllTemplates(openDefault = false) {
         currentTemplateReference = {};
 
         if (openDefault) {
-            activeTemplate = null;
-            templateCodeEditor.setValue("{}");
-
-            activeTemplate = defaultTemplate;
+            activeTemplate = {name: 'untitled', parent: null, data: '', active: true, marks: []};
+            defaultTemplate = activeTemplate;
             openTemplates = [activeTemplate];
-            currentTemplateReference = {[activeTemplate.name]: activeTemplate.data};
-            $("#template-name-input").val("");
+            currentTemplateReference = {untitled: ''};
+            templateCodeEditor.setValue('');
+            $('#template-tabs').html("<a class=\"nav-item nav-link font-weight-bold\" onclick=\"changeTab('untitled')\">untitled</a>");
+            $('#template-open-name').text('untitled');
+            $('#message-name').text('No sample');
+            $('#unsaved-dot').attr('hidden', true);
         }
     }
 
@@ -62,36 +66,29 @@ function closeAllTemplates(openDefault = false) {
 
 function saveTemplate() {
     var reqBody = templateCodeEditor.getValue();
-    var templateName = $('#template-name-input').val();
+    var templateName = activeTemplate.name;
 
-    $.ajax(getDataTypeSpecificUrl('templates', templateName), {
+    $.ajax(templateFileUrl(templateName), {
         'data': reqBody,
         'type': 'PUT',
         'processData': false,
         'contentType': 'text/plain',
         'success': function () {
-            var oldName = activeTemplate.name;
-
-            if (oldName !== templateName) {
-                refreshTemplateNames();
-                $('#template-name-input').val(templateName);
-
-                renameTab(oldName, templateName);
-            }
-
             currentTemplateReference[templateName] = reqBody;
-
-            getTab(activeTemplate.name).removeClass("font-italic");
-            displayBanner("Save successful", "alert-success");
+            activeTemplate.data = reqBody;
+            hideConversionError();
+            updateUnsavedDot();
+            refreshTemplateNames();
+            if (typeof refreshFileBrowser === 'function') {
+                refreshFileBrowser();
+            }
         },
         'error': function (response) {
-            try {
-                console.error(response.responseJSON.error.message);
-                displayBanner(response.responseJSON.error.message, "alert-danger");
-            } catch (ex) {
-                console.error('Error saving template: ' + JSON.stringify(response));
-                displayBanner('Error saving template: ' + JSON.stringify(response), "alert-danger");
+            var message = 'Unable to save the template.';
+            if (response.responseJSON && response.responseJSON.error && response.responseJSON.error.message) {
+                message = response.responseJSON.error.message;
             }
+            showConversionError(message);
         }
     });
 }
@@ -113,9 +110,7 @@ function loadDataOptions() {
 
 function loadTemplateOptions() {
     $.getJSON(getUrl('templates'), function (templateList) {
-        templateNames = templateList.templates
-            .filter(template => template.templateName.startsWith(currentDataType))
-            .map(template => template.templateName.substring(currentDataType.length + 1));
+        applyTemplateList(templateList.templates);
 
         $("#template-load-dropdown").html('');
         $.each(templateNames, function (index, item) {
@@ -124,12 +119,27 @@ function loadTemplateOptions() {
     });
 }
 
+var templateKeyPrefix = 'Hl7v2/';
+
+function templateFileUrl(shortName) {
+    return '/api/v1/templates/' + templateKeyPrefix + shortName;
+}
+
+function applyTemplateList(templates) {
+    var names = templates.map(template => template.templateName);
+    var match = names.find(name => name.toLowerCase().startsWith('hl7v2/'));
+    if (match) {
+        templateKeyPrefix = match.slice(0, match.indexOf('/') + 1);
+    }
+    templateNames = names
+        .filter(name => name.toLowerCase().startsWith('hl7v2/'))
+        .map(name => name.substring(name.indexOf('/') + 1));
+}
+
 function refreshTemplateNames() {
-    $.getJSON(getUrl('templates'), function (templateList) {
-        templateNames = templateList.templates
-            .filter(template => template.templateName.startsWith(currentDataType))
-            .map(template => template.templateName.substring(currentDataType.length + 1));
-    });
+    $.ajax({url: getUrl('templates'), dataType: 'json', cache: false, success: function (templateList) {
+        applyTemplateList(templateList.templates);
+    }});
 }
 
 function addToTemplateDropdown(menuId, fullPath, templateName, level) {
@@ -176,5 +186,5 @@ function addToTemplateDropdown(menuId, fullPath, templateName, level) {
 }
 
 function isTemplateName(templateName) {
-    return templateNames.includes(templateName);
+    return Array.isArray(templateNames) && templateNames.includes(templateName);
 }
