@@ -294,6 +294,50 @@ body {
     margin: 0;
 }
 
+#included-panel {
+    flex: 0 0 auto;
+    max-height: 96px;
+    overflow: auto;
+    padding: 4px 8px 8px;
+    border-bottom: 1px solid #eef1f6;
+}
+
+#included-panel[hidden] {
+    display: none;
+}
+
+#included-heading {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #667085;
+    margin-bottom: 4px;
+}
+
+#included-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.included-chip {
+    border: 1px solid #e3e8ef;
+    background: #fff;
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 12px;
+    text-align: left;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.included-chip[disabled] {
+    color: #98a2b3;
+    cursor: default;
+}
+
 #conversion-error {
     flex: 0 0 auto;
     margin-top: 6px;

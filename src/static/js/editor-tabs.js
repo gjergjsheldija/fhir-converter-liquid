@@ -54,6 +54,9 @@ function changeTab(templateName) {
         if (typeof updateUnsavedDot === 'function') {
             updateUnsavedDot();
         }
+        if (typeof renderIncludedPanel === 'function') {
+            renderIncludedPanel();
+        }
     }
 }
 

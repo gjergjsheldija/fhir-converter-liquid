@@ -382,8 +382,7 @@ function underlinePartialTemplateNames(document, change) {
     });
 
     document.eachLine(startLine, endLine, (line) => {
-        var nameLocation = getPartialTemplateNameLocation(line.text);
-        if (nameLocation) {
+        findPartialNamesOnLine(line.text).forEach(function (nameLocation) {
             activeTemplate.marks.push(
                 document.markText(
                     {
@@ -397,27 +396,126 @@ function underlinePartialTemplateNames(document, change) {
                     {
                         className: "underline"
                     }));
-        }
+        });
     });
 }
 
-function getPartialTemplateNameLocation(lineText) {
-    var startPoint = lineText.indexOf("{{>");
-
-    if (startPoint !== -1) {
-        var nextWhitespace = lineText.indexOf(" ", startPoint);
-        var handlebarEnd = lineText.indexOf("}}", startPoint);
-        var endPoint = nextWhitespace < handlebarEnd && nextWhitespace !== -1 ? nextWhitespace : handlebarEnd;
-
-        if (endPoint !== -1) {
-            var templateName = lineText.substring(startPoint + 3, endPoint);
-            if (isTemplateName(templateName)) {
-                return {start: startPoint + 3, end: endPoint, name: templateName};
+function findIncludeRefs(text) {
+    var patterns = [
+        /{%-?\s*(?:include|render)\s+'([^']+)'/g,
+        /{%-?\s*evaluate\s+[A-Za-z_][\w]*\s+using\s+'([^']+)'/g,
+        /\{\{>\s*([^\s}]+)/g
+    ];
+    var all = [];
+    patterns.forEach(function (pattern) {
+        var match;
+        while ((match = pattern.exec(text)) !== null) {
+            var quoted = match[1];
+            if (quoted) {
+                all.push({quoted: quoted, index: match.index});
             }
         }
-    }
+    });
+    var seen = {};
+    all.forEach(function (ref) {
+        if (seen[ref.quoted] === undefined) {
+            seen[ref.quoted] = ref;
+        } else if (ref.index < seen[ref.quoted].index) {
+            seen[ref.quoted] = ref;
+        }
+    });
+    var refs = Object.keys(seen).map(function (key) {
+        return seen[key];
+    });
+    refs.sort(function (a, b) {
+        return a.index - b.index;
+    });
+    return refs;
+}
 
+function resolveIncludeName(quoted) {
+    if (!Array.isArray(templateNames)) {
+        return null;
+    }
+    if (templateNames.indexOf(quoted) !== -1) {
+        return quoted;
+    }
+    var segments = quoted.split('/');
+    if (segments.length === 1) {
+        if (templateNames.indexOf(segments[0] + '.liquid') !== -1) {
+            return segments[0] + '.liquid';
+        }
+        return null;
+    }
+    var lower = quoted.toLowerCase();
+    var last = segments[segments.length - 1];
+    if (lower.endsWith('codesystem/codesystem') || lower.endsWith('valueset/valueset')) {
+        last = last + '.json';
+    } else {
+        last = '_' + last + '.liquid';
+    }
+    var resolved = segments.slice(0, segments.length - 1).concat(last).join('/');
+    if (templateNames.indexOf(resolved) !== -1) {
+        return resolved;
+    }
     return null;
+}
+
+function findPartialNamesOnLine(lineText) {
+    var patterns = [
+        /{%-?\s*(?:include|render)\s+'([^']+)'/g,
+        /{%-?\s*evaluate\s+[A-Za-z_][\w]*\s+using\s+'([^']+)'/g,
+        /\{\{>\s*([^\s}]+)/g
+    ];
+    var matches = [];
+    patterns.forEach(function (pattern) {
+        var match;
+        while ((match = pattern.exec(lineText)) !== null) {
+            var quoted = match[1];
+            if (!quoted) {
+                continue;
+            }
+            var file = resolveIncludeName(quoted);
+            if (!file) {
+                continue;
+            }
+            var start = match.index + match[0].length - quoted.length;
+            matches.push({start: start, end: start + quoted.length, name: file});
+        }
+    });
+    matches.sort(function (a, b) {
+        return a.start - b.start;
+    });
+    return matches;
+}
+
+function renderIncludedPanel() {
+    var text = activeTemplate ? activeTemplate.data : '';
+    var resolved = findIncludeRefs(text).map(function (ref) {
+        return {quoted: ref.quoted, file: resolveIncludeName(ref.quoted)};
+    });
+    if (resolved.length === 0) {
+        $('#included-panel').attr('hidden', true);
+        $('#included-list').empty();
+        return;
+    }
+    $('#included-panel').removeAttr('hidden');
+    $('#included-heading').text('Included (' + resolved.length + ')');
+    var list = $('#included-list').empty();
+    resolved.forEach(function (item) {
+        var button = $('<button type="button" class="included-chip"></button>').text(item.quoted);
+        if (item.file) {
+            button.attr('title', item.file);
+            button.attr('data-template-name', item.file);
+            button.on('click', function () {
+                addTab(item.file, activeTemplate.name);
+            });
+        } else {
+            button.attr('title', 'Not in the template list');
+            button.attr('disabled', true);
+        }
+        list.append(button);
+    });
 }
 
 function unchangedFromReference(templateName, templateData) {
@@ -568,6 +666,7 @@ $(document).ready(function () {
                 }
             }
             updateUnsavedDot();
+            renderIncludedPanel();
         }
         convertData();
     });
@@ -588,9 +687,12 @@ $(document).ready(function () {
         var doc = templateCodeEditor.getDoc();
         var cursorPos = doc.getCursor();
         var lineText = doc.getLine(cursorPos.line);
-        var nameLocation = getPartialTemplateNameLocation(lineText);
+        var matches = findPartialNamesOnLine(lineText);
+        var nameLocation = matches.find(function (match) {
+            return cursorPos.ch >= match.start && cursorPos.ch <= match.end;
+        });
 
-        if (nameLocation && cursorPos.ch >= nameLocation.start && cursorPos.ch <= nameLocation.end) {
+        if (nameLocation) {
             addTab(nameLocation.name, activeTemplate.name);
         }
     });
