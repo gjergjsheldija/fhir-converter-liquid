@@ -441,7 +441,7 @@ function openExternalFile(entry) {
             if (/\.liquid$/i.test(name)) {
                 openLocalTemplate(name, text, true);
                 $('#template-open-name').text(name);
-                templateCodeEditor.setOption('mode', 'text/plain');
+                templateCodeEditor.setOption("mode", templateEditorModeForName(name));
                 templateCodeEditor.refresh();
                 templateCodeEditor.focus();
                 return;
@@ -453,6 +453,7 @@ function openExternalFile(entry) {
                 return;
             }
             openLocalTemplate(name, text, true);
+            templateCodeEditor.setOption("mode", templateEditorModeForName(name));
             templateCodeEditor.refresh();
         },
         error: function (err) {

@@ -272,6 +272,10 @@ body {
     min-height: 0;
     overflow: hidden;
     display: flex;
+    flex-direction: row;
+}
+
+#editor-main.vertical-content {
     flex-direction: column;
 }
 
@@ -516,6 +520,7 @@ body {
 }
 
 #navbar {
+    flex: 0 0 auto;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     padding: 10px 16px;

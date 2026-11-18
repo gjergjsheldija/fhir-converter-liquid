@@ -706,7 +706,7 @@ function changeDataType(dataType) {
                     onDragEnd: refreshEditors
                 });
 
-                dataEditor.setOption("mode", "default");
+                dataEditor.setOption("mode", "hl7v2");
                 break;
             case 'CDA':
                 $('#editor-main').removeClass('vertical-content');
@@ -726,7 +726,7 @@ function changeDataType(dataType) {
                     onDragEnd: refreshEditors
                 });
 
-                dataEditor.setOption("mode", "text/html");
+                dataEditor.setOption("mode", "xml");
                 break;
         }
     }
@@ -752,7 +752,7 @@ $(document).ready(function () {
         lineNumbers: true,
         lineWrapping: true,
         theme: "fhir",
-        mode: {name: "default"},
+        mode: "hl7v2",
         extraKeys: {
             "Ctrl-Q": function (cm) {
                 cm.foldCode(cm.getCursor());
@@ -771,7 +771,7 @@ $(document).ready(function () {
         lineNumbers: true,
         lineWrapping: true,
         theme: "fhir",
-        mode: {name: "javascript"},
+        mode: {name: "javascript", json: true},
         extraKeys: {
             "Ctrl-Q": function (cm) {
                 cm.foldCode(cm.getCursor());
@@ -792,7 +792,7 @@ $(document).ready(function () {
         lineNumbers: true,
         /*global hintExtraKeysObj*/
         extraKeys: Object.assign(extrakeysObj, hintExtraKeysObj),
-        mode: "application/json",
+        mode: "liquid-json",
         smartIndent: false,
         matchBrackets: true
     });

@@ -42,6 +42,7 @@ function changeTab(templateName) {
         activeTemplate = templateObj;
 
         templateCodeEditor.setValue(templateObj.data);
+        templateCodeEditor.setOption("mode", templateEditorModeForName(templateName));
 
         // TODO: This can be made more efficent. It shouldn't be nessisary to recheck the whole document after every load.
         underlinePartialTemplateNames(templateCodeEditor.getDoc());
