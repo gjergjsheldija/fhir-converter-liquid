@@ -117,6 +117,33 @@ function hideConversionError() {
     $('#conversion-error').text('').attr('hidden', true);
 }
 
+function formatActiveTemplate() {
+    var text = templateCodeEditor.getValue();
+    var formatted;
+    if (/\.json$/i.test(activeTemplate.name)) {
+        try {
+            formatted = JSON.stringify(JSON.parse(text), null, 4);
+        } catch (error) {
+            showConversionError('Cannot format invalid JSON.');
+            return;
+        }
+    } else {
+        formatted = beautifyLiquidTemplate(text);
+    }
+    if (formatted === text) {
+        return;
+    }
+    var cursor = templateCodeEditor.getCursor();
+    var scrollInfo = templateCodeEditor.getScrollInfo();
+    var doc = templateCodeEditor.getDoc();
+    doc.replaceRange(formatted, {line: 0, ch: 0}, {line: doc.lastLine(), ch: doc.getLine(doc.lastLine()).length});
+    var lastLine = doc.lastLine();
+    var maxCh = doc.getLine(lastLine).length;
+    templateCodeEditor.setCursor({line: Math.min(cursor.line, lastLine), ch: Math.min(cursor.ch, maxCh)});
+    templateCodeEditor.scrollTo(scrollInfo.left, scrollInfo.top);
+    templateCodeEditor.focus();
+}
+
 function setUnusedLegend(visible) {
     if (visible) {
         $('#unused-legend').removeAttr('hidden');
@@ -782,6 +809,7 @@ $(document).ready(function () {
     });
 
     let extrakeysObj = {};
+    extrakeysObj["Shift-Alt-F"] = formatActiveTemplate;
     extrakeysObj["Tab"] = function (cm) {
         var spaces = Array(5).join(" ");
         cm.replaceSelection(spaces);
@@ -1054,6 +1082,7 @@ $(document).ready(function () {
         sendToFhir();
     });
 
+    $('#format-template-button').on('click', formatActiveTemplate);
     $('#generate-template-button').on('click', function () {
         $('#generate-modal').modal('show');
         loadGenerateProviders();
