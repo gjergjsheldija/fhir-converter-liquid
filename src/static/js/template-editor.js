@@ -786,6 +786,9 @@ $(document).ready(function () {
         var spaces = Array(5).join(" ");
         cm.replaceSelection(spaces);
     };
+    extrakeysObj["Ctrl-Q"] = function (cm) {
+        cm.foldCode(cm.getCursor());
+    };
 
     templateCodeEditor = CodeMirror.fromTextArea(document.getElementById("templatebox"), {
         theme: "fhir",
@@ -794,7 +797,12 @@ $(document).ready(function () {
         extraKeys: Object.assign(extrakeysObj, hintExtraKeysObj),
         mode: "liquid-json",
         smartIndent: false,
-        matchBrackets: true
+        matchBrackets: true,
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        foldOptions: {
+            rangeFinder: CodeMirror.fold.combine(CodeMirror.fold.liquid, CodeMirror.fold.brace)
+        }
     });
 
     templateCodeEditor.on("change", function (instance, changeObj) {

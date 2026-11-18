@@ -19,7 +19,7 @@ Implement `specs/runtime/02`, `specs/web-ui/usability/` (`01` through `20`), and
 | Spec | Status | File | What it changes |
 | --- | --- | --- | --- |
 | 01 | Done (2026-11-18) | `01-syntax-coloring-hl7-liquid-json.md` | Custom CodeMirror modes for HL7v2 (`hl7v2`), Liquid + JSON (`liquid-json`), and strict FHIR JSON (`{name: "javascript", json: true}`), plus mode restoration on tab switch and `#editor-main`/`#navbar` flex fixes. |
-| 02 | Not started | `02-liquid-code-folding.md` | Fold gutter and `Ctrl-Q` in the Liquid editor for both Liquid block tags (`comment`, `if`, `for`, `unless`, `capture`, `case`) and JSON `{...}` / `[...]`. |
+| 02 | Done (2026-11-18) | `02-liquid-code-folding.md` | Fold gutter and `Ctrl-Q` in the Liquid editor for both Liquid block tags (`comment`, `if`, `for`, `unless`, `capture`, `case`) and JSON `{...}` / `[...]`. |
 | 03 | Not started | `03-liquid-beautifier.md` | `Format` button (`Shift+Alt+F`) in the Template pane that indents Liquid + JSON safely in the editor buffer with single-step undo. |
 | 04 | Not started | `04-debug-trace-and-hover-values.md` | Opt-in `?debug=true` parsed HL7v2 + Liquid scope snapshots and mouse-over value tooltips on variables and HL7 paths (`firstSegments.MSH.10`). |
 | 05 | Not started | `05-bottom-debug-drawer.md` | Collapsible, resizable Chrome-DevTools-style bottom Debug drawer with Parsed HL7 tree, Variables & Console evaluator, and Diagnostics/Bundle jump list. |
