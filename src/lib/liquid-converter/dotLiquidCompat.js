@@ -161,6 +161,15 @@ const DEFINES_TEXTSTRING = /\{%-?\s*(?:capture|assign)\s+textstring\b/;
  *   `text`) came out empty. DotLiquid resolves `textstring` to `textString`. Many other templates use
  *   `textstring` as their own variable, so this applies only to content that captures/assigns
  *   `textString` and never captures/assigns `textstring`.
+ * - `OBR_34: OBR_34` / `OBR_35: OBR_35` → `OBR_34: obr_34` / `OBR_35: obr_35` (the argument *value*
+ *   only; 9 templates, e.g. `ORU_R01.liquid` lines 897/908: `{% for obr_34 in obrSegment.34.Repeats -%}
+ *   … {% include 'Resource/PractitionerRole' OBR_34: OBR_34, ID: practitionerRoleId_obr_34 -%}`).
+ *   No variable named `OBR_34`/`OBR_35` is ever assigned; the loop variable is lowercase. Traced at
+ *   ORU-R01-01 PractitionerRole `6f4104a9-6928-bcaf-7719-2fb47f0c2df5`: the render sees `OBR_34` = nil, so
+ *   `_PractitionerRole.liquid` lines 19-31 (`{% if OBR_34 %}` → code `TN`) never ran; actual had no `code`,
+ *   `location`; expected `TN` / `Technician` / `v2-0443` (`f035eb01…`: `OBR_35` nil, no `TR`, `period`,
+ *   `location`). DotLiquid resolves `OBR_34` to the loop variable `obr_34`. The argument name
+ *   (`OBR_34:`) and the `{% if OBR_34 %}` read inside the partial keep their spelling.
  */
 export function normalizeVariableNameTypos(content) {
     // Normalize messageHeaderID -> messageHeaderId (the correct variable name)
@@ -174,6 +183,7 @@ export function normalizeVariableNameTypos(content) {
     content = content.replace(/\bdevice_ID_AIG_3\b/g, 'device_Id_AIG_3');
     content = content.replace(/\bpractitionerId_obr_10\b/g, 'practitionerId_OBR_10');
     content = content.replace(/\bREF_prac\b/g, 'REF_Prac');
+    content = content.replace(/(\bOBR_(34|35):\s*)OBR_\2\b/g, '$1obr_$2');
     if (DEFINES_TEXT_STRING.test(content) && !DEFINES_TEXTSTRING.test(content)) {
         content = content.replace(/\btextstring\b/g, 'textString');
     }

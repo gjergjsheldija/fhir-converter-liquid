@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 131,
+    "pass": 132,
     "count": 0,
-    "content": 1
+    "content": 0
   },
   "cases": [
     {
@@ -778,36 +778,10 @@
     {
       "template": "ORU_R01",
       "dataFile": "ORU-R01-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 157,
       "expectedCount": 157,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "PractitionerRole/6f4104a9-6928-bcaf-7719-2fb47f0c2df5",
-            "paths": [
-              "code",
-              "location"
-            ]
-          },
-          {
-            "key": "PractitionerRole/f035eb01-dd52-98c8-42f4-08d3a63e5aa2",
-            "paths": [
-              "code",
-              "location",
-              "period"
-            ]
-          },
-          {
-            "key": "Provenance/4b8e3786-de8b-c12f-345b-3c83fc1c4a0d",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORU_R01",
