@@ -312,6 +312,17 @@ describe("dotLiquidCompat", () => {
             expect(normalizeVariableNameTypos(input)).to.equal(input);
         });
 
+        it("normalizes practitionerId_obr_10 to practitionerId_OBR_10 in the collector PractitionerRole include", () => {
+            const input = "{% include 'Resource/PractitionerRole' OBR: obrSegment, collection_collector_practitioner: practitionerId_obr_10, ID: practitionerRoleId_OBR_10 -%}";
+            const expected = "{% include 'Resource/PractitionerRole' OBR: obrSegment, collection_collector_practitioner: practitionerId_OBR_10, ID: practitionerRoleId_OBR_10 -%}";
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("leaves practitionerId_OBR_10, full_practitionerId_obr_10 and longer names unchanged", () => {
+            const input = "{{ practitionerId_OBR_10 }} {{ full_practitionerId_obr_10 }} {{ practitionerId_obr_100 }}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
+
         it("reads textString where the template captured textString but read textstring (MedicationRequest patientInstruction)", () => {
             const input = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textstring  | split: "~" | join: "+" }}{% endcapture -%}';
             const expected = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textString  | split: "~" | join: "+" }}{% endcapture -%}';
