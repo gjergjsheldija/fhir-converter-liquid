@@ -311,6 +311,31 @@ describe("dotLiquidCompat", () => {
             const input = "{{ device_Id_AIG_3 }} {{ device_ID_AIG_3x }} {{ fulldevice_ID_AIG_3 }}";
             expect(normalizeVariableNameTypos(input)).to.equal(input);
         });
+
+        it("reads textString where the template captured textString but read textstring (MedicationRequest patientInstruction)", () => {
+            const input = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textstring  | split: "~" | join: "+" }}{% endcapture -%}';
+            const expected = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textString  | split: "~" | join: "+" }}{% endcapture -%}';
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("leaves textstring alone when the template itself captures or assigns textstring", () => {
+            const input = '{% capture textstring %}{{ x }}{% endcapture -%}{{ textstring }} {% capture textString %}{{ y }}{% endcapture -%}';
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+            const assigned = '{% assign textstring = "" -%}{{ textstring }}';
+            expect(normalizeVariableNameTypos(assigned)).to.equal(assigned);
+        });
+
+        it("leaves textstring alone when textString is never defined, and does not touch textStringValue", () => {
+            const input = "{{ textstring }} {{ textStringValue }}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
+
+        it("renders the captured instruction through the engine after normalization", async () => {
+            const engine = new Liquid();
+            const raw = '{% capture textString %}{{ v | split: "^" | join: "--" }}{% endcapture -%}{% capture specomp %}{{ textstring | split: "~" | join: "+" }}{% endcapture -%}[{{ specomp }}]';
+            expect(await engine.parseAndRender(raw, { v: "^1 tablet" })).to.equal("[]");
+            expect(await engine.parseAndRender(applyDotLiquidCompatTransforms(raw), { v: "1 tablet" })).to.equal("[1 tablet]");
+        });
     });
 
     describe("normalizeRepeatedTagArgumentCommas()", () => {

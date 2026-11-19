@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 110,
+    "pass": 117,
     "count": 0,
-    "content": 22
+    "content": 15
   },
   "cases": [
     {
@@ -860,28 +860,10 @@
     {
       "template": "ORM_O01",
       "dataFile": "ORM-O01-06.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 55,
       "expectedCount": 55,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORU_R01",
@@ -1054,191 +1036,50 @@
     {
       "template": "RDE_O11",
       "dataFile": "RDE-O11-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 125,
       "expectedCount": 125,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "RDE_O11",
       "dataFile": "RDE-O11-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 96,
       "expectedCount": 96,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "MedicationRequest/7c3b2f36-f464-f008-892b-345dafbd5c6e",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "RDE_O25",
       "dataFile": "RDE-O25-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 126,
       "expectedCount": 126,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "RDE_O25",
       "dataFile": "RDE-O25-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 98,
       "expectedCount": 98,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "MedicationRequest/7c3b2f36-f464-f008-892b-345dafbd5c6e",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "RDS_O13",
       "dataFile": "RDS-O13-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "MedicationRequest/64ef35d7-b2c7-855b-7178-b890ea66c8e9",
-            "paths": [
-              "dosageInstruction.0.patientInstruction"
-            ]
-          },
-          {
-            "key": "MedicationRequest/fe3ab6c9-0823-aa36-c4ce-39bd8212313f",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Provenance/7ef3ede5-7daf-eba5-9d3a-c0f3a068af0a",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "RDS_O13",
       "dataFile": "RDS-O13-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 81,
       "expectedCount": 81,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "MedicationRequest/64ef35d7-b2c7-855b-7178-b890ea66c8e9",
-            "paths": [
-              "dosageInstruction.0.patientInstruction"
-            ]
-          },
-          {
-            "key": "MedicationRequest/fe3ab6c9-0823-aa36-c4ce-39bd8212313f",
-            "paths": [
-              "dosageInstruction.0.patientInstruction",
-              "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Provenance/7ef3ede5-7daf-eba5-9d3a-c0f3a068af0a",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "REF_I12",
