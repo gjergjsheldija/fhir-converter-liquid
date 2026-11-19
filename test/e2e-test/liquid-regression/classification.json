@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 120,
+    "pass": 122,
     "count": 0,
-    "content": 12
+    "content": 10
   },
   "cases": [
     {
@@ -576,52 +576,18 @@
     {
       "template": "DFT_P11",
       "dataFile": "DFT-P11-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 85,
       "expectedCount": 85,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
-            "paths": [
-              "account.1"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "DFT_P11",
       "dataFile": "DFT-P11-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 100,
       "expectedCount": 100,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
-            "paths": [
-              "account.1"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "MDM_T01",

@@ -301,6 +301,17 @@ describe("dotLiquidCompat", () => {
             expect(normalizeVariableNameTypos(input)).to.equal(input);
         });
 
+        it("normalizes AccountId to accountId in the Encounter account reference and caller argument", () => {
+            const input = '{% if AccountId -%}{ "reference":"Account/{{ AccountId }}" }{% endif -%}\n{% include \'Resource/Encounter\' ID: encounterId, AccountId:accountId -%}';
+            const expected = '{% if accountId -%}{ "reference":"Account/{{ accountId }}" }{% endif -%}\n{% include \'Resource/Encounter\' ID: encounterId, accountId:accountId -%}';
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("leaves accountId and longer AccountId names unchanged", () => {
+            const input = "{{ accountId }} {{ AccountIdx }} {{ fullAccountId }} {{ AccountId_Other }}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
+
         it("normalizes device_ID_AIG_3 to device_Id_AIG_3 in the Appointment participant reference", () => {
             const input = '"reference":"Device/{{ device_ID_AIG_3 }}"';
             const expected = '"reference":"Device/{{ device_Id_AIG_3 }}"';
