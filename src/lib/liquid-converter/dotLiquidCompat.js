@@ -173,6 +173,7 @@ export function normalizeVariableNameTypos(content) {
     content = content.replace(/\bAccountId\b/g, 'accountId');
     content = content.replace(/\bdevice_ID_AIG_3\b/g, 'device_Id_AIG_3');
     content = content.replace(/\bpractitionerId_obr_10\b/g, 'practitionerId_OBR_10');
+    content = content.replace(/\bREF_prac\b/g, 'REF_Prac');
     if (DEFINES_TEXT_STRING.test(content) && !DEFINES_TEXTSTRING.test(content)) {
         content = content.replace(/\btextstring\b/g, 'textString');
     }
