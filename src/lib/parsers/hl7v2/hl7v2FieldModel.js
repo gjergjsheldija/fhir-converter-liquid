@@ -34,6 +34,20 @@ function normalizeText(value, fieldSeparator, componentSeparator, subcomponentSe
     return Escape(Unescape(value, fieldSeparator, componentSeparator, subcomponentSeparator, repetitionSeparator));
 }
 
+// DotLiquid resolves member names case-insensitively, and two pinned templates read `.value`
+// instead of `.Value` (`Resource/_AllergyIntolerance.liquid` line 194 `IAM.26.value`,
+// `Resource/_ClaimResponse.liquid` line 41 `AUT.29.value`). LiquidJS is case-sensitive, so
+// `.value` rendered empty and the AllergyIntolerance lost its `meta.lastUpdated`. Expose a
+// non-enumerable `value` alias for exactly this one member; it is not a general lookup.
+function withValueAlias(node) {
+    Object.defineProperty(node, 'value', {
+        get: function () { return this.Value; },
+        enumerable: false,
+        configurable: true
+    });
+    return node;
+}
+
 function buildSubcomponents(text, seps) {
     var subcomponents = [null];
     var raw = text.split(seps.subcomponentSeparator);
@@ -48,7 +62,7 @@ function buildComponent(text, seps) {
     var component = subcomponents.slice();
     component.Value = normalizeText(text, seps.fieldSeparator, seps.componentSeparator, seps.subcomponentSeparator, seps.repetitionSeparator);
     component.Subcomponents = subcomponents;
-    return component;
+    return withValueAlias(component);
 }
 
 function buildComponents(text, seps) {
@@ -66,7 +80,7 @@ function buildFieldInstance(text, seps) {
     var instance = components.slice();
     instance.Value = normalizeText(text, seps.fieldSeparator, seps.componentSeparator, seps.subcomponentSeparator, seps.repetitionSeparator);
     instance.Components = components;
-    return instance;
+    return withValueAlias(instance);
 }
 
 // A full field: Value is the raw whole-field text (repetition separators included, matching
@@ -79,7 +93,7 @@ function buildField(text, seps) {
     field.Value = normalizeText(text, seps.fieldSeparator, seps.componentSeparator, seps.subcomponentSeparator, seps.repetitionSeparator);
     field.Components = repeats[0].Components;
     field.Repeats = repeats;
-    return field;
+    return withValueAlias(field);
 }
 
 // MSH.1 (field separator) and MSH.2 (encoding characters) are never split into
@@ -92,13 +106,14 @@ function buildAtomicField(text) {
     var component = subcomponents.slice();
     component.Value = text;
     component.Subcomponents = subcomponents;
+    withValueAlias(component);
 
     var components = [null, component];
     var field = components.slice();
     field.Value = text;
     field.Components = components;
     field.Repeats = [];
-    return field;
+    return withValueAlias(field);
 }
 
 function buildFieldsForSegment(fieldsRaw, seps, isHeaderSegment) {
@@ -162,6 +177,7 @@ export function parseHl7v2FieldModel(msg) {
         var segment = fields.slice();
         segment.Value = normalizeText(segments[i], seps.fieldSeparator, seps.componentSeparator, seps.subcomponentSeparator, seps.repetitionSeparator);
         segment.Fields = fields;
+        withValueAlias(segment);
 
         meta.push(fields[0] ? fields[0].Value : '');
         data.push(segment);

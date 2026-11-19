@@ -34,6 +34,18 @@ describe('parseHl7v2FieldModel', function () {
         strictEqual(result.meta[1], 'PID');
     });
 
+    it('should expose a non-enumerable lowercase `value` alias of `Value` (DotLiquid member lookup)', function () {
+        const iamFields = ['IAM', '1'].concat(new Array(24).fill(''), ['202010151600+0215']);
+        const msg = 'MSH|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||\n' + iamFields.join('|');
+        const result = parseHl7v2FieldModel(msg);
+        const iam = result.data[result.meta.indexOf('IAM')];
+        strictEqual(iam.Fields[26].value, '202010151600+0215');
+        strictEqual(iam.Fields[26].value, iam.Fields[26].Value);
+        strictEqual(iam.Fields[26].Repeats[0].value, '202010151600+0215');
+        strictEqual(iam.Fields[26].Components[1].value, '202010151600+0215');
+        strictEqual(Object.keys(iam.Fields[26]).includes('value'), false);
+    });
+
     it('should split segments on CRLF, matching upstream', function () {
         const msg = 'MSH|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||\r\nPID|1||111111||DUCK^DONALD^D';
         const result = parseHl7v2FieldModel(msg);
