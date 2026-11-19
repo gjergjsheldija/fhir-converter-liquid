@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 129,
+    "pass": 131,
     "count": 0,
-    "content": 3
+    "content": 1
   },
   "cases": [
     {
@@ -450,64 +450,18 @@
     {
       "template": "ADT_A60",
       "dataFile": "ADT-A60-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 63,
       "expectedCount": 63,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "AllergyIntolerance/373c1fcc-c86b-470a-6469-b7642c16262d",
-            "paths": [
-              "meta"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A60",
       "dataFile": "ADT-A60-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 21,
       "expectedCount": 21,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "AllergyIntolerance/373c1fcc-c86b-470a-6469-b7642c16262d",
-            "paths": [
-              "meta"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "BAR_P01",
