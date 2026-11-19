@@ -56,4 +56,5 @@ Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec.
 Keep compatibility changes strictly separate from Web UI commits (`AGENTS.md`):
 
 - `specs/liquid-template-compat/07-align-generate-uuid-empty-input.md` — **Done (2026-11-19)** — Align `generate_uuid` empty/null handling with official Microsoft `v7.0` expected outputs.
+- `specs/liquid-template-compat/08-classify-official-bundle-diffs.md` — **Done (2026-11-19)** — Classify every official HL7v2 case as pass/count/content (132 cases: 27 pass, 19 count, 86 content); `Device` is the dominant count family.
 - `specs/liquid-template-compat/HANDOFF.md` — Historical triage notes for the remaining engine/template-drift cases.
