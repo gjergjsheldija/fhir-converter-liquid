@@ -39,6 +39,7 @@ Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec.
 14. `specs/web-ui/editor/05-bottom-debug-drawer.md` — **Done**
 - `specs/web-ui/editor/06-expected-bundle-diff.md` — **Done (2026-11-19)** — Debug drawer **Expected diff** tab shows Bundle resources added, removed, and changed against the open project's `tests/expected/<sample basename>.json` (`bundleResourceDiff`; `readProjectFile` now allows that one path pattern).
 - `specs/web-ui/editor/07-validate-against-fhir-server.md` — **Done (2026-11-19)** — **Validate** button posts the result to the Settings FHIR server at `{base}/$validate` via `POST /api/v1/fhir/validate` and lists OperationOutcome issues in a Debug drawer **Validation** tab; Convert never calls the server.
+- `specs/web-ui/editor/08-conditional-send.md` — **Done (2026-11-19)** — Settings option **Match existing resources by identifier** (off by default) makes Send post one `transaction` with `If-None-Exist` on each entry's first identifier for `batch` or `collection` Bundles.
 
 ### Phase 5 — Local & GitHub conversion projects (`specs/web-ui/projects/00-order.md`) — Done
 15. `specs/web-ui/projects/01-manifest.md` — **Done**

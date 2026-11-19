@@ -43,14 +43,35 @@ export function fhirHeaders(auth) {
     return headers;
 }
 
-export async function sendResource(baseUrl, resource, auth) {
-    const target = fhirTarget(baseUrl, resource);
+export function conditionalTransaction(resource) {
+    if (!resource || resource.resourceType !== "Bundle" || (resource.type !== "batch" && resource.type !== "collection")) {
+        return resource;
+    }
+    const copy = JSON.parse(JSON.stringify(resource));
+    copy.type = "transaction";
+    copy.entry = (Array.isArray(copy.entry) ? copy.entry : []).map((entry) => {
+        const entryResource = entry && entry.resource;
+        const request = {method: "POST", url: entryResource && entryResource.resourceType};
+        const identifier = entryResource && Array.isArray(entryResource.identifier) ? entryResource.identifier[0] : undefined;
+        if (identifier && typeof identifier === "object" &&
+            typeof identifier.system === "string" && identifier.system !== "" &&
+            typeof identifier.value === "string" && identifier.value !== "") {
+            request.ifNoneExist = "identifier=" + encodeURIComponent(identifier.system) + "|" + encodeURIComponent(identifier.value);
+        }
+        return Object.assign({}, entry, {request});
+    });
+    return copy;
+}
+
+export async function sendResource(baseUrl, resource, auth, options) {
+    const payload = options && options.conditional === true ? conditionalTransaction(resource) : resource;
+    const target = fhirTarget(baseUrl, payload);
     let response;
     try {
         response = await fetch(target, {
             method: "POST",
             headers: fhirHeaders(auth),
-            body: JSON.stringify(resource)
+            body: JSON.stringify(payload)
         });
     } catch (err) {
         throw httpError(400, `FHIR server request failed: ${err.message}`);
