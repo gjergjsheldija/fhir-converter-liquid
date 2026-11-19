@@ -80,3 +80,9 @@ src/service-samples/
 
 .worktrees/
 .nvmrc
+
+# Local agent and editor config
+.agents/
+.opencode/
+.vscode/
+AGENTS.md
