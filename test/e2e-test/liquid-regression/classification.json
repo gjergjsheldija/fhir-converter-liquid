@@ -1454,7 +1454,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1487,8 +1486,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
-              "participant.4.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1515,7 +1512,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1548,8 +1544,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
-              "participant.4.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1576,7 +1570,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1609,8 +1602,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
-              "participant.4.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1637,7 +1628,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
@@ -1671,8 +1661,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
-              "participant.4.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
@@ -1700,7 +1688,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
@@ -1734,8 +1721,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
-              "participant.4.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
@@ -1763,7 +1748,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
@@ -1797,8 +1781,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
-              "participant.4.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
@@ -1826,7 +1808,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
@@ -1860,8 +1841,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "participant.1.actor.reference",
-              "participant.4.actor.reference",
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
