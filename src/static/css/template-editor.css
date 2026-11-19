@@ -85,6 +85,122 @@ html[data-theme="dark"] {
     --syntax-comment: #a89888;
 }
 
+html[data-palette="slate"][data-theme="light"] {
+    --canvas: #eef1f6;
+    --surface: #ffffff;
+    --surface-muted: #f2f4f8;
+    --text: #1c2430;
+    --text-muted: #667085;
+    --border: #e3e8ef;
+    --border-subtle: #eef1f6;
+    --selection: #dbe7ff;
+    --hover: #f2f6fb;
+    --accent: #1f6feb;
+    --accent-text: #ffffff;
+    --danger-text: #842029;
+    --danger-bg: #f8d7da;
+    --warning: #d97706;
+    --unread: #c41e3a;
+    --include: #087443;
+    --focus: #1f6feb;
+    --dirty: #0d6efd;
+    --gutter: #c5ced9;
+    --syntax-keyword: #6f42c1;
+    --syntax-property: #0550ae;
+    --syntax-string: #0a7a3e;
+    --syntax-number: #1f6feb;
+    --syntax-variable: #9a3412;
+    --syntax-punctuation: #57606a;
+    --syntax-comment: #667085;
+}
+
+html[data-palette="slate"][data-theme="dark"] {
+    --canvas: #151b24;
+    --surface: #1c2430;
+    --surface-muted: #242d3b;
+    --text: #e7ecf2;
+    --text-muted: #98a2b3;
+    --border: #323c4d;
+    --border-subtle: #2a3444;
+    --selection: #1f3a5f;
+    --hover: #243044;
+    --accent: #4c9aff;
+    --accent-text: #0b1220;
+    --danger-text: #ffb4b4;
+    --danger-bg: #4a2428;
+    --warning: #fbbf24;
+    --unread: #ff8a8a;
+    --include: #5dcaa5;
+    --focus: #4c9aff;
+    --dirty: #6cb6ff;
+    --gutter: #3a4658;
+    --syntax-keyword: #d2a8ff;
+    --syntax-property: #79c0ff;
+    --syntax-string: #7ee787;
+    --syntax-number: #a5d6ff;
+    --syntax-variable: #ffa657;
+    --syntax-punctuation: #8b949e;
+    --syntax-comment: #98a2b3;
+}
+
+html[data-palette="grove"][data-theme="light"] {
+    --canvas: #e7f0ea;
+    --surface: #fbfefb;
+    --surface-muted: #eef5f0;
+    --text: #1c2a22;
+    --text-muted: #5c6f64;
+    --border: #d3e2d8;
+    --border-subtle: #e6f0ea;
+    --selection: #d5eadc;
+    --hover: #f3f8f4;
+    --accent: #2f6b45;
+    --accent-text: #f7fbf8;
+    --danger-text: #8f332c;
+    --danger-bg: #f8e6e1;
+    --warning: #b86a1a;
+    --unread: #b42318;
+    --include: #1f6b4a;
+    --focus: #2f6b45;
+    --dirty: #3d8f5a;
+    --gutter: #c5d6cb;
+    --syntax-keyword: #5c4d8a;
+    --syntax-property: #1d5c45;
+    --syntax-string: #8a4a28;
+    --syntax-number: #2a6f8a;
+    --syntax-variable: #9a4030;
+    --syntax-punctuation: #5c6b62;
+    --syntax-comment: #7a8a80;
+}
+
+html[data-palette="grove"][data-theme="dark"] {
+    --canvas: #121a16;
+    --surface: #1a2420;
+    --surface-muted: #22302a;
+    --text: #e7f3ec;
+    --text-muted: #a8c0b2;
+    --border: #31443a;
+    --border-subtle: #28382f;
+    --selection: #2a4536;
+    --hover: #24362d;
+    --accent: #8dcea8;
+    --accent-text: #102018;
+    --danger-text: #ffc4b8;
+    --danger-bg: #4a2a24;
+    --warning: #f0b46a;
+    --unread: #ffb0a4;
+    --include: #b7e0c8;
+    --focus: #8dcea8;
+    --dirty: #8dcea8;
+    --gutter: #3a4d42;
+    --syntax-keyword: #d7b4e8;
+    --syntax-property: #9ddec0;
+    --syntax-string: #f0c09a;
+    --syntax-number: #a9d4ea;
+    --syntax-variable: #f0a080;
+    --syntax-punctuation: #a8c0b2;
+    --syntax-comment: #8aa396;
+}
+
 html,
 body {
     margin: 0;
@@ -421,6 +537,62 @@ body {
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 12px;
     line-height: 1.45;
+}
+
+.palette-choices {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.palette-choice {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin: 0;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    cursor: pointer;
+    min-width: 0;
+}
+
+.palette-choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.palette-choice small {
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+.palette-name {
+    font-weight: 650;
+    font-size: 13px;
+}
+
+.palette-swatch {
+    width: 100%;
+    height: 28px;
+    border-radius: 6px;
+    border: 2px solid;
+    margin-bottom: 4px;
+}
+
+.palette-choice:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--selection);
+}
+
+.palette-choice:focus-within {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
 }
 
 .settings-group {

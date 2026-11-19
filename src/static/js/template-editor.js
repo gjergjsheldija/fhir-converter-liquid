@@ -49,6 +49,7 @@ var currentEditorSettings = {
     aiModel: 'gpt-4.1-mini',
     aiApiKey: '',
     aiPrompt: '',
+    palette: 'paper',
     aiApiKeys: {},
     aiModels: {},
     aiBaseUrls: {}
@@ -107,11 +108,23 @@ function resolveStoredTheme() {
     return 'system';
 }
 
+function resolveStoredPalette() {
+    var settings = getSettings();
+    if (settings.palette === 'paper' || settings.palette === 'slate' || settings.palette === 'grove') {
+        return settings.palette;
+    }
+    return 'paper';
+}
+
 function applyTheme(choice) {
     if (choice === 'system') {
         choice = themePreference && themePreference.matches ? 'dark' : 'light';
     }
     document.documentElement.dataset.theme = choice;
+}
+
+function applyPalette(name) {
+    document.documentElement.dataset.palette = name === 'slate' || name === 'grove' ? name : 'paper';
 }
 
 var currentThemeChoice = resolveStoredTheme();
@@ -839,6 +852,7 @@ function refreshEditors() {
 
 $(document).ready(function () {
     applyTheme(currentThemeChoice);
+    applyPalette(resolveStoredPalette());
 
     dataEditor = CodeMirror.fromTextArea(document.getElementById("databox"), {
         //readOnly: false,
@@ -1116,6 +1130,7 @@ $(document).ready(function () {
         var settings = getSettings();
         var themeChoice = resolveStoredTheme();
         $('input[name="settings-theme"][value="' + themeChoice + '"]').prop('checked', true);
+        $('input[name="settings-palette"][value="' + resolveStoredPalette() + '"]').prop('checked', true);
         $('#settings-convert-while-typing').prop('checked', settings.convertWhileTyping !== false);
         $('#settings-timezone').val(settings.timezone || '');
         $('#settings-fhir-url').val(settings.fhirBaseUrl || '');
@@ -1138,6 +1153,13 @@ $(document).ready(function () {
         applyTheme(currentThemeChoice);
     });
 
+    $('input[name="settings-palette"]').on('change', function () {
+        var settings = getSettings();
+        settings.palette = $(this).val();
+        setSettings(settings);
+        applyPalette(settings.palette);
+    });
+
     $('#settings-fhir-auth').on('change', showFhirAuthFields);
 
     $('#settings-ai-provider').on('change', function () {
@@ -1148,6 +1170,7 @@ $(document).ready(function () {
     $('#settings-save-button').on('click', function () {
         var settings = getSettings();
         settings.theme = $('input[name="settings-theme"]:checked').val() || settings.theme || 'light';
+        settings.palette = $('input[name="settings-palette"]:checked').val() || settings.palette || 'paper';
         settings.convertWhileTyping = $('#settings-convert-while-typing').prop('checked');
         settings.timezone = $('#settings-timezone').val();
         settings.fhirBaseUrl = $('#settings-fhir-url').val().trim();
