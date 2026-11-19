@@ -4,6 +4,7 @@ import { getFirstSegments, getSegmentLists, getRelatedSegmentList, getParentSegm
 import { addHyphensDate, formatAsDateTime, nowFilter, dateAdd } from "./filters/dateFilters.js";
 import { getProperty } from "./filters/getProperty.js";
 import { append } from "./filters/append.js";
+import { prepend } from "./filters/prepend.js";
 
 export const external = [
     {
@@ -102,5 +103,10 @@ export const external = [
         name: 'append',
         description: 'Appends a string; returns null for a nil input like DotLiquid (DotLiquid compat)',
         func: append
+    },
+    {
+        name: 'prepend',
+        description: 'Prepends a string; returns null for a nil input like DotLiquid (DotLiquid compat)',
+        func: prepend
     },
 ];
