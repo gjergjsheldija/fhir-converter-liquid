@@ -5,6 +5,14 @@ import { addHyphensDate, formatAsDateTime, nowFilter, dateAdd } from "./filters/
 import { getProperty } from "./filters/getProperty.js";
 import { append } from "./filters/append.js";
 import { prepend } from "./filters/prepend.js";
+import { toJsonString } from "./filters/toJsonString.js";
+import { toArray } from "./filters/toArray.js";
+import { match } from "./filters/match.js";
+import { getFirstCcdaSectionsByTemplateId } from "./filters/getFirstCcdaSectionsByTemplateId.js";
+import { batchRender } from "./filters/batchRender.js";
+import { gzip } from "./filters/gzip.js";
+import { sha1Hash } from "./filters/sha1Hash.js";
+import { base64Encode } from "./filters/base64Encode.js";
 
 export const external = [
     {
@@ -108,5 +116,45 @@ export const external = [
         name: 'prepend',
         description: 'Prepends a string; returns null for a nil input like DotLiquid (DotLiquid compat)',
         func: prepend
+    },
+    {
+        name: 'to_json_string',
+        description: 'Serializes a value to compact JSON; returns null for a nil input (pinned StringFilters.ToJsonString)',
+        func: toJsonString
+    },
+    {
+        name: 'to_array',
+        description: 'Wraps a value in a list; null becomes an empty list (pinned CollectionFilters.ToArray)',
+        func: toArray
+    },
+    {
+        name: 'match',
+        description: 'Returns the first regex match of a string as a one-item list (pinned StringFilters.Match)',
+        func: match
+    },
+    {
+        name: 'get_first_ccda_sections_by_template_id',
+        description: 'Returns the first C-CDA section per template id (pinned SectionFilters.GetFirstCcdaSectionsByTemplateId)',
+        func: getFirstCcdaSectionsByTemplateId
+    },
+    {
+        name: 'batch_render',
+        description: 'Renders a template once per collection entry and joins the results with trailing commas (pinned CollectionFilters.BatchRender)',
+        func: batchRender
+    },
+    {
+        name: 'gzip',
+        description: 'GZip-compresses a string and returns base64 (pinned StringFilters.Gzip)',
+        func: gzip
+    },
+    {
+        name: 'sha1_hash',
+        description: 'Lowercase hex SHA-1 of a string (pinned StringFilters.Sha1Hash)',
+        func: sha1Hash
+    },
+    {
+        name: 'base64_encode',
+        description: 'Base64 of the UTF-8 bytes of a string (pinned StringFilters.Base64Encode)',
+        func: base64Encode
     },
 ];

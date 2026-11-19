@@ -55,6 +55,10 @@ Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec.
 25. `specs/web-ui/projects/11-add-official-hl7v2-samples.md` — **Done**
 26. `specs/web-ui/projects/12-site-pack.md` — **Done** (2026-11-19)
 
+### C-CDA track (`specs/ccda/00-order.md`)
+
+- `specs/ccda/01-convert-ccda.md` — **Done (2026-11-19)** — `make sync-ccda-templates` syncs the pinned Microsoft `Ccda` templates (822 files) into `src/templates/Ccda/`; `srcDataType: "ccda"` renders with `msg.ClinicalDocument` (xml2js model that mirrors `CcdaDataParser` + `DictionaryJsonConverter`: attributes without `@`, text on `_`); registered the pinned filters `to_json_string`, `to_array`, `match`, `get_first_ccda_sections_by_template_id`, `batch_render`, `gzip`, `sha1_hash`, `base64_encode`; a ccda-only local project converts with its `templates/Ccda` and falls back to the synced tree. The sample document converts to a Bundle through `CCD.liquid`.
+
 ---
 
 ## Separate track — Microsoft v7.0 Liquid template compatibility
