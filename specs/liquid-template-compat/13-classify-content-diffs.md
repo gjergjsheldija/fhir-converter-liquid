@@ -65,18 +65,15 @@ Filled by the implementer from `classification.json`. Do not leave this section 
 
 | First path signature | Content cases | Example `dataFile` |
 |---|---|---|
-| `extension.0.valueDateTime` | 29 | ADT-A01-01.hl7 |
-| `period.start` | 19 | ADT-A01-02.hl7 |
-| `end` | 14 | SIU-S12-01.hl7 |
-| `costToBeneficiary.1` | 10 | DFT-P03-01.hl7 |
-| `period.end` | 9 | ADT-A03-02.hl7 |
+| `costToBeneficiary.1` | 33 | ADT-A01-01.hl7 |
+| `extension.7.extension.0.valueCodeableConcept.text` | 27 | ADT-A01-02.hl7 |
+| `participant.1.actor.reference` | 14 | SIU-S12-01.hl7 |
+| `extension.5.extension.0.valueCodeableConcept.text` | 11 | ADT-A06-02.hl7 |
 | `costToBeneficiary` | 5 | ADT01-23.hl7 |
 | `address.1` | 3 | ADT01-28.hl7 |
-| `extension.5.extension.0.valueCodeableConcept.text` | 3 | ADT-A09-02.hl7 |
-| `meta.security.5.extension.0.valuePeriod.end` | 2 | ADT-A02-01.hl7 |
+| `dosageInstruction.0.patientInstruction` | 3 | ORM-O01-06.hl7 |
 | `meta` | 2 | ADT-A60-01.hl7 |
-| `servicePeriod.start` | 2 | BAR-P01-01.hl7 |
 | `encounter` | 2 | IZ_1_1.1_Admin_Child_Max_Message.hl7 |
-| `_birthDate.extension.0.valueDateTime` | 1 | ADT-A26-01.hl7 |
-| `content.0.attachment.creation` | 1 | MDM-T02-03.hl7 |
+| `presentedForm.0.contentType` | 1 | BAR-P12-01.hl7 |
+| `identifier.1.system` | 1 | MDM-T02-03.hl7 |
 | `account` | 1 | ORU-R01-01.hl7 |

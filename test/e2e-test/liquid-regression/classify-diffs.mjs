@@ -38,13 +38,26 @@ const MAX_PATHS = 8;
 
 const isContainer = (value) => value !== null && typeof value === 'object';
 
+const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+
+const sameInstant = (actual, expected) => {
+    if (typeof actual !== 'string' || typeof expected !== 'string') {
+        return false;
+    }
+    if (!DATE_TIME.test(actual) || !DATE_TIME.test(expected)) {
+        return false;
+    }
+    const a = Date.parse(actual);
+    return !Number.isNaN(a) && a === Date.parse(expected);
+};
+
 const diffPaths = (actual, expected, prefix, out) => {
     if (isContainer(actual) && isContainer(expected) && Array.isArray(actual) === Array.isArray(expected)) {
         const keys = new Set([...Object.keys(actual), ...Object.keys(expected)]);
         keys.forEach((key) => diffPaths(actual[key], expected[key], prefix ? `${prefix}.${key}` : key, out));
         return;
     }
-    if (actual !== expected) {
+    if (actual !== expected && !sameInstant(actual, expected)) {
         out.push(prefix);
     }
 };
