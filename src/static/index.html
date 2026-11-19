@@ -237,6 +237,7 @@
                             <span id="conversion-status"></span>
                             <span class="pane-actions">
                                 <button class="btn btn-sm btn-outline-primary" id="send-fhir-button" type="button">Send</button>
+                                <button class="btn btn-sm btn-outline-primary" id="validate-fhir-button" type="button" disabled>Validate</button>
                                 <button class="btn btn-sm btn-outline-dark" id="copy-result-button" type="button">Copy</button>
                             </span>
                         </div>
@@ -253,6 +254,7 @@
                             <button type="button" role="tab" data-debug-tab="vars" aria-selected="false">Variables &amp; Console</button>
                             <button type="button" role="tab" data-debug-tab="diag" aria-selected="false">Diagnostics &amp; Bundle</button>
                             <button type="button" role="tab" id="debug-expected-tab" data-debug-tab="expected" aria-selected="false" hidden>Expected diff</button>
+                            <button type="button" role="tab" id="debug-validation-tab" data-debug-tab="validation" aria-selected="false" hidden>Validation</button>
                         </div>
                         <input id="debug-tree-filter" class="form-control form-control-sm" type="text" placeholder="Filter tree…" aria-label="Filter debug view">
                         <span id="debug-timing" class="debug-meta"></span>
@@ -271,6 +273,7 @@
                         </div>
                         <div id="debug-panel-diag" class="debug-panel" hidden></div>
                         <div id="debug-panel-expected" class="debug-panel" hidden></div>
+                        <div id="debug-panel-validation" class="debug-panel" hidden></div>
                     </div>
                 </section>
             </div>
