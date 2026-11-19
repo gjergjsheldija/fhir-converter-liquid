@@ -1,6 +1,6 @@
 # Spec 07: Align `generate_uuid` empty and null handling with pinned Microsoft v7.0
 
-**Status:** Not started. Follow `.agents/skills/fhir-template-compat/SKILL.md` and `AGENTS.md`. Implement this file only after `specs/runtime/02-worker-pool-and-loader-cleanup.md` is in place so `npm test` runs cleanly.
+**Status:** Done (2026-11-19). `generateUuid` returns `null` for null/undefined/whitespace input; all 11 `generate_uuid` tests pass, `0` previously passing regression cases regressed, and the full run is 444 passing / 105 failing (all official `Bundle.entry` baseline diffs). Follow `.agents/skills/fhir-template-compat/SKILL.md` and `AGENTS.md`. Implement this file only after `specs/runtime/02-worker-pool-and-loader-cleanup.md` is in place so `npm test` runs cleanly.
 
 ## 1. Goal
 
