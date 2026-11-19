@@ -4,7 +4,6 @@
 // -------------------------------------------------------------------------------------------------
 
 import deepmerge from 'deepmerge';
-import {uniq} from 'underscore';
 import {createHash} from 'crypto';
 import {ReplaceText} from './resourceMover.js';
 
@@ -71,17 +70,30 @@ function isSentinelIdEntry(entry) {
     return !!rt && SKIP_RESOURCE_TYPES.has(rt);
 }
 
+// Upstream merges with Newtonsoft `JObject.Merge(MergeArrayHandling.Union)` (PostProcessor.cs @
+// 253307fe…): the target array is kept as-is (its own duplicates survive), and only source items not
+// already present are appended. Arrays that exist on one side only are copied untouched. deepmerge
+// would otherwise clone target-only arrays through `arrayMerge([], array)`, which de-duplicated a
+// single render's repeated items (e.g. Appointment.supportingInformation).
 const merge = (r1, r2) => {
     const merged = deepmerge(r1, r2, {
-        arrayMerge: concatAndDedup
+        arrayMerge: unionArrays,
+        clone: false
     });
     return merged;
 };
 
-const concatAndDedup = (target, source) => {
-    let destination = target.concat(source);
-    destination = uniq(destination, false, function (item) {
-        return createHash('md5').update(JSON.stringify(item)).digest('hex');
+const itemHash = (item) => createHash('md5').update(JSON.stringify(item)).digest('hex');
+
+const unionArrays = (target, source) => {
+    const destination = target.slice();
+    const seen = new Set(target.map(itemHash));
+    source.forEach((item) => {
+        const hash = itemHash(item);
+        if (!seen.has(hash)) {
+            seen.add(hash);
+            destination.push(item);
+        }
     });
     return destination;
 };
