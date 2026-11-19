@@ -94,7 +94,12 @@ async function collectFilesUnderRelativeDir(projectRootReal, relRoot, filterFn) 
     return found;
 }
 
+const EXPECTED_BUNDLE_PATH = /^tests\/expected\/[A-Za-z0-9._-]+\.json$/;
+
 function isAllowedRootPrefix(relPath, manifest) {
+    if (EXPECTED_BUNDLE_PATH.test(relPath)) {
+        return true;
+    }
     for (const fam of manifest.families) {
         const root = manifest.roots[fam];
         if (relPath.startsWith(root.samples + "/") || relPath.startsWith(root.templates + "/")) {

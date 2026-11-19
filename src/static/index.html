@@ -252,6 +252,7 @@
                             <button type="button" role="tab" data-debug-tab="hl7" aria-selected="true" class="is-active">Parsed HL7</button>
                             <button type="button" role="tab" data-debug-tab="vars" aria-selected="false">Variables &amp; Console</button>
                             <button type="button" role="tab" data-debug-tab="diag" aria-selected="false">Diagnostics &amp; Bundle</button>
+                            <button type="button" role="tab" id="debug-expected-tab" data-debug-tab="expected" aria-selected="false" hidden>Expected diff</button>
                         </div>
                         <input id="debug-tree-filter" class="form-control form-control-sm" type="text" placeholder="Filter tree…" aria-label="Filter debug view">
                         <span id="debug-timing" class="debug-meta"></span>
@@ -269,6 +270,7 @@
                             </div>
                         </div>
                         <div id="debug-panel-diag" class="debug-panel" hidden></div>
+                        <div id="debug-panel-expected" class="debug-panel" hidden></div>
                     </div>
                 </section>
             </div>

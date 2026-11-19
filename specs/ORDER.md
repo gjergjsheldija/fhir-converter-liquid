@@ -35,6 +35,7 @@ Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec.
 12. `specs/web-ui/editor/03-liquid-beautifier.md` — **Done** (`e42bc41`)
 13. `specs/web-ui/editor/04-debug-trace-and-hover-values.md` — **Done**
 14. `specs/web-ui/editor/05-bottom-debug-drawer.md` — **Done**
+- `specs/web-ui/editor/06-expected-bundle-diff.md` — **Done (2026-11-19)** — Debug drawer **Expected diff** tab shows Bundle resources added, removed, and changed against the open project's `tests/expected/<sample basename>.json` (`bundleResourceDiff`; `readProjectFile` now allows that one path pattern).
 
 ### Phase 5 — Local & GitHub conversion projects (`specs/web-ui/projects/00-order.md`) — Done
 15. `specs/web-ui/projects/01-manifest.md` — **Done**

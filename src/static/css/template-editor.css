@@ -1801,6 +1801,28 @@ li.CodeMirror-hint-active {
     color: var(--unread);
 }
 
+.debug-pill.is-added {
+    border-color: var(--include);
+    color: var(--include);
+}
+
+.debug-pill.is-removed {
+    border-color: var(--unread);
+    color: var(--unread);
+}
+
+.debug-pill.is-changed {
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+.debug-expected-error {
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    padding: 6px 8px;
+    border-radius: 5px;
+}
+
 .debug-mini-btn {
     flex: 0 0 auto;
     border: 1px solid var(--border);
