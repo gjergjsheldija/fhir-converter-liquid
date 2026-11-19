@@ -1,0 +1,1200 @@
+{
+  "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
+  "summary": {
+    "cases": 132,
+    "pass": 27,
+    "count": 19,
+    "content": 86
+  },
+  "cases": [
+    {
+      "template": "ADT_A01",
+      "dataFile": "ADT-A01-01.hl7",
+      "status": "content",
+      "actualCount": 119,
+      "expectedCount": 119,
+      "byType": []
+    },
+    {
+      "template": "ADT_A01",
+      "dataFile": "ADT-A01-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A01",
+      "dataFile": "ADT01-23.hl7",
+      "status": "content",
+      "actualCount": 25,
+      "expectedCount": 25,
+      "byType": []
+    },
+    {
+      "template": "ADT_A01",
+      "dataFile": "ADT01-28.hl7",
+      "status": "content",
+      "actualCount": 12,
+      "expectedCount": 12,
+      "byType": []
+    },
+    {
+      "template": "ADT_A02",
+      "dataFile": "ADT-A02-01.hl7",
+      "status": "content",
+      "actualCount": 87,
+      "expectedCount": 87,
+      "byType": []
+    },
+    {
+      "template": "ADT_A02",
+      "dataFile": "ADT-A02-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A03",
+      "dataFile": "ADT-A03-01.hl7",
+      "status": "content",
+      "actualCount": 119,
+      "expectedCount": 119,
+      "byType": []
+    },
+    {
+      "template": "ADT_A03",
+      "dataFile": "ADT-A03-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A04",
+      "dataFile": "ADT-A04-01.hl7",
+      "status": "content",
+      "actualCount": 119,
+      "expectedCount": 119,
+      "byType": []
+    },
+    {
+      "template": "ADT_A04",
+      "dataFile": "ADT-A04-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A04",
+      "dataFile": "ADT04-23.hl7",
+      "status": "content",
+      "actualCount": 21,
+      "expectedCount": 21,
+      "byType": []
+    },
+    {
+      "template": "ADT_A04",
+      "dataFile": "ADT04-251.hl7",
+      "status": "pass",
+      "actualCount": 8,
+      "expectedCount": 8,
+      "byType": []
+    },
+    {
+      "template": "ADT_A04",
+      "dataFile": "ADT04-28.hl7",
+      "status": "content",
+      "actualCount": 18,
+      "expectedCount": 18,
+      "byType": []
+    },
+    {
+      "template": "ADT_A05",
+      "dataFile": "ADT-A05-01.hl7",
+      "status": "content",
+      "actualCount": 107,
+      "expectedCount": 107,
+      "byType": []
+    },
+    {
+      "template": "ADT_A05",
+      "dataFile": "ADT-A05-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A06",
+      "dataFile": "ADT-A06-01.hl7",
+      "status": "content",
+      "actualCount": 78,
+      "expectedCount": 78,
+      "byType": []
+    },
+    {
+      "template": "ADT_A06",
+      "dataFile": "ADT-A06-02.hl7",
+      "status": "content",
+      "actualCount": 27,
+      "expectedCount": 27,
+      "byType": []
+    },
+    {
+      "template": "ADT_A07",
+      "dataFile": "ADT-A07-01.hl7",
+      "status": "content",
+      "actualCount": 71,
+      "expectedCount": 71,
+      "byType": []
+    },
+    {
+      "template": "ADT_A07",
+      "dataFile": "ADT-A07-02.hl7",
+      "status": "content",
+      "actualCount": 26,
+      "expectedCount": 26,
+      "byType": []
+    },
+    {
+      "template": "ADT_A08",
+      "dataFile": "ADT-A08-01.hl7",
+      "status": "count",
+      "actualCount": 120,
+      "expectedCount": 119,
+      "byType": [
+        {
+          "resourceType": "EpisodeOfCare",
+          "actual": 2,
+          "expected": 1,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "ADT_A08",
+      "dataFile": "ADT-A08-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A09",
+      "dataFile": "ADT-A09-01.hl7",
+      "status": "content",
+      "actualCount": 44,
+      "expectedCount": 44,
+      "byType": []
+    },
+    {
+      "template": "ADT_A09",
+      "dataFile": "ADT-A09-02.hl7",
+      "status": "content",
+      "actualCount": 32,
+      "expectedCount": 32,
+      "byType": []
+    },
+    {
+      "template": "ADT_A10",
+      "dataFile": "ADT-A10-01.hl7",
+      "status": "content",
+      "actualCount": 44,
+      "expectedCount": 44,
+      "byType": []
+    },
+    {
+      "template": "ADT_A10",
+      "dataFile": "ADT-A10-02.hl7",
+      "status": "content",
+      "actualCount": 32,
+      "expectedCount": 32,
+      "byType": []
+    },
+    {
+      "template": "ADT_A11",
+      "dataFile": "ADT-A11-01.hl7",
+      "status": "content",
+      "actualCount": 72,
+      "expectedCount": 72,
+      "byType": []
+    },
+    {
+      "template": "ADT_A11",
+      "dataFile": "ADT-A11-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A13",
+      "dataFile": "ADT-A13-01.hl7",
+      "status": "content",
+      "actualCount": 119,
+      "expectedCount": 119,
+      "byType": []
+    },
+    {
+      "template": "ADT_A13",
+      "dataFile": "ADT-A13-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A14",
+      "dataFile": "ADT-A14-01.hl7",
+      "status": "content",
+      "actualCount": 107,
+      "expectedCount": 107,
+      "byType": []
+    },
+    {
+      "template": "ADT_A14",
+      "dataFile": "ADT-A14-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A15",
+      "dataFile": "ADT-A15-01.hl7",
+      "status": "content",
+      "actualCount": 75,
+      "expectedCount": 75,
+      "byType": []
+    },
+    {
+      "template": "ADT_A15",
+      "dataFile": "ADT-A15-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A16",
+      "dataFile": "ADT-A16-01.hl7",
+      "status": "content",
+      "actualCount": 107,
+      "expectedCount": 107,
+      "byType": []
+    },
+    {
+      "template": "ADT_A16",
+      "dataFile": "ADT-A16-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A25",
+      "dataFile": "ADT-A25-01.hl7",
+      "status": "content",
+      "actualCount": 72,
+      "expectedCount": 72,
+      "byType": []
+    },
+    {
+      "template": "ADT_A25",
+      "dataFile": "ADT-A25-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A26",
+      "dataFile": "ADT-A26-01.hl7",
+      "status": "content",
+      "actualCount": 63,
+      "expectedCount": 63,
+      "byType": []
+    },
+    {
+      "template": "ADT_A26",
+      "dataFile": "ADT-A26-02.hl7",
+      "status": "content",
+      "actualCount": 43,
+      "expectedCount": 43,
+      "byType": []
+    },
+    {
+      "template": "ADT_A27",
+      "dataFile": "ADT-A27-01.hl7",
+      "status": "content",
+      "actualCount": 72,
+      "expectedCount": 72,
+      "byType": []
+    },
+    {
+      "template": "ADT_A27",
+      "dataFile": "ADT-A27-02.hl7",
+      "status": "content",
+      "actualCount": 54,
+      "expectedCount": 54,
+      "byType": []
+    },
+    {
+      "template": "ADT_A28",
+      "dataFile": "ADT-A28-01.hl7",
+      "status": "content",
+      "actualCount": 107,
+      "expectedCount": 107,
+      "byType": []
+    },
+    {
+      "template": "ADT_A28",
+      "dataFile": "ADT-A28-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A29",
+      "dataFile": "ADT-A29-01.hl7",
+      "status": "content",
+      "actualCount": 72,
+      "expectedCount": 72,
+      "byType": []
+    },
+    {
+      "template": "ADT_A29",
+      "dataFile": "ADT-A29-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A31",
+      "dataFile": "ADT-A31-01.hl7",
+      "status": "content",
+      "actualCount": 107,
+      "expectedCount": 107,
+      "byType": []
+    },
+    {
+      "template": "ADT_A31",
+      "dataFile": "ADT-A31-02.hl7",
+      "status": "content",
+      "actualCount": 47,
+      "expectedCount": 47,
+      "byType": []
+    },
+    {
+      "template": "ADT_A40",
+      "dataFile": "ADT-A40-01.hl7",
+      "status": "pass",
+      "actualCount": 7,
+      "expectedCount": 7,
+      "byType": []
+    },
+    {
+      "template": "ADT_A40",
+      "dataFile": "ADT-A40-02.hl7",
+      "status": "pass",
+      "actualCount": 7,
+      "expectedCount": 7,
+      "byType": []
+    },
+    {
+      "template": "ADT_A41",
+      "dataFile": "ADT-A41-01.hl7",
+      "status": "pass",
+      "actualCount": 15,
+      "expectedCount": 15,
+      "byType": []
+    },
+    {
+      "template": "ADT_A41",
+      "dataFile": "ADT-A41-02.hl7",
+      "status": "pass",
+      "actualCount": 14,
+      "expectedCount": 14,
+      "byType": []
+    },
+    {
+      "template": "ADT_A45",
+      "dataFile": "ADT-A45-01.hl7",
+      "status": "pass",
+      "actualCount": 25,
+      "expectedCount": 25,
+      "byType": []
+    },
+    {
+      "template": "ADT_A45",
+      "dataFile": "ADT-A45-02.hl7",
+      "status": "pass",
+      "actualCount": 18,
+      "expectedCount": 18,
+      "byType": []
+    },
+    {
+      "template": "ADT_A47",
+      "dataFile": "ADT-A47-01.hl7",
+      "status": "pass",
+      "actualCount": 13,
+      "expectedCount": 13,
+      "byType": []
+    },
+    {
+      "template": "ADT_A47",
+      "dataFile": "ADT-A47-02.hl7",
+      "status": "pass",
+      "actualCount": 13,
+      "expectedCount": 13,
+      "byType": []
+    },
+    {
+      "template": "ADT_A60",
+      "dataFile": "ADT-A60-01.hl7",
+      "status": "content",
+      "actualCount": 63,
+      "expectedCount": 63,
+      "byType": []
+    },
+    {
+      "template": "ADT_A60",
+      "dataFile": "ADT-A60-02.hl7",
+      "status": "content",
+      "actualCount": 21,
+      "expectedCount": 21,
+      "byType": []
+    },
+    {
+      "template": "BAR_P01",
+      "dataFile": "BAR-P01-01.hl7",
+      "status": "content",
+      "actualCount": 108,
+      "expectedCount": 108,
+      "byType": []
+    },
+    {
+      "template": "BAR_P01",
+      "dataFile": "BAR-P01-02.hl7",
+      "status": "content",
+      "actualCount": 98,
+      "expectedCount": 98,
+      "byType": []
+    },
+    {
+      "template": "BAR_P02",
+      "dataFile": "BAR-P02-01.hl7",
+      "status": "content",
+      "actualCount": 52,
+      "expectedCount": 52,
+      "byType": []
+    },
+    {
+      "template": "BAR_P02",
+      "dataFile": "BAR-P02-02.hl7",
+      "status": "content",
+      "actualCount": 53,
+      "expectedCount": 53,
+      "byType": []
+    },
+    {
+      "template": "BAR_P12",
+      "dataFile": "BAR-P12-01.hl7",
+      "status": "content",
+      "actualCount": 74,
+      "expectedCount": 74,
+      "byType": []
+    },
+    {
+      "template": "BAR_P12",
+      "dataFile": "BAR-P12-02.hl7",
+      "status": "content",
+      "actualCount": 75,
+      "expectedCount": 75,
+      "byType": []
+    },
+    {
+      "template": "DFT_P03",
+      "dataFile": "DFT-P03-01.hl7",
+      "status": "content",
+      "actualCount": 96,
+      "expectedCount": 96,
+      "byType": []
+    },
+    {
+      "template": "DFT_P03",
+      "dataFile": "DFT-P03-02.hl7",
+      "status": "content",
+      "actualCount": 91,
+      "expectedCount": 91,
+      "byType": []
+    },
+    {
+      "template": "DFT_P11",
+      "dataFile": "DFT-P11-01.hl7",
+      "status": "content",
+      "actualCount": 85,
+      "expectedCount": 85,
+      "byType": []
+    },
+    {
+      "template": "DFT_P11",
+      "dataFile": "DFT-P11-02.hl7",
+      "status": "content",
+      "actualCount": 100,
+      "expectedCount": 100,
+      "byType": []
+    },
+    {
+      "template": "MDM_T01",
+      "dataFile": "MDM-T01-01.hl7",
+      "status": "pass",
+      "actualCount": 25,
+      "expectedCount": 25,
+      "byType": []
+    },
+    {
+      "template": "MDM_T01",
+      "dataFile": "MDM-T01-02.hl7",
+      "status": "pass",
+      "actualCount": 26,
+      "expectedCount": 26,
+      "byType": []
+    },
+    {
+      "template": "MDM_T02",
+      "dataFile": "MDM-T02-01.hl7",
+      "status": "pass",
+      "actualCount": 26,
+      "expectedCount": 26,
+      "byType": []
+    },
+    {
+      "template": "MDM_T02",
+      "dataFile": "MDM-T02-02.hl7",
+      "status": "pass",
+      "actualCount": 28,
+      "expectedCount": 28,
+      "byType": []
+    },
+    {
+      "template": "MDM_T02",
+      "dataFile": "MDM-T02-03.hl7",
+      "status": "content",
+      "actualCount": 45,
+      "expectedCount": 45,
+      "byType": []
+    },
+    {
+      "template": "MDM_T05",
+      "dataFile": "MDM-T05-01.hl7",
+      "status": "pass",
+      "actualCount": 25,
+      "expectedCount": 25,
+      "byType": []
+    },
+    {
+      "template": "MDM_T05",
+      "dataFile": "MDM-T05-02.hl7",
+      "status": "pass",
+      "actualCount": 26,
+      "expectedCount": 26,
+      "byType": []
+    },
+    {
+      "template": "MDM_T06",
+      "dataFile": "MDM-T06-01.hl7",
+      "status": "pass",
+      "actualCount": 26,
+      "expectedCount": 26,
+      "byType": []
+    },
+    {
+      "template": "MDM_T06",
+      "dataFile": "MDM-T06-02.hl7",
+      "status": "pass",
+      "actualCount": 28,
+      "expectedCount": 28,
+      "byType": []
+    },
+    {
+      "template": "MDM_T09",
+      "dataFile": "MDM-T09-01.hl7",
+      "status": "pass",
+      "actualCount": 25,
+      "expectedCount": 25,
+      "byType": []
+    },
+    {
+      "template": "MDM_T09",
+      "dataFile": "MDM-T09-02.hl7",
+      "status": "pass",
+      "actualCount": 26,
+      "expectedCount": 26,
+      "byType": []
+    },
+    {
+      "template": "MDM_T10",
+      "dataFile": "MDM-T10-01.hl7",
+      "status": "pass",
+      "actualCount": 26,
+      "expectedCount": 26,
+      "byType": []
+    },
+    {
+      "template": "MDM_T10",
+      "dataFile": "MDM-T10-02.hl7",
+      "status": "pass",
+      "actualCount": 28,
+      "expectedCount": 28,
+      "byType": []
+    },
+    {
+      "template": "OMG_O19",
+      "dataFile": "OMG-O19-01.hl7",
+      "status": "content",
+      "actualCount": 128,
+      "expectedCount": 128,
+      "byType": []
+    },
+    {
+      "template": "OMG_O19",
+      "dataFile": "OMG-O19-02.hl7",
+      "status": "content",
+      "actualCount": 88,
+      "expectedCount": 88,
+      "byType": []
+    },
+    {
+      "template": "OML_O21",
+      "dataFile": "MDHHS-OML-O21-1.hl7",
+      "status": "content",
+      "actualCount": 21,
+      "expectedCount": 21,
+      "byType": []
+    },
+    {
+      "template": "OML_O21",
+      "dataFile": "MDHHS-OML-O21-2.hl7",
+      "status": "content",
+      "actualCount": 27,
+      "expectedCount": 27,
+      "byType": []
+    },
+    {
+      "template": "OML_O21",
+      "dataFile": "OML-O21-01.hl7",
+      "status": "content",
+      "actualCount": 64,
+      "expectedCount": 64,
+      "byType": []
+    },
+    {
+      "template": "OML_O21",
+      "dataFile": "OML-O21-02.hl7",
+      "status": "content",
+      "actualCount": 50,
+      "expectedCount": 50,
+      "byType": []
+    },
+    {
+      "template": "OML_O21",
+      "dataFile": "OML-O21-03.hl7",
+      "status": "content",
+      "actualCount": 127,
+      "expectedCount": 127,
+      "byType": []
+    },
+    {
+      "template": "ORM_O01",
+      "dataFile": "ORM-O01-01.hl7",
+      "status": "content",
+      "actualCount": 50,
+      "expectedCount": 50,
+      "byType": []
+    },
+    {
+      "template": "ORM_O01",
+      "dataFile": "ORM-O01-02.hl7",
+      "status": "content",
+      "actualCount": 44,
+      "expectedCount": 44,
+      "byType": []
+    },
+    {
+      "template": "ORM_O01",
+      "dataFile": "ORM-O01-03.hl7",
+      "status": "count",
+      "actualCount": 45,
+      "expectedCount": 46,
+      "byType": [
+        {
+          "resourceType": "Account",
+          "actual": 2,
+          "expected": 3,
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "template": "ORM_O01",
+      "dataFile": "ORM-O01-04.hl7",
+      "status": "content",
+      "actualCount": 51,
+      "expectedCount": 51,
+      "byType": []
+    },
+    {
+      "template": "ORM_O01",
+      "dataFile": "ORM-O01-05.hl7",
+      "status": "content",
+      "actualCount": 53,
+      "expectedCount": 53,
+      "byType": []
+    },
+    {
+      "template": "ORM_O01",
+      "dataFile": "ORM-O01-06.hl7",
+      "status": "count",
+      "actualCount": 56,
+      "expectedCount": 55,
+      "byType": [
+        {
+          "resourceType": "MedicationRequest",
+          "actual": 2,
+          "expected": 1,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "ORU_R01",
+      "dataFile": "LAB-ORU-1.hl7",
+      "status": "content",
+      "actualCount": 25,
+      "expectedCount": 25,
+      "byType": []
+    },
+    {
+      "template": "ORU_R01",
+      "dataFile": "LAB-ORU-2.hl7",
+      "status": "content",
+      "actualCount": 25,
+      "expectedCount": 25,
+      "byType": []
+    },
+    {
+      "template": "ORU_R01",
+      "dataFile": "LRI_2.0-NG_CBC_Typ_Message.hl7",
+      "status": "pass",
+      "actualCount": 42,
+      "expectedCount": 42,
+      "byType": []
+    },
+    {
+      "template": "ORU_R01",
+      "dataFile": "ORU-R01-01.hl7",
+      "status": "content",
+      "actualCount": 157,
+      "expectedCount": 157,
+      "byType": []
+    },
+    {
+      "template": "ORU_R01",
+      "dataFile": "ORU-R01-RMGEAD.hl7",
+      "status": "pass",
+      "actualCount": 12,
+      "expectedCount": 12,
+      "byType": []
+    },
+    {
+      "template": "OUL_R22",
+      "dataFile": "OUL-R22-01.hl7",
+      "status": "pass",
+      "actualCount": 83,
+      "expectedCount": 83,
+      "byType": []
+    },
+    {
+      "template": "OUL_R22",
+      "dataFile": "OUL-R22-02.hl7",
+      "status": "pass",
+      "actualCount": 50,
+      "expectedCount": 50,
+      "byType": []
+    },
+    {
+      "template": "OUL_R23",
+      "dataFile": "OUL-R23-01.hl7",
+      "status": "count",
+      "actualCount": 109,
+      "expectedCount": 108,
+      "byType": [
+        {
+          "resourceType": "DiagnosticReport",
+          "actual": 6,
+          "expected": 5,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "OUL_R23",
+      "dataFile": "OUL-R23-02.hl7",
+      "status": "count",
+      "actualCount": 84,
+      "expectedCount": 83,
+      "byType": [
+        {
+          "resourceType": "DiagnosticReport",
+          "actual": 5,
+          "expected": 4,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "OUL_R24",
+      "dataFile": "OUL-R24-01.hl7",
+      "status": "pass",
+      "actualCount": 110,
+      "expectedCount": 110,
+      "byType": []
+    },
+    {
+      "template": "OUL_R24",
+      "dataFile": "OUL-R24-02.hl7",
+      "status": "pass",
+      "actualCount": 73,
+      "expectedCount": 73,
+      "byType": []
+    },
+    {
+      "template": "RDE_O11",
+      "dataFile": "RDE-O11-01.hl7",
+      "status": "content",
+      "actualCount": 125,
+      "expectedCount": 125,
+      "byType": []
+    },
+    {
+      "template": "RDE_O11",
+      "dataFile": "RDE-O11-02.hl7",
+      "status": "content",
+      "actualCount": 96,
+      "expectedCount": 96,
+      "byType": []
+    },
+    {
+      "template": "RDE_O25",
+      "dataFile": "RDE-O25-01.hl7",
+      "status": "content",
+      "actualCount": 126,
+      "expectedCount": 126,
+      "byType": []
+    },
+    {
+      "template": "RDE_O25",
+      "dataFile": "RDE-O25-02.hl7",
+      "status": "content",
+      "actualCount": 98,
+      "expectedCount": 98,
+      "byType": []
+    },
+    {
+      "template": "RDS_O13",
+      "dataFile": "RDS-O13-01.hl7",
+      "status": "content",
+      "actualCount": 119,
+      "expectedCount": 119,
+      "byType": []
+    },
+    {
+      "template": "RDS_O13",
+      "dataFile": "RDS-O13-02.hl7",
+      "status": "content",
+      "actualCount": 81,
+      "expectedCount": 81,
+      "byType": []
+    },
+    {
+      "template": "REF_I12",
+      "dataFile": "REF-I12-01.hl7",
+      "status": "content",
+      "actualCount": 88,
+      "expectedCount": 88,
+      "byType": []
+    },
+    {
+      "template": "REF_I12",
+      "dataFile": "REF-I12-02.hl7",
+      "status": "content",
+      "actualCount": 91,
+      "expectedCount": 91,
+      "byType": []
+    },
+    {
+      "template": "REF_I14",
+      "dataFile": "REF-I14-01.hl7",
+      "status": "content",
+      "actualCount": 86,
+      "expectedCount": 86,
+      "byType": []
+    },
+    {
+      "template": "REF_I14",
+      "dataFile": "REF-I14-02.hl7",
+      "status": "content",
+      "actualCount": 90,
+      "expectedCount": 90,
+      "byType": []
+    },
+    {
+      "template": "SIU_S12",
+      "dataFile": "SIU-S12-01.hl7",
+      "status": "count",
+      "actualCount": 49,
+      "expectedCount": 48,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 3,
+          "expected": 2,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S12",
+      "dataFile": "SIU-S12-02.hl7",
+      "status": "count",
+      "actualCount": 42,
+      "expectedCount": 41,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 4,
+          "expected": 3,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S13",
+      "dataFile": "SIU-S13-01.hl7",
+      "status": "count",
+      "actualCount": 32,
+      "expectedCount": 31,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 3,
+          "expected": 2,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S13",
+      "dataFile": "SIU-S13-02.hl7",
+      "status": "count",
+      "actualCount": 42,
+      "expectedCount": 41,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 4,
+          "expected": 3,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S14",
+      "dataFile": "SIU-S14-01.hl7",
+      "status": "count",
+      "actualCount": 32,
+      "expectedCount": 31,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 3,
+          "expected": 2,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S14",
+      "dataFile": "SIU-S14-02.hl7",
+      "status": "count",
+      "actualCount": 42,
+      "expectedCount": 41,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 4,
+          "expected": 3,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S15",
+      "dataFile": "SIU-S15-01.hl7",
+      "status": "count",
+      "actualCount": 32,
+      "expectedCount": 31,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 3,
+          "expected": 2,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S15",
+      "dataFile": "SIU-S15-02.hl7",
+      "status": "count",
+      "actualCount": 42,
+      "expectedCount": 41,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 4,
+          "expected": 3,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S16",
+      "dataFile": "SIU-S16-01.hl7",
+      "status": "count",
+      "actualCount": 32,
+      "expectedCount": 31,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 3,
+          "expected": 2,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S16",
+      "dataFile": "SIU-S16-02.hl7",
+      "status": "count",
+      "actualCount": 42,
+      "expectedCount": 41,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 4,
+          "expected": 3,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S17",
+      "dataFile": "SIU-S17-01.hl7",
+      "status": "count",
+      "actualCount": 32,
+      "expectedCount": 31,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 3,
+          "expected": 2,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S17",
+      "dataFile": "SIU-S17-02.hl7",
+      "status": "count",
+      "actualCount": 42,
+      "expectedCount": 41,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 4,
+          "expected": 3,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S26",
+      "dataFile": "SIU-S26-01.hl7",
+      "status": "count",
+      "actualCount": 32,
+      "expectedCount": 31,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 3,
+          "expected": 2,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "SIU_S26",
+      "dataFile": "SIU-S26-02.hl7",
+      "status": "count",
+      "actualCount": 42,
+      "expectedCount": 41,
+      "byType": [
+        {
+          "resourceType": "Device",
+          "actual": 4,
+          "expected": 3,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "template": "VXU_V04",
+      "dataFile": "IZ_1_1.1_Admin_Child_Max_Message.hl7",
+      "status": "content",
+      "actualCount": 16,
+      "expectedCount": 16,
+      "byType": []
+    },
+    {
+      "template": "VXU_V04",
+      "dataFile": "VXU-V04-01.hl7",
+      "status": "content",
+      "actualCount": 97,
+      "expectedCount": 97,
+      "byType": []
+    },
+    {
+      "template": "VXU_V04",
+      "dataFile": "VXU-V04-02.hl7",
+      "status": "content",
+      "actualCount": 84,
+      "expectedCount": 84,
+      "byType": []
+    },
+    {
+      "template": "VXU_V04",
+      "dataFile": "VXU.hl7",
+      "status": "content",
+      "actualCount": 19,
+      "expectedCount": 19,
+      "byType": []
+    }
+  ]
+}

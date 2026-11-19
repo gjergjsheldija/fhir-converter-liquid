@@ -1,0 +1,80 @@
+# Spec 08: Classify the official HL7v2 Bundle.entry diffs
+
+**Status:** Done (2026-11-19). Classification generated for all 132 official cases (27 pass, 19 count, 86 content); unit test, full summary, and immutability check passed. Follow `.agents/skills/fhir-template-compat/SKILL.md` and `AGENTS.md`. Spec 07 is Done. This spec records the remaining official diffs. It does not fix them.
+
+## 1. Goal
+
+Produce a checked-in classification of every case in `test/e2e-test/liquid-regression/testcases-hl7v2.json` against the pinned Microsoft v7.0 expected JSON. Each case is `pass`, `count`, or `content`. A later spec fixes one `count` family. This spec changes no conversion behavior.
+
+## 2. Current behavior
+
+The regression suite posts each case to `POST /api/v1/convert/hl7v2` and compares `response.body.fhirResource` with `test/e2e-test/util/compare.js` `compareContent`. After spec 07 the host summary is 444 passing and 105 failing. The 105 failures are official `Bundle.entry` compare diffs. There is no checked-in file that says, per case, whether the entry multiset differs by `resourceType` or the counts match and the content does not.
+
+## 3. Files you may edit
+
+- Create: `test/e2e-test/liquid-regression/classify-diffs.mjs`
+- Create: `test/e2e-test/liquid-regression/classify-diffs.spec.js`
+- Create: `test/e2e-test/liquid-regression/classification.json`
+- Modify: this spec's `**Status:**` line when acceptance is met
+- Modify: the spec 08 bullet in `specs/ORDER.md`
+
+Do not edit `src/**`, any `*.liquid` file, `src/sample-data/**`, or `test/e2e-test/liquid-fixtures/**`. Do not add a dependency. Do not change `compare.js`.
+
+## 4. Requirements
+
+1. Export `entryDelta(actualBundle, expectedBundle)` from `classify-diffs.mjs`. It reads `Bundle.entry` (missing or non-array counts as `0`). It returns `{ actualCount, expectedCount, byType }` where `byType` is an array of `{ resourceType, actual, expected, delta }` for types whose counts differ, sorted by `resourceType`. `delta` is `actual - expected`. A missing `resource.resourceType` counts as `"(missing)"`.
+2. `classify-diffs.spec.js` covers three inputs and nothing else: equal Patient counts return `byType: []`; one extra Device returns `[{ resourceType: "Device", actual: 1, expected: 0, delta: 1 }]`; a missing Account returns `delta: -1`. Use plain objects, not the fixture files.
+3. Running `node test/e2e-test/liquid-regression/classify-diffs.mjs` converts every case through the same route and payload shape as `liquid-regression.spec.js` (inline `template` and `srcData` strings, result at `response.body.fhirResource`). It writes `classification.json` with this shape and no timestamps:
+
+```json
+{
+  "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
+  "summary": { "cases": 132, "pass": 0, "count": 0, "content": 0 },
+  "cases": [
+    {
+      "template": "ADT_A01",
+      "dataFile": "ADT-A01-01.hl7",
+      "status": "pass",
+      "actualCount": 1,
+      "expectedCount": 1,
+      "byType": []
+    }
+  ]
+}
+```
+
+4. `status` is `pass` when `compareContent` does not throw. It is `count` when `compareContent` throws and `byType` is non-empty. It is `content` when `compareContent` throws and `byType` is empty. `cases` is sorted by `template`, then `dataFile`, and includes every testcase, including passes.
+5. Paste a summary table into section 7 of this spec: one row per `resourceType` that appears in any `count` case, with the number of cases that have a positive delta and the number that have a negative delta, plus the `content` and `pass` totals from `summary`. The table is generated from `classification.json`, not estimated.
+6. `summary.pass + summary.count + summary.content` equals `summary.cases`, and `summary.cases` equals the number of entries in `testcases-hl7v2.json`.
+
+## 5. Validation
+
+```sh
+npx mocha test/e2e-test/liquid-regression/classify-diffs.spec.js --exit --timeout 10000
+node test/e2e-test/liquid-regression/classify-diffs.mjs
+node scripts/test-summary.mjs
+```
+
+`classify-diffs.mjs` may take several minutes. The full summary must show 0 unexpected failures. The pre-existing official regression failures stay. ESLint and `git diff --check` must pass.
+
+## 6. Acceptance criteria
+
+- The three unit assertions pass.
+- `classification.json` contains one record per official testcase.
+- Section 7 of this spec lists the `count` resource types from that file.
+- No file under `src/`, `src/templates/`, `src/sample-data/`, or `test/e2e-test/liquid-fixtures/` changed.
+- This spec's status and the `specs/ORDER.md` bullet say Done with the date and the summary counts.
+
+## 7. Count families
+
+Generated from `classification.json` (pin `253307fe6063a42b024ef7dbeb6aae157f1c2f61`).
+
+| resourceType | Cases with positive delta (extra) | Cases with negative delta (missing) |
+| --- | --- | --- |
+| Account | 0 | 1 |
+| Device | 14 | 0 |
+| DiagnosticReport | 2 | 0 |
+| EpisodeOfCare | 1 | 0 |
+| MedicationRequest | 1 | 0 |
+
+Totals: `pass` 27, `count` 19, `content` 86 (cases 132).
