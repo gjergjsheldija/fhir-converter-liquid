@@ -4,7 +4,84 @@
 // -------------------------------------------------------------------------------------------------
 
 import assert from 'assert';
-import {validateTarget, validateResource} from './sendResource.js';
+import {validateTarget, validateResource, sendResource, conditionalTransaction} from './sendResource.js';
+
+describe('FHIR conditional send', function () {
+    let realFetch;
+    let calls;
+
+    beforeEach(function () {
+        realFetch = global.fetch;
+        calls = [];
+        global.fetch = async (url, options) => {
+            calls.push({url, options});
+            return {ok: true, status: 201, text: async () => '{}', headers: {get: () => ''}};
+        };
+    });
+
+    afterEach(function () {
+        global.fetch = realFetch;
+    });
+
+    function batchBundle() {
+        return {
+            resourceType: 'Bundle',
+            type: 'batch',
+            entry: [
+                {fullUrl: 'urn:uuid:1', resource: {resourceType: 'Patient', identifier: [{system: 'http://hospital.example/mrn', value: '12345'}]}},
+                {fullUrl: 'urn:uuid:2', resource: {resourceType: 'Observation', status: 'final'}}
+            ]
+        };
+    }
+
+    it('posts one transaction with ifNoneExist on the first identifier', async function () {
+        const bundle = batchBundle();
+        await sendResource('https://fhir.example.org/baseR4/', bundle, undefined, {conditional: true});
+        assert.strictEqual(calls.length, 1);
+        assert.strictEqual(calls[0].url, 'https://fhir.example.org/baseR4');
+        const posted = JSON.parse(calls[0].options.body);
+        assert.strictEqual(posted.type, 'transaction');
+        assert.strictEqual(posted.entry[0].fullUrl, 'urn:uuid:1');
+        assert.deepStrictEqual(posted.entry[0].request, {
+            method: 'POST',
+            url: 'Patient',
+            ifNoneExist: 'identifier=' + encodeURIComponent('http://hospital.example/mrn') + '|12345'
+        });
+        assert.deepStrictEqual(posted.entry[1].request, {method: 'POST', url: 'Observation'});
+        assert.strictEqual(bundle.type, 'batch');
+        assert.strictEqual(bundle.entry[0].request, undefined);
+    });
+
+    it('posts the original batch Bundle when the option is off or omitted', async function () {
+        const bundle = batchBundle();
+        await sendResource('https://fhir.example.org/baseR4', bundle, undefined, {conditional: false});
+        await sendResource('https://fhir.example.org/baseR4', bundle);
+        assert.strictEqual(calls.length, 2);
+        for (const call of calls) {
+            assert.strictEqual(call.url, 'https://fhir.example.org/baseR4');
+            assert.deepStrictEqual(JSON.parse(call.options.body), bundle);
+        }
+        assert.strictEqual(JSON.parse(calls[0].options.body).type, 'batch');
+    });
+
+    it('does not wrap a plain Patient when the option is on', async function () {
+        const patient = {resourceType: 'Patient', identifier: [{system: 'http://hospital.example/mrn', value: '12345'}]};
+        await sendResource('https://fhir.example.org/baseR4', patient, undefined, {conditional: true});
+        assert.strictEqual(calls.length, 1);
+        assert.strictEqual(calls[0].url, 'https://fhir.example.org/baseR4/Patient');
+        assert.deepStrictEqual(JSON.parse(calls[0].options.body), patient);
+    });
+
+    it('converts a collection Bundle and returns other Bundle types as-is', function () {
+        const collection = {resourceType: 'Bundle', type: 'collection', entry: [{resource: {resourceType: 'Patient', identifier: [{system: 'http://a', value: ''}]}}]};
+        const result = conditionalTransaction(collection);
+        assert.strictEqual(result.type, 'transaction');
+        assert.deepStrictEqual(result.entry[0].request, {method: 'POST', url: 'Patient'});
+        assert.strictEqual(collection.type, 'collection');
+        const searchset = {resourceType: 'Bundle', type: 'searchset'};
+        assert.strictEqual(conditionalTransaction(searchset), searchset);
+    });
+});
 
 describe('FHIR $validate', function () {
     let realFetch;

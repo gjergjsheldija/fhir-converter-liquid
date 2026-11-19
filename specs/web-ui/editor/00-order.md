@@ -25,6 +25,7 @@ Implement `specs/runtime/02`, `specs/web-ui/usability/` (`01` through `20`), and
 | 05 | Done (2026-11-18) | `05-bottom-debug-drawer.md` | Collapsible, resizable Chrome-DevTools-style bottom Debug drawer with Parsed HL7 tree, Variables & Console evaluator, and Diagnostics/Bundle jump list. |
 | 06 | Done (2026-11-19) | `06-expected-bundle-diff.md` | **Expected diff** tab in the Debug drawer lists Bundle resources added, removed, and changed against `tests/expected/<sample basename>.json` of the open project; hidden in Built-in mode or when that file is missing. |
 | 07 | Done (2026-11-19) | `07-validate-against-fhir-server.md` | **Validate** button posts the result to `{base}/$validate` of the Settings FHIR server (`POST /api/v1/fhir/validate`) and lists OperationOutcome issues in a Debug drawer **Validation** tab; Convert never calls the server.
+| 08 | Done (2026-11-19) | `08-conditional-send.md` | Settings option **Match existing resources by identifier** (off by default) makes Send rewrite a `batch` or `collection` Bundle into one `transaction` POST with `If-None-Exist` on each entry's first identifier (`conditionalTransaction`). |
 
 ## Check
 

@@ -44,6 +44,7 @@ var currentEditorSettings = {
     fhirToken: '',
     fhirUsername: '',
     fhirPassword: '',
+    fhirConditional: false,
     aiProvider: 'openai',
     aiBaseUrl: '',
     aiModel: 'gpt-4.1-mini',
@@ -1141,6 +1142,7 @@ $(document).ready(function () {
         $('#settings-fhir-token').val(settings.fhirToken || '');
         $('#settings-fhir-username').val(settings.fhirUsername || '');
         $('#settings-fhir-password').val(settings.fhirPassword || '');
+        $('#settings-fhir-conditional').prop('checked', settings.fhirConditional === true);
         showFhirAuthFields();
         populateAiSettingsModal();
     });
@@ -1181,6 +1183,7 @@ $(document).ready(function () {
         settings.fhirToken = $('#settings-fhir-token').val();
         settings.fhirUsername = $('#settings-fhir-username').val();
         settings.fhirPassword = $('#settings-fhir-password').val();
+        settings.fhirConditional = $('#settings-fhir-conditional').prop('checked');
         saveAiFieldsFromModal(settings);
         setSettings(settings);
     });
@@ -1728,15 +1731,19 @@ function sendToFhir() {
         return;
     }
     $('#conversion-status').text('Sending…');
+    var sendBody = {
+        baseUrl: settings.fhirBaseUrl,
+        resource: resource,
+        auth: settings.fhirAuth,
+        token: settings.fhirToken,
+        username: settings.fhirUsername,
+        password: settings.fhirPassword
+    };
+    if (settings.fhirConditional === true) {
+        sendBody.conditional = true;
+    }
     $.ajax('/api/v1/fhir/send', {
-        data: JSON.stringify({
-            baseUrl: settings.fhirBaseUrl,
-            resource: resource,
-            auth: settings.fhirAuth,
-            token: settings.fhirToken,
-            username: settings.fhirUsername,
-            password: settings.fhirPassword
-        }),
+        data: JSON.stringify(sendBody),
         type: 'POST',
         processData: false,
         contentType: 'application/json',
