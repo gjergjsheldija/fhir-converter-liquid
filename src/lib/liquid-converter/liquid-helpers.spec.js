@@ -105,6 +105,19 @@ EVN|A01|20050110045502|||||`);
         it('should return null for whitespace-only input, matching upstream GenerateUUID', function () {
             assert.equal(generateUuid('   '), null);
         });
+        it('should render empty output through a Liquid pipeline for empty input and a deterministic UUID otherwise', async function () {
+            const testEngine = new Liquid();
+            testEngine.registerFilter('generate_id_input', generateIdInput);
+            testEngine.registerFilter('generate_uuid', generateUuid);
+            const empty = await testEngine.parseAndRender(
+                `{% capture empty %}{% endcapture %}{{ empty | generate_id_input: 'Location', false | generate_uuid }}`
+            );
+            assert.equal(empty, '');
+            const filled = await testEngine.parseAndRender(
+                `{{ 'MSG00001' | generate_id_input: 'Bundle', false | generate_uuid }}`
+            );
+            assert.equal(filled, '513a3d06-5e87-6fbc-ad1b-170ab430499f');
+        });
     });
 });
 
