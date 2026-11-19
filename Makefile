@@ -57,6 +57,10 @@ sync-templates: ## Sync HL7v2 templates from the pinned Microsoft FHIR Converter
 	node scripts/sync-upstream-assets.js templates
 .PHONY: sync-templates
 
+sync-ccda-templates: ## Sync C-CDA templates from the pinned Microsoft FHIR Converter revision
+	node scripts/sync-upstream-assets.js ccda-templates
+.PHONY: sync-ccda-templates
+
 sync-expected-results: ## Sync official HL7v2 expected JSON results from the pinned revision
 	node scripts/sync-upstream-assets.js expected-results
 .PHONY: sync-expected-results

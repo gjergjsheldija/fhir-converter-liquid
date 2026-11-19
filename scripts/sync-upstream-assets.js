@@ -19,6 +19,12 @@ const ASSETS = {
             path.join(ROOT, 'src', 'service-templates', 'Hl7v2')
         ]
     },
+    'ccda-templates': {
+        description: 'C-CDA templates',
+        upstreamPath: path.join('data', 'Templates', 'Ccda'),
+        extension: '',
+        destinations: [path.join(ROOT, 'src', 'templates', 'Ccda')]
+    },
     'expected-results': {
         description: 'official HL7v2 expected JSON results',
         upstreamPath: path.join(

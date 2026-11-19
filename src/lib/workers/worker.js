@@ -14,7 +14,7 @@ import {
 } from '../constants/constants.js';
 import {errorCodes, errorMessage} from '../error/error.js';
 import {instance as _liquidInstance} from '../liquid-converter/liquid-converter.js';
-import {HL7V2_LIQUID_TEMPLATE_LOCATION} from '../constants/constants.js';
+import {CCDA_LIQUID_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION} from '../constants/constants.js';
 import {parentPort} from 'worker_threads';
 import {workerTaskProcessor} from './workerUtils.js';
 import dataHandlerFactory from '../dataHandler/dataHandlerFactory.js';
@@ -31,7 +31,8 @@ var rebuildLiquidCache = true;
 
 function GetLiquidInstance(dataTypeHandler, templatesMap, templateDirectory, strictOverridesOnly, fallbackTemplateDirectory) {
     const hasCustomProjectContext = Boolean(templateDirectory || strictOverridesOnly);
-    const rootDir = templateDirectory || HL7V2_LIQUID_TEMPLATE_LOCATION;
+    const defaultRoot = dataTypeHandler.dataType === 'ccda' ? CCDA_LIQUID_TEMPLATE_LOCATION : HL7V2_LIQUID_TEMPLATE_LOCATION;
+    const rootDir = templateDirectory || defaultRoot;
     let needToUseMap = hasCustomProjectContext || (templatesMap && Object.entries(templatesMap).length > 0 && templatesMap.constructor === Object);
     var instance = _liquidInstance(
         needToUseMap ? true : rebuildLiquidCache,
@@ -105,7 +106,8 @@ export function convertInlineHl7v2(msg) {
 
                 var dataTypeHandler = dataHandlerFactory.createDataHandler(msg.srcDataType);
 
-                if (dataTypeHandler.dataType === 'hl7v2') {
+                const isCcda = dataTypeHandler.dataType === 'ccda';
+                if (dataTypeHandler.dataType === 'hl7v2' || isCcda) {
                     let liquidInstance = GetLiquidInstance(
                         dataTypeHandler,
                         templatesMap,
@@ -119,7 +121,7 @@ export function convertInlineHl7v2(msg) {
                     // collector is stored on this request's CLS session so the liquid engine's
                     // partial-render hooks (debugCollector.js) can attach to it. Non-debug requests
                     // never create or store a collector and never pay for serialization.
-                    const collector = msg.debug === true ? createDebugCollector(s) : null;
+                    const collector = msg.debug === true ? createDebugCollector(isCcda ? '' : s) : null;
                     if (collector) {
                         session.set(DEBUG_COLLECTOR_KEY, collector);
                     }
@@ -127,7 +129,7 @@ export function convertInlineHl7v2(msg) {
 
                     dataTypeHandler.parseSrcData(s)
                         .then((parsedData) => {
-                            var dataContext = {msg: parsedData, hl7v2Data: parsedData.v2};
+                            var dataContext = isCcda ? {msg: parsedData} : {msg: parsedData, hl7v2Data: parsedData.v2};
                             if (templateString == null || templateString.length == 0) {
                                 var result = Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), JSON.parse(JSON.stringify(dataContext.msg)));
                                 fulfill({'status': 200, 'resultMsg': result});
@@ -145,7 +147,7 @@ export function convertInlineHl7v2(msg) {
                                         const metadata = dataTypeHandler.getConversionResultMetadata(dataContext.msg);
                                         const resultMsg = Object.assign(metadata, {'fhirResource': result});
                                         if (collector) {
-                                            resultMsg.debugInfo = collector.buildDebugInfo(Date.now() - debugStartedAt, serializeHl7v2Debug(s, dataContext.msg.v2));
+                                            resultMsg.debugInfo = collector.buildDebugInfo(Date.now() - debugStartedAt, isCcda ? null : serializeHl7v2Debug(s, dataContext.msg.v2));
                                         }
                                         fulfill({'status': 200, 'resultMsg': resultMsg});
                                     } catch (err) {

@@ -1,13 +1,17 @@
 import assert from "assert";
 import {existsSync} from "fs";
 import {mkdir, mkdtemp, rm, writeFile} from "fs/promises";
-import {HL7V2_LIQUID_TEMPLATE_LOCATION} from "../constants/constants.js";
+import {CCDA_LIQUID_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION} from "../constants/constants.js";
 import os from "os";
 import path from "path";
 import {convertInlineHl7v2} from "../workers/worker.js";
 import {createProject} from "./createProject.js";
-import {emptyHl7v2Manifest} from "./manifest.js";
+import {emptyCcdaManifest, emptyHl7v2Manifest, writeManifest} from "./manifest.js";
 import {clearGithubConvertCache, prepareProjectConversion} from "./convertProject.js";
+
+const SAMPLE_CCDA = `<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <id root="1.2.3"/>
+</ClinicalDocument>`;
 
 const SAMPLE_HL7 = [
     "MSH|^~\\&|IDE|CLINIC|FHIR|SANDBOX|20200101120000||ADT^A04|MSG00001|P|2.5",
@@ -222,5 +226,58 @@ describe("projects/convertProject", function () {
             strictOverridesOnly: prepOverride.strictOverridesOnly
         });
         assert.strictEqual(resOverride.resultMsg.fhirResource.entry[0].resource.id, "from-tab-override");
+    });
+
+    it("converts a ccda-only local project with its Ccda templates and falls back to the synced Ccda tree", async function () {
+        const projectDir = path.join(tempRoot, "ccda-only-project");
+        await mkdir(path.join(projectDir, "templates/Ccda/Resource"), {recursive: true});
+        await writeManifest(projectDir, emptyCcdaManifest("Ccda only"));
+        await writeFile(
+            path.join(projectDir, "templates/Ccda/Resource/_OnlyInProject.liquid"),
+            `{ "resourceType": "Patient", "id": "{{ msg.ClinicalDocument.id.root }}" }`,
+            "utf8"
+        );
+
+        const rootTemplate = `{ "resourceType": "Bundle", "entry": [ { "resource": {% include 'Resource/OnlyInProject' %} } ], "system": {% include 'ValueSet/SystemReference' code: '2.16.840.1.113883.6.1' %} }`;
+        const prep = await prepareProjectConversion({
+            project: {kind: "local", path: projectDir},
+            template: rootTemplate,
+            templatesOverride: {}
+        });
+        assert.strictEqual(path.basename(prep.templateDirectory), "Ccda");
+        assert.strictEqual(prep.fallbackTemplateDirectory, CCDA_LIQUID_TEMPLATE_LOCATION);
+        assert.strictEqual(prep.strictOverridesOnly, false);
+
+        const result = await convertInlineHl7v2({
+            srcDataType: "ccda",
+            srcData: SAMPLE_CCDA,
+            template: rootTemplate,
+            templatesOverride: prep.templatesOverride,
+            templateDirectory: prep.templateDirectory,
+            strictOverridesOnly: prep.strictOverridesOnly,
+            fallbackTemplateDirectory: prep.fallbackTemplateDirectory
+        });
+        assert.strictEqual(result.status, 200);
+        assert.strictEqual(result.resultMsg.fhirResource.entry[0].resource.id, "1.2.3");
+        // ValueSet/_SystemReference exists only in the synced Ccda tree.
+        assert.strictEqual(result.resultMsg.fhirResource.system, "http://loinc.org");
+    });
+
+    it("keeps HL7 v2 behavior for a project that includes hl7v2 alongside ccda", async function () {
+        const projectDir = path.join(tempRoot, "dual-family-project");
+        await mkdir(path.join(projectDir, "templates/Hl7v2"), {recursive: true});
+        await mkdir(path.join(projectDir, "templates/Ccda"), {recursive: true});
+        const manifest = emptyHl7v2Manifest("Dual");
+        manifest.families = ["hl7v2", "ccda"];
+        manifest.roots.ccda = {templates: "templates/Ccda", samples: "samples/ccda"};
+        await writeManifest(projectDir, manifest);
+
+        const prep = await prepareProjectConversion({
+            project: {kind: "local", path: projectDir},
+            template: "",
+            templatesOverride: {}
+        });
+        assert.strictEqual(path.basename(prep.templateDirectory), "Hl7v2");
+        assert.strictEqual(prep.fallbackTemplateDirectory, HL7V2_LIQUID_TEMPLATE_LOCATION);
     });
 });

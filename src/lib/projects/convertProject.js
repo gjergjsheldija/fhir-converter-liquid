@@ -6,7 +6,7 @@
 import {realpath, stat} from "fs/promises";
 import path from "path";
 import {isValidGitRef, parseGithubRepo, readGithubFile} from "../browse/sources.js";
-import {HL7V2_LIQUID_TEMPLATE_LOCATION} from "../constants/constants.js";
+import {CCDA_LIQUID_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION} from "../constants/constants.js";
 import {isSafeRelativePath, readManifest, validateManifest} from "./manifest.js";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -110,13 +110,18 @@ export async function prepareProjectConversion(body = {}) {
             throw httpError(400, readRes.error);
         }
         const manifest = readRes.manifest;
-        if (!manifest.families.includes("hl7v2")) {
+        const isCcdaOnly = manifest.families.length === 1 && manifest.families[0] === "ccda";
+        if (!isCcdaOnly && !manifest.families.includes("hl7v2")) {
             throw httpError(400, "This converter only supports HL7v2.");
         }
-        const tplCandidate = path.resolve(rootReal, manifest.roots.hl7v2.templates);
+        const familyLabel = isCcdaOnly ? "C-CDA" : "HL7 v2";
+        const tplCandidate = path.resolve(
+            rootReal,
+            isCcdaOnly ? manifest.roots.ccda.templates : manifest.roots.hl7v2.templates
+        );
         const tplInfo = await stat(tplCandidate).catch(() => null);
         if (!tplInfo || !tplInfo.isDirectory()) {
-            throw httpError(404, "Project HL7 v2 templates directory was not found.");
+            throw httpError(404, `Project ${familyLabel} templates directory was not found.`);
         }
         const tplReal = await realpath(tplCandidate);
         if (tplReal !== rootReal && !tplReal.startsWith(rootReal + path.sep)) {
@@ -125,7 +130,7 @@ export async function prepareProjectConversion(body = {}) {
         return {
             templateDirectory: tplReal,
             strictOverridesOnly: false,
-            fallbackTemplateDirectory: HL7V2_LIQUID_TEMPLATE_LOCATION,
+            fallbackTemplateDirectory: isCcdaOnly ? CCDA_LIQUID_TEMPLATE_LOCATION : HL7V2_LIQUID_TEMPLATE_LOCATION,
             projectRoot: rootReal,
             templatesOverride: userOverrides
         };
