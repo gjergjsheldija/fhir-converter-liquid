@@ -12,6 +12,7 @@ import { external as filters } from "./liquid-helpers.js";
 import { applyDotLiquidCompatTransforms } from "./dotLiquidCompat.js";
 import { CLS_NAMESPACE } from "../constants/constants.js";
 import { DEBUG_COLLECTOR_KEY } from "./debugCollector.js";
+import { suppressStringIndexAccess } from "./stringIndexAccess.js";
 
 var liquidInstances = {};
 
@@ -146,7 +147,7 @@ export function instance(
             if (collector && collector.pendingPartial) {
                 collector.recordPartialRender(collector.takePendingPartial(), ctx);
             }
-            return originalRenderTemplates(templates, ctx, emitter);
+            return originalRenderTemplates(templates, suppressStringIndexAccess(ctx), emitter);
         };
 
         liquidInstances[dataType] = engine;
