@@ -35,6 +35,24 @@ var defaultAiPrompt = [
     'Trim tags with {%- and -%}. Leave out a JSON property when its HL7 field is empty.'
 ].join('\n');
 
+var ccdaAiPrompt = [
+    'Return the Liquid template only. No markdown fence and no explanation.',
+    'Write one FHIR R4 Bundle with "type": "batch".',
+    'The message is msg, the parsed C-CDA document.',
+    'An attribute is msg.ClinicalDocument.id.root. Text is msg.ClinicalDocument.title._.',
+    'A tag prefix becomes an underscore, so sdtc:raceCode is msg.ClinicalDocument.recordTarget.patientRole.patient.sdtc_raceCode.',
+    'A repeated element is an array, so loop over it with {% for given in msg.ClinicalDocument.recordTarget.patientRole.patient.name.given -%}.',
+    'Trim tags with {%- and -%}. Leave out a JSON property when its value is empty.'
+].join('\n');
+
+// A saved prompt that differs from the HL7 default is the user's own and is used as is.
+function effectiveAiPrompt(savedPrompt) {
+    if (savedPrompt && savedPrompt !== defaultAiPrompt && savedPrompt !== ccdaAiPrompt) {
+        return savedPrompt;
+    }
+    return (typeof getActiveProjectFamily === 'function' && getActiveProjectFamily() === 'ccda') ? ccdaAiPrompt : defaultAiPrompt;
+}
+
 var currentEditorSettings = {
     darkMode: false,
     convertWhileTyping: true,
@@ -1669,7 +1687,7 @@ function populateAiSettingsModal() {
         }
         activeSettingsAiProvider = null;
         select.val(chosen);
-        $('#settings-ai-prompt').val(settings.aiPrompt || defaultAiPrompt);
+        $('#settings-ai-prompt').val(effectiveAiPrompt(settings.aiPrompt));
         syncAiProviderFields(chosen);
     };
 
@@ -1869,7 +1887,7 @@ function runGenerateTemplate() {
             sampleDataInline: srcMessage,
             provider: provider,
             model: model,
-            prompt: settings.aiPrompt || defaultAiPrompt,
+            prompt: effectiveAiPrompt(settings.aiPrompt),
             confirmedExternalSend: true
         };
         if (apiKey) {
