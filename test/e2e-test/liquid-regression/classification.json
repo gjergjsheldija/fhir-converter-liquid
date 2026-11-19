@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 96,
+    "pass": 110,
     "count": 0,
-    "content": 36
+    "content": 22
   },
   "cases": [
     {
@@ -666,16 +666,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Patient/a6ea438d-b20e-d59e-c9bf-e31dd88f7e4e",
-            "paths": [
-              "identifier.1.system",
-              "identifier.1.type.coding.0.code",
-              "identifier.1.type.coding.0.display",
-              "identifier.1.value",
-              "identifier.2"
-            ]
-          },
-          {
             "key": "PractitionerRole/9f64bd3b-d5e9-678b-2f14-b0d756a4e7f1",
             "paths": [
               "practitioner"
@@ -1267,12 +1257,6 @@
             ]
           },
           {
-            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
-            "paths": [
-              "address.1"
-            ]
-          },
-          {
             "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
             "paths": [
               "performer.2",
@@ -1296,12 +1280,6 @@
             "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
             "paths": [
               "text.div"
-            ]
-          },
-          {
-            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
-            "paths": [
-              "address.1"
             ]
           },
           {
@@ -1331,12 +1309,6 @@
             ]
           },
           {
-            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
-            "paths": [
-              "address.1"
-            ]
-          },
-          {
             "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
             "paths": [
               "performer.2",
@@ -1363,12 +1335,6 @@
             ]
           },
           {
-            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
-            "paths": [
-              "address.1"
-            ]
-          },
-          {
             "key": "ServiceRequest/0dde495c-51b7-d47f-febd-19d8e4e764db",
             "paths": [
               "performer.2",
@@ -1381,408 +1347,114 @@
     {
       "template": "SIU_S12",
       "dataFile": "SIU-S12-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 48,
       "expectedCount": 48,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
-            "paths": [
-              "orderDetail.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S12",
       "dataFile": "SIU-S12-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S13",
       "dataFile": "SIU-S13-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
-            "paths": [
-              "orderDetail.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S13",
       "dataFile": "SIU-S13-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S14",
       "dataFile": "SIU-S14-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
-            "paths": [
-              "orderDetail.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S14",
       "dataFile": "SIU-S14-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S15",
       "dataFile": "SIU-S15-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
-            "paths": [
-              "orderDetail.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S15",
       "dataFile": "SIU-S15-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S16",
       "dataFile": "SIU-S16-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
-            "paths": [
-              "orderDetail.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S16",
       "dataFile": "SIU-S16-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S17",
       "dataFile": "SIU-S17-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
-            "paths": [
-              "orderDetail.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S17",
       "dataFile": "SIU-S17-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S26",
       "dataFile": "SIU-S26-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
-            "paths": [
-              "orderDetail.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S26",
       "dataFile": "SIU-S26-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
-            "paths": [
-              "supportingInformation.1.reference",
-              "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "VXU_V04",

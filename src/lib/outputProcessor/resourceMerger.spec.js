@@ -24,6 +24,14 @@ describe('resourceMerger', function () {
             {"resource":{"resourceType":"Patient","a":["2","3"]}}]},{}],
         out: '{"entry":[{"resource":{"resourceType":"Patient","a":["1","2","3"]}}]}'}, // array concatenation
 
+        {in: [{"entry": [ { "resource":{"resourceType":"Patient", "a":["1","1","2"]}},
+            {"resource":{"resourceType":"Patient","b":"2"}}]},{}],
+        out: '{"entry":[{"resource":{"resourceType":"Patient","a":["1","1","2"],"b":"2"}}]}'}, // duplicates already in the first render survive (Newtonsoft Union keeps the target)
+
+        {in: [{"entry": [ { "resource":{"resourceType":"Patient", "a":["1","1"]}},
+            {"resource":{"resourceType":"Patient","a":["1","3","3"]}}]},{}],
+        out: '{"entry":[{"resource":{"resourceType":"Patient","a":["1","1","3"]}}]}'}, // only new source items are appended, once each
+
         {in: [{"entry": [ { "resource":{"resourceType":"Patient", "id":"1", "a":"1"}},
             {"resource":{"resourceType":"Patient", "id":"1", "a":"2"}},
             { "resource":{"resourceType":"Patient", "a":"3"}}]},{}],
