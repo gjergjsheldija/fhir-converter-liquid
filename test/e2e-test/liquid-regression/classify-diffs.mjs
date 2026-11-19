@@ -34,6 +34,61 @@ export const entryDelta = (actualBundle, expectedBundle) => {
 
 const compareStrings = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
+const MAX_PATHS = 8;
+
+const isContainer = (value) => value !== null && typeof value === 'object';
+
+const diffPaths = (actual, expected, prefix, out) => {
+    if (isContainer(actual) && isContainer(expected) && Array.isArray(actual) === Array.isArray(expected)) {
+        const keys = new Set([...Object.keys(actual), ...Object.keys(expected)]);
+        keys.forEach((key) => diffPaths(actual[key], expected[key], prefix ? `${prefix}.${key}` : key, out));
+        return;
+    }
+    if (actual !== expected) {
+        out.push(prefix);
+    }
+};
+
+const keyedResources = (bundle) => {
+    const entries = Array.isArray(bundle?.entry) ? bundle.entry : [];
+    const seen = new Map();
+    const map = new Map();
+    entries.forEach((entry) => {
+        const resource = entry?.resource;
+        const base = `${resource?.resourceType || '(missing)'}/${resource?.id || '(no id)'}`;
+        const n = (seen.get(base) || 0) + 1;
+        seen.set(base, n);
+        map.set(n === 1 ? base : `${base}#${n}`, resource);
+    });
+    return map;
+};
+
+export const contentDelta = (actualBundle, expectedBundle) => {
+    const actual = keyedResources(actualBundle);
+    const expected = keyedResources(expectedBundle);
+    const unmatched = [];
+    const fields = [];
+    actual.forEach((resource, key) => {
+        if (!expected.has(key)) {
+            unmatched.push({ kind: 'extra', key });
+            return;
+        }
+        const paths = [];
+        diffPaths(resource, expected.get(key), '', paths);
+        if (paths.length > 0) {
+            fields.push({ key, paths: paths.sort(compareStrings).slice(0, MAX_PATHS) });
+        }
+    });
+    expected.forEach((_resource, key) => {
+        if (!actual.has(key)) {
+            unmatched.push({ kind: 'missing', key });
+        }
+    });
+    unmatched.sort((a, b) => compareStrings(a.key, b.key));
+    fields.sort((a, b) => compareStrings(a.key, b.key));
+    return { unmatched, fields };
+};
+
 const run = async () => {
     const { default: supertest } = await import('supertest');
     const { default: express } = await import('express');
@@ -65,7 +120,11 @@ const run = async () => {
         } catch {
             status = byType.length > 0 ? 'count' : 'content';
         }
-        cases.push({ template: testCase.template, dataFile: testCase.dataFile, status, actualCount, expectedCount, byType });
+        const row = { template: testCase.template, dataFile: testCase.dataFile, status, actualCount, expectedCount, byType };
+        if (status === 'content') {
+            row.contentDelta = contentDelta(response.body.fhirResource, JSON.parse(expectedText));
+        }
+        cases.push(row);
     }
 
     cases.sort((a, b) => compareStrings(a.template, b.template) || compareStrings(a.dataFile, b.dataFile));

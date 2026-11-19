@@ -13,7 +13,86 @@
       "status": "content",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/52a080c9-730f-b892-7e9c-a0335259b927",
+            "paths": [
+              "performedPeriod.end",
+              "performedPeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/6fb50710-b922-603a-1ad2-56cd531acc7c",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A01",
@@ -21,7 +100,44 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A01",
@@ -29,7 +145,42 @@
       "status": "content",
       "actualCount": 25,
       "expectedCount": 25,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/513f3296-d7f1-67cf-3804-626f676bdfe6",
+            "paths": [
+              "costToBeneficiary"
+            ]
+          },
+          {
+            "key": "Coverage/7b35da63-ce1c-52f4-960b-ae08c5a3410d",
+            "paths": [
+              "costToBeneficiary"
+            ]
+          },
+          {
+            "key": "Coverage/832bb930-49c3-4505-d1ce-bcade656dba5",
+            "paths": [
+              "costToBeneficiary"
+            ]
+          },
+          {
+            "key": "Patient/bab5ca58-f272-4c06-4b3f-f9661e45a22b",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "Provenance/4e45fbdc-bab9-f433-dde6-a8adf26acf93",
+            "paths": [
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A01",
@@ -37,7 +188,24 @@
       "status": "content",
       "actualCount": 12,
       "expectedCount": 12,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A02",
@@ -45,7 +213,61 @@
       "status": "content",
       "actualCount": 87,
       "expectedCount": 87,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/52a080c9-730f-b892-7e9c-a0335259b927",
+            "paths": [
+              "performedPeriod.end",
+              "performedPeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/6fb50710-b922-603a-1ad2-56cd531acc7c",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A02",
@@ -53,7 +275,44 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A03",
@@ -61,7 +320,87 @@
       "status": "content",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/52a080c9-730f-b892-7e9c-a0335259b927",
+            "paths": [
+              "performedPeriod.end",
+              "performedPeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/6fb50710-b922-603a-1ad2-56cd531acc7c",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A03",
@@ -69,7 +408,45 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A04",
@@ -77,7 +454,87 @@
       "status": "content",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/52a080c9-730f-b892-7e9c-a0335259b927",
+            "paths": [
+              "performedPeriod.end",
+              "performedPeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/6fb50710-b922-603a-1ad2-56cd531acc7c",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A04",
@@ -85,7 +542,45 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A04",
@@ -93,7 +588,30 @@
       "status": "content",
       "actualCount": 21,
       "expectedCount": 21,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/bcc1f6b5-29eb-234c-e0f0-fe9afcf1a7bf",
+            "paths": [
+              "costToBeneficiary"
+            ]
+          },
+          {
+            "key": "Coverage/c850f5a3-5de9-908d-e20a-8d2964a02f2a",
+            "paths": [
+              "costToBeneficiary"
+            ]
+          },
+          {
+            "key": "Provenance/b8bf5f81-bc6a-5fda-5fb2-fd273ac267a8",
+            "paths": [
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A04",
@@ -109,7 +627,30 @@
       "status": "content",
       "actualCount": 18,
       "expectedCount": 18,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/118533a8-4806-05da-77f9-55e1e8b3cb48",
+            "paths": [
+              "costToBeneficiary"
+            ]
+          },
+          {
+            "key": "Patient/f7a9494a-3fac-e0e1-78d8-d7c20410ca33",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "Provenance/312fba25-b9c6-151e-8c0c-45a36f66ed03",
+            "paths": [
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A05",
@@ -117,7 +658,74 @@
       "status": "content",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A05",
@@ -125,7 +733,45 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A06",
@@ -133,7 +779,76 @@
       "status": "content",
       "actualCount": 78,
       "expectedCount": 78,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/aec42ae9-bf55-717a-0728-35b8eb475264",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Practitioner/6c9ea0f5-1b45-04f9-e07d-bae5096b7a4a",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Procedure/67788ddb-a883-0905-ea3a-f5cc486b7ea0",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/f63d3422-af5c-03f8-aa55-5f20d0d11aef",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "RelatedPerson/a00546c4-20d0-1f02-01be-ac602d6ccfa1",
+            "paths": [
+              "address.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A06",
@@ -141,7 +856,47 @@
       "status": "content",
       "actualCount": 27,
       "expectedCount": 27,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Practitioner/6c9ea0f5-1b45-04f9-e07d-bae5096b7a4a",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/f63d3422-af5c-03f8-aa55-5f20d0d11aef",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A07",
@@ -149,7 +904,76 @@
       "status": "content",
       "actualCount": 71,
       "expectedCount": 71,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/aec42ae9-bf55-717a-0728-35b8eb475264",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Practitioner/6c9ea0f5-1b45-04f9-e07d-bae5096b7a4a",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Procedure/67788ddb-a883-0905-ea3a-f5cc486b7ea0",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/f63d3422-af5c-03f8-aa55-5f20d0d11aef",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "RelatedPerson/a00546c4-20d0-1f02-01be-ac602d6ccfa1",
+            "paths": [
+              "address.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A07",
@@ -157,7 +981,47 @@
       "status": "content",
       "actualCount": 26,
       "expectedCount": 26,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Practitioner/6c9ea0f5-1b45-04f9-e07d-bae5096b7a4a",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/f63d3422-af5c-03f8-aa55-5f20d0d11aef",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A08",
@@ -165,7 +1029,87 @@
       "status": "content",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/52a080c9-730f-b892-7e9c-a0335259b927",
+            "paths": [
+              "performedPeriod.end",
+              "performedPeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/6fb50710-b922-603a-1ad2-56cd531acc7c",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A08",
@@ -173,7 +1117,44 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A09",
@@ -181,7 +1162,47 @@
       "status": "content",
       "actualCount": 44,
       "expectedCount": 44,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Practitioner/6c9ea0f5-1b45-04f9-e07d-bae5096b7a4a",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/bffeceee-c43b-5971-a8f9-662a4a9ea710",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A09",
@@ -189,7 +1210,27 @@
       "status": "content",
       "actualCount": 32,
       "expectedCount": 32,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A10",
@@ -197,7 +1238,27 @@
       "status": "content",
       "actualCount": 44,
       "expectedCount": 44,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A10",
@@ -205,7 +1266,27 @@
       "status": "content",
       "actualCount": 32,
       "expectedCount": 32,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A11",
@@ -213,7 +1294,45 @@
       "status": "content",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A11",
@@ -221,7 +1340,45 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A13",
@@ -229,7 +1386,86 @@
       "status": "content",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/52a080c9-730f-b892-7e9c-a0335259b927",
+            "paths": [
+              "performedPeriod.end",
+              "performedPeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/6fb50710-b922-603a-1ad2-56cd531acc7c",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A13",
@@ -237,7 +1473,44 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A14",
@@ -245,7 +1518,72 @@
       "status": "content",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A14",
@@ -253,7 +1591,45 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A15",
@@ -261,7 +1637,47 @@
       "status": "content",
       "actualCount": 75,
       "expectedCount": 75,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A15",
@@ -269,7 +1685,44 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A16",
@@ -277,7 +1730,74 @@
       "status": "content",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A16",
@@ -285,7 +1805,45 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A25",
@@ -293,7 +1851,44 @@
       "status": "content",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A25",
@@ -301,7 +1896,44 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A26",
@@ -309,7 +1941,38 @@
       "status": "content",
       "actualCount": 63,
       "expectedCount": 63,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A26",
@@ -317,7 +1980,44 @@
       "status": "content",
       "actualCount": 43,
       "expectedCount": 43,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A27",
@@ -325,7 +2025,45 @@
       "status": "content",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A27",
@@ -333,7 +2071,45 @@
       "status": "content",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A28",
@@ -341,7 +2117,74 @@
       "status": "content",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A28",
@@ -349,7 +2192,44 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A29",
@@ -357,7 +2237,44 @@
       "status": "content",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A29",
@@ -365,7 +2282,44 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A31",
@@ -373,7 +2327,74 @@
       "status": "content",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/739ae409-c591-1a59-32ad-d2ef1b937b0f",
+            "paths": [
+              "authoredOn"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A31",
@@ -381,7 +2402,44 @@
       "status": "content",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/9f6be243-c2fa-f8c8-0a7a-d168e98bdd4c",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A40",
@@ -453,7 +2511,57 @@
       "status": "content",
       "actualCount": 63,
       "expectedCount": 63,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "AllergyIntolerance/373c1fcc-c86b-470a-6469-b7642c16262d",
+            "paths": [
+              "meta",
+              "note.0.time",
+              "recordedDate"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "meta.security.5.extension.0.valuePeriod.end",
+              "meta.security.5.extension.0.valuePeriod.start",
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ADT_A60",
@@ -461,7 +2569,45 @@
       "status": "content",
       "actualCount": 21,
       "expectedCount": 21,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "AllergyIntolerance/373c1fcc-c86b-470a-6469-b7642c16262d",
+            "paths": [
+              "meta",
+              "recordedDate"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "BAR_P01",
@@ -469,7 +2615,69 @@
       "status": "content",
       "actualCount": 108,
       "expectedCount": 108,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Account/4ad7c7d0-b69a-0653-9ea9-0979b8a66b39",
+            "paths": [
+              "servicePeriod.start"
+            ]
+          },
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "BAR_P01",
@@ -477,7 +2685,82 @@
       "status": "content",
       "actualCount": 98,
       "expectedCount": 98,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Account/4ad7c7d0-b69a-0653-9ea9-0979b8a66b39",
+            "paths": [
+              "servicePeriod.start"
+            ]
+          },
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Condition/5991eb42-526a-fbf7-e37c-de2b312d182c",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Encounter/e797ca80-e9da-4aaf-4177-d6a681cece28",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "BAR_P02",
@@ -485,7 +2768,53 @@
       "status": "content",
       "actualCount": 52,
       "expectedCount": 52,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Patient/c1930384-4018-a75c-1bd9-d31eb400b536",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/0d294d4d-3c8c-be35-4813-e61ba6e34968",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "BAR_P02",
@@ -493,7 +2822,59 @@
       "status": "content",
       "actualCount": 53,
       "expectedCount": 53,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Encounter/a60349ad-6c2c-01ef-ebe9-fd40f4016e25",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Patient/c1930384-4018-a75c-1bd9-d31eb400b536",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/0d294d4d-3c8c-be35-4813-e61ba6e34968",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "BAR_P12",
@@ -501,7 +2882,63 @@
       "status": "content",
       "actualCount": 74,
       "expectedCount": 74,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "DiagnosticReport/242addc9-9ddc-3aaf-97ca-cdedace9d87c",
+            "paths": [
+              "presentedForm.0.contentType"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/b867d34c-37a2-f79b-bb8a-ee155ab769b7",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/d0039bfd-62c8-0522-802c-02dfd7bc527b",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "BAR_P12",
@@ -509,7 +2946,57 @@
       "status": "content",
       "actualCount": 75,
       "expectedCount": 75,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/481123a1-ca9c-c3c8-0284-e6926c3a50d8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Procedure/c06db9c2-d07b-bac2-53c2-48ed83dd32b6",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/b867d34c-37a2-f79b-bb8a-ee155ab769b7",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/d0039bfd-62c8-0522-802c-02dfd7bc527b",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "DFT_P03",
@@ -517,7 +3004,37 @@
       "status": "content",
       "actualCount": 96,
       "expectedCount": 96,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/ebc0841e-e3bc-e964-235e-342bd84324c5",
+            "paths": [
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "DFT_P03",
@@ -525,7 +3042,38 @@
       "status": "content",
       "actualCount": 91,
       "expectedCount": 91,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/7ea13aa8-faf2-0187-4bb2-5dea25212fba",
+            "paths": [
+              "occurredDateTime",
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "DFT_P11",
@@ -533,7 +3081,43 @@
       "status": "content",
       "actualCount": 85,
       "expectedCount": 85,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "account.1"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/64309ddd-01f4-1ae3-d8ce-1fc236689335",
+            "paths": [
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "DFT_P11",
@@ -541,7 +3125,49 @@
       "status": "content",
       "actualCount": 100,
       "expectedCount": 100,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/963a930c-4ef6-ff03-ae47-9c2b7edac8d5",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "account.1"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "Provenance/64309ddd-01f4-1ae3-d8ce-1fc236689335",
+            "paths": [
+              "recorded"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "MDM_T01",
@@ -581,7 +3207,65 @@
       "status": "content",
       "actualCount": 45,
       "expectedCount": 45,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "DocumentReference/ba02f303-e848-5771-d742-0de5371b5be4",
+            "paths": [
+              "content.0.attachment.creation",
+              "context.period.start",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Patient/a6ea438d-b20e-d59e-c9bf-e31dd88f7e4e",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "identifier.1.system",
+              "identifier.1.type.coding.0.code",
+              "identifier.1.type.coding.0.display",
+              "identifier.1.value",
+              "identifier.2"
+            ]
+          },
+          {
+            "key": "PractitionerRole/9f64bd3b-d5e9-678b-2f14-b0d756a4e7f1",
+            "paths": [
+              "practitioner"
+            ]
+          },
+          {
+            "key": "Provenance/e7af414f-7873-8d60-ad37-fd7560092849",
+            "paths": [
+              "recorded"
+            ]
+          },
+          {
+            "key": "Provenance/ff198209-2ee9-a32c-124f-d63637240f8d",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/c031cd63-1fa2-cb31-8841-e4a2a3c936bb",
+            "paths": [
+              "authoredOn",
+              "occurrenceDateTime"
+            ]
+          },
+          {
+            "key": "Specimen/2cb11a40-e62b-7255-c309-1dd5b722b803",
+            "paths": [
+              "collection.collectedDateTime",
+              "receivedTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "MDM_T05",
@@ -653,7 +3337,46 @@
       "status": "content",
       "actualCount": 128,
       "expectedCount": 128,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/5642a2b6-64cb-1aaf-7db0-f7b50da024b8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "RelatedPerson/aaab79ac-3725-fd40-4a95-90cd8e0603f7",
+            "paths": [
+              "address.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "OMG_O19",
@@ -661,7 +3384,59 @@
       "status": "content",
       "actualCount": 88,
       "expectedCount": 88,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/5642a2b6-64cb-1aaf-7db0-f7b50da024b8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Condition/6aa417bb-3fc5-62b0-ec32-70959986e738",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Device/d65fb981-c111-4bb1-b58f-6dde5b80f922",
+            "paths": [
+              "identifier.1"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "RelatedPerson/aaab79ac-3725-fd40-4a95-90cd8e0603f7",
+            "paths": [
+              "address.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "OML_O21",
@@ -669,7 +3444,33 @@
       "status": "content",
       "actualCount": 21,
       "expectedCount": 21,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/b4494dc0-e11b-658a-8cce-5241ed1ccdc0",
+            "paths": [
+              "costToBeneficiary",
+              "period.end"
+            ]
+          },
+          {
+            "key": "Patient/97997f4d-5259-b974-5a44-1b7450c2f4ab",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/a8f237a8-b330-c901-c5c0-5f847b8ecd91",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "OML_O21",
@@ -677,7 +3478,60 @@
       "status": "content",
       "actualCount": 27,
       "expectedCount": 27,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/2839c7cc-58ca-f08d-1358-a15fa18660d3",
+            "paths": [
+              "costToBeneficiary",
+              "period.end"
+            ]
+          },
+          {
+            "key": "Observation/7fd7b81a-cae2-53b5-1d4c-b220a32a5695",
+            "paths": [
+              "effectiveDateTime"
+            ]
+          },
+          {
+            "key": "Patient/daed9284-6d12-ca12-4260-9aad09e1f201",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/2f0f2d7d-7f93-e624-fa21-11d1c490897f",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/c0150cb3-0fdf-5809-54b6-8e3f186a90d7",
+            "paths": [
+              "authoredOn",
+              "encounter",
+              "occurrenceDateTime"
+            ]
+          },
+          {
+            "key": "Specimen/29fb3250-9864-4dad-e590-4126768684d4",
+            "paths": [
+              "collection.collectedPeriod.end",
+              "collection.collectedPeriod.start"
+            ]
+          },
+          {
+            "key": "Specimen/92af9b9a-bcfc-b6f6-ce19-bf5bc7b28707",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "OML_O21",
@@ -685,7 +3539,84 @@
       "status": "content",
       "actualCount": 64,
       "expectedCount": 64,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [
+          {
+            "kind": "missing",
+            "key": "Specimen/0755f744-dafd-776b-bff7-2d023e54406e"
+          },
+          {
+            "kind": "extra",
+            "key": "Specimen/904fd2f7-76fc-4b76-0414-7a375a309f23"
+          }
+        ],
+        "fields": [
+          {
+            "key": "Condition/e06055fc-0230-24ef-7d66-7ae83cafb322",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Observation/16335be6-44e0-0cc2-9a7f-17c89e266592",
+            "paths": [
+              "note.0.time"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/20d84998-5ed2-d428-4ff3-fbeb9a9054a6",
+            "paths": [
+              "authoredOn"
+            ]
+          },
+          {
+            "key": "Specimen/93cb07c2-034f-56b1-9a47-558f231eeea0",
+            "paths": [
+              "collection.collectedPeriod.end",
+              "collection.collectedPeriod.start",
+              "parent.0.reference"
+            ]
+          },
+          {
+            "key": "Specimen/b3a1bcae-087f-966b-7cfd-fc61a168d02a",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "OML_O21",
@@ -693,7 +3624,99 @@
       "status": "content",
       "actualCount": 50,
       "expectedCount": 50,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [
+          {
+            "kind": "missing",
+            "key": "Specimen/0755f744-dafd-776b-bff7-2d023e54406e"
+          },
+          {
+            "kind": "extra",
+            "key": "Specimen/904fd2f7-76fc-4b76-0414-7a375a309f23"
+          }
+        ],
+        "fields": [
+          {
+            "key": "Condition/e06055fc-0230-24ef-7d66-7ae83cafb322",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Observation/16335be6-44e0-0cc2-9a7f-17c89e266592",
+            "paths": [
+              "note.0.time"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/20d84998-5ed2-d428-4ff3-fbeb9a9054a6",
+            "paths": [
+              "authoredOn"
+            ]
+          },
+          {
+            "key": "ServiceRequest/2a774e77-46ab-f8d2-779a-6dd77c938ed7",
+            "paths": [
+              "authoredOn",
+              "occurrenceTiming.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Specimen/0df7b0a3-d581-3f7c-4a37-9aba787cc146",
+            "paths": [
+              "collection.collectedPeriod.end",
+              "collection.collectedPeriod.start",
+              "parent.0.reference"
+            ]
+          },
+          {
+            "key": "Specimen/2b31b7a0-ab9d-942c-4611-89590ee58b1f",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          },
+          {
+            "key": "Specimen/2c6b831e-bbce-171b-2ba6-c9f247ed1ee5",
+            "paths": [
+              "collection.collectedPeriod.end",
+              "collection.collectedPeriod.start",
+              "parent.0.reference"
+            ]
+          },
+          {
+            "key": "Specimen/b3a1bcae-087f-966b-7cfd-fc61a168d02a",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "OML_O21",
@@ -701,7 +3724,59 @@
       "status": "content",
       "actualCount": 127,
       "expectedCount": 127,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/5642a2b6-64cb-1aaf-7db0-f7b50da024b8",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Condition/6aa417bb-3fc5-62b0-ec32-70959986e738",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Device/d65fb981-c111-4bb1-b58f-6dde5b80f922",
+            "paths": [
+              "identifier.1"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.security.4.extension.0.valuePeriod.end",
+              "meta.security.4.extension.0.valuePeriod.start"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "RelatedPerson/aaab79ac-3725-fd40-4a95-90cd8e0603f7",
+            "paths": [
+              "address.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORM_O01",
@@ -709,7 +3784,55 @@
       "status": "content",
       "actualCount": 50,
       "expectedCount": 50,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/97303ad2-9731-b8ac-465e-560ad9ac67ec",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/593d8946-c0ad-b912-332a-2993c02ccae5",
+            "paths": [
+              "authoredOn"
+            ]
+          },
+          {
+            "key": "Specimen/6158edb0-9ff7-8872-c1ec-a897e3af065b",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORM_O01",
@@ -717,7 +3840,68 @@
       "status": "content",
       "actualCount": 44,
       "expectedCount": 44,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/97303ad2-9731-b8ac-465e-560ad9ac67ec",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Observation/16335be6-44e0-0cc2-9a7f-17c89e266592",
+            "paths": [
+              "note.0.time"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/593d8946-c0ad-b912-332a-2993c02ccae5",
+            "paths": [
+              "authoredOn",
+              "occurrenceTiming.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Specimen/c3574395-5ad6-bf2a-9907-c1a7caa8c850",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORM_O01",
@@ -725,7 +3909,69 @@
       "status": "content",
       "actualCount": 46,
       "expectedCount": 46,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/97303ad2-9731-b8ac-465e-560ad9ac67ec",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/2a774e77-46ab-f8d2-779a-6dd77c938ed7",
+            "paths": [
+              "authoredOn",
+              "occurrenceTiming.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "ServiceRequest/593d8946-c0ad-b912-332a-2993c02ccae5",
+            "paths": [
+              "authoredOn",
+              "occurrenceTiming.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Specimen/8849ee55-3313-2d6a-bfbe-be22941a5a2a",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          },
+          {
+            "key": "Specimen/c3574395-5ad6-bf2a-9907-c1a7caa8c850",
+            "paths": [
+              "collection.collectedDateTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORM_O01",
@@ -733,7 +3979,55 @@
       "status": "content",
       "actualCount": 51,
       "expectedCount": 51,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/97303ad2-9731-b8ac-465e-560ad9ac67ec",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "NutritionOrder/e3cd6eca-335d-36c3-5614-0375edecdd4a",
+            "paths": [
+              "dateTime"
+            ]
+          },
+          {
+            "key": "Observation/6586ece7-7d50-e6c0-b0f9-2da3a2c26174",
+            "paths": [
+              "note.0.time"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORM_O01",
@@ -741,7 +4035,56 @@
       "status": "content",
       "actualCount": 53,
       "expectedCount": 53,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/97303ad2-9731-b8ac-465e-560ad9ac67ec",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Observation/6586ece7-7d50-e6c0-b0f9-2da3a2c26174",
+            "paths": [
+              "note.0.time"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "SupplyRequest/a4593c44-65bc-e59b-2c53-a94eb2e9e939",
+            "paths": [
+              "authoredOn",
+              "occurrenceDateTime"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORM_O01",
@@ -749,7 +4092,57 @@
       "status": "content",
       "actualCount": 55,
       "expectedCount": 55,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/97303ad2-9731-b8ac-465e-560ad9ac67ec",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "Observation/6586ece7-7d50-e6c0-b0f9-2da3a2c26174",
+            "paths": [
+              "note.0.time"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORU_R01",
@@ -757,7 +4150,30 @@
       "status": "content",
       "actualCount": 25,
       "expectedCount": 25,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Patient/bab5ca58-f272-4c06-4b3f-f9661e45a22b",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "PractitionerRole/be571888-010e-9a32-e87f-f1ee1bd631a8",
+            "paths": [
+              "practitioner"
+            ]
+          },
+          {
+            "key": "Provenance/9f79a1ce-a1d5-c6dd-a0d6-3bc75109716c",
+            "paths": [
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORU_R01",
@@ -765,7 +4181,30 @@
       "status": "content",
       "actualCount": 25,
       "expectedCount": 25,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Patient/bab5ca58-f272-4c06-4b3f-f9661e45a22b",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "PractitionerRole/be571888-010e-9a32-e87f-f1ee1bd631a8",
+            "paths": [
+              "practitioner"
+            ]
+          },
+          {
+            "key": "Provenance/9f79a1ce-a1d5-c6dd-a0d6-3bc75109716c",
+            "paths": [
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORU_R01",
@@ -781,7 +4220,112 @@
       "status": "content",
       "actualCount": 157,
       "expectedCount": 157,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [
+          {
+            "kind": "missing",
+            "key": "Specimen/0755f744-dafd-776b-bff7-2d023e54406e"
+          },
+          {
+            "kind": "extra",
+            "key": "Specimen/904fd2f7-76fc-4b76-0414-7a375a309f23"
+          }
+        ],
+        "fields": [
+          {
+            "key": "ChargeItem/bf0359a9-c8e5-c91c-a362-3fe4189e62a3",
+            "paths": [
+              "account"
+            ]
+          },
+          {
+            "key": "DiagnosticReport/3c202c0c-e3eb-2262-23c1-e1f328a0bbe4",
+            "paths": [
+              "effectiveDateTime",
+              "issued",
+              "performer.0.reference",
+              "performer.1.reference",
+              "performer.2"
+            ]
+          },
+          {
+            "key": "DocumentReference/c9562bfa-117f-9b25-6657-9b7cff7e1674",
+            "paths": [
+              "content.0.attachment.creation",
+              "context.period.start",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Encounter/3a404c65-0d2a-4e7b-80a1-dda6136656e0",
+            "paths": [
+              "period.end",
+              "period.start"
+            ]
+          },
+          {
+            "key": "Observation/cdbf1614-4191-7f8c-d914-c071cc2a44bc",
+            "paths": [
+              "note.0.time",
+              "note.1.time"
+            ]
+          },
+          {
+            "key": "PractitionerRole/6f4104a9-6928-bcaf-7719-2fb47f0c2df5",
+            "paths": [
+              "code",
+              "location"
+            ]
+          },
+          {
+            "key": "PractitionerRole/9f64bd3b-d5e9-678b-2f14-b0d756a4e7f1",
+            "paths": [
+              "practitioner"
+            ]
+          },
+          {
+            "key": "PractitionerRole/f035eb01-dd52-98c8-42f4-08d3a63e5aa2",
+            "paths": [
+              "code",
+              "location",
+              "period"
+            ]
+          },
+          {
+            "key": "Provenance/4b8e3786-de8b-c12f-345b-3c83fc1c4a0d",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/805f1b25-f43a-3bca-8bbd-49d530107363",
+            "paths": [
+              "authoredOn",
+              "note.5.time",
+              "occurrenceTiming.repeat.boundsPeriod.end",
+              "occurrenceTiming.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Specimen/95c9f253-3bac-cf73-202b-907e4e997489",
+            "paths": [
+              "collection.collectedDateTime",
+              "receivedTime"
+            ]
+          },
+          {
+            "key": "Specimen/e42df22d-2f6d-d024-aa57-9d069936760a",
+            "paths": [
+              "collection.collectedPeriod.end",
+              "collection.collectedPeriod.start",
+              "parent.0.reference"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "ORU_R01",
@@ -845,7 +4389,58 @@
       "status": "content",
       "actualCount": 125,
       "expectedCount": 125,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "MedicationRequest/3b50863f-db50-f2bb-1363-647ac32cf021",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "RDE_O11",
@@ -853,7 +4448,76 @@
       "status": "content",
       "actualCount": 96,
       "expectedCount": 96,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "MedicationRequest/3b50863f-db50-f2bb-1363-647ac32cf021",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/7c3b2f36-f464-f008-892b-345dafbd5c6e",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/98deab99-5806-4bb3-8bce-36c7527df86a",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "RDE_O25",
@@ -861,7 +4525,58 @@
       "status": "content",
       "actualCount": 126,
       "expectedCount": 126,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "MedicationRequest/3b50863f-db50-f2bb-1363-647ac32cf021",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "RDE_O25",
@@ -869,7 +4584,76 @@
       "status": "content",
       "actualCount": 98,
       "expectedCount": 98,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "MedicationRequest/3b50863f-db50-f2bb-1363-647ac32cf021",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/7c3b2f36-f464-f008-892b-345dafbd5c6e",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/98deab99-5806-4bb3-8bce-36c7527df86a",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "RDS_O13",
@@ -877,7 +4661,58 @@
       "status": "content",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/64ef35d7-b2c7-855b-7178-b890ea66c8e9",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction"
+            ]
+          },
+          {
+            "key": "MedicationRequest/fe3ab6c9-0823-aa36-c4ce-39bd8212313f",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Practitioner/6c9ea0f5-1b45-04f9-e07d-bae5096b7a4a",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Provenance/7ef3ede5-7daf-eba5-9d3a-c0f3a068af0a",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "RDS_O13",
@@ -885,7 +4720,81 @@
       "status": "content",
       "actualCount": 81,
       "expectedCount": 81,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "MedicationRequest/3b50863f-db50-f2bb-1363-647ac32cf021",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.end",
+              "dosageInstruction.0.timing.repeat.boundsPeriod.start"
+            ]
+          },
+          {
+            "key": "MedicationRequest/64ef35d7-b2c7-855b-7178-b890ea66c8e9",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction"
+            ]
+          },
+          {
+            "key": "MedicationRequest/fe3ab6c9-0823-aa36-c4ce-39bd8212313f",
+            "paths": [
+              "authoredOn",
+              "dosageInstruction.0.patientInstruction",
+              "dosageInstruction.0.text"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Practitioner/6c9ea0f5-1b45-04f9-e07d-bae5096b7a4a",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Practitioner/aaabbc3b-a186-0461-6456-9974f494563b",
+            "paths": [
+              "name.0.period.end",
+              "name.0.period.start"
+            ]
+          },
+          {
+            "key": "Provenance/7ef3ede5-7daf-eba5-9d3a-c0f3a068af0a",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "REF_I12",
@@ -893,7 +4802,64 @@
       "status": "content",
       "actualCount": 88,
       "expectedCount": 88,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/98b5d1f9-c308-2a89-f0b7-9fa6b800153f",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Procedure/67788ddb-a883-0905-ea3a-f5cc486b7ea0",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
+            "paths": [
+              "performer.2",
+              "requester"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "REF_I12",
@@ -901,7 +4867,62 @@
       "status": "content",
       "actualCount": 91,
       "expectedCount": 91,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/98b5d1f9-c308-2a89-f0b7-9fa6b800153f",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Procedure/67788ddb-a883-0905-ea3a-f5cc486b7ea0",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
+            "paths": [
+              "performer.2",
+              "requester"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "REF_I14",
@@ -909,7 +4930,64 @@
       "status": "content",
       "actualCount": 86,
       "expectedCount": 86,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/98b5d1f9-c308-2a89-f0b7-9fa6b800153f",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Procedure/67788ddb-a883-0905-ea3a-f5cc486b7ea0",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
+            "paths": [
+              "performer.2",
+              "requester"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "REF_I14",
@@ -917,7 +4995,62 @@
       "status": "content",
       "actualCount": 90,
       "expectedCount": 90,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Condition/98b5d1f9-c308-2a89-f0b7-9fa6b800153f",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/19f93d0c-778a-6a5d-4816-504675827c1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
+            "paths": [
+              "extension.5.extension.0.valueCodeableConcept.text"
+            ]
+          },
+          {
+            "key": "Procedure/67788ddb-a883-0905-ea3a-f5cc486b7ea0",
+            "paths": [
+              "performedDateTime"
+            ]
+          },
+          {
+            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
+            "paths": [
+              "text.div"
+            ]
+          },
+          {
+            "key": "RelatedPerson/78fca696-5142-59aa-cf2b-c4a4bd7c69cc",
+            "paths": [
+              "address.1"
+            ]
+          },
+          {
+            "key": "ServiceRequest/0dde495c-51b7-d47f-febd-19d8e4e764db",
+            "paths": [
+              "performer.2",
+              "requester"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S12",
@@ -925,7 +5058,63 @@
       "status": "content",
       "actualCount": 48,
       "expectedCount": 48,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.1.period.start",
+              "participant.2.period.start",
+              "participant.3.period.start",
+              "start",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Condition/ac4c8e5d-ba4c-33b6-28f4-2f60bf978cfb",
+            "paths": [
+              "extension.0.valueDateTime",
+              "onsetDateTime"
+            ]
+          },
+          {
+            "key": "Encounter/da6f322f-ef5e-4f2c-c1f8-6e38dffbf995",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
+            "paths": [
+              "occurrencePeriod.start",
+              "orderDetail.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S12",
@@ -933,7 +5122,41 @@
       "status": "content",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.4.actor.reference",
+              "start",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S13",
@@ -941,7 +5164,50 @@
       "status": "content",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.1.period.start",
+              "participant.2.period.start",
+              "participant.3.period.start",
+              "start",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
+            "paths": [
+              "occurrencePeriod.start",
+              "orderDetail.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S13",
@@ -949,7 +5215,41 @@
       "status": "content",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.4.actor.reference",
+              "start",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S14",
@@ -957,7 +5257,50 @@
       "status": "content",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.1.period.start",
+              "participant.2.period.start",
+              "participant.3.period.start",
+              "start",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
+            "paths": [
+              "occurrencePeriod.start",
+              "orderDetail.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S14",
@@ -965,7 +5308,41 @@
       "status": "content",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.4.actor.reference",
+              "start",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S15",
@@ -973,7 +5350,50 @@
       "status": "content",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.1.period.start",
+              "participant.2.period.start",
+              "participant.3.period.start",
+              "start",
+              "status",
+              "supportingInformation.1.reference"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
+            "paths": [
+              "occurrencePeriod.start",
+              "orderDetail.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S15",
@@ -981,7 +5401,42 @@
       "status": "content",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.4.actor.reference",
+              "start",
+              "status",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S16",
@@ -989,7 +5444,50 @@
       "status": "content",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.1.period.start",
+              "participant.2.period.start",
+              "participant.3.period.start",
+              "start",
+              "status",
+              "supportingInformation.1.reference"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
+            "paths": [
+              "occurrencePeriod.start",
+              "orderDetail.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S16",
@@ -997,7 +5495,42 @@
       "status": "content",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.4.actor.reference",
+              "start",
+              "status",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S17",
@@ -1005,7 +5538,50 @@
       "status": "content",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.1.period.start",
+              "participant.2.period.start",
+              "participant.3.period.start",
+              "start",
+              "status",
+              "supportingInformation.1.reference"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
+            "paths": [
+              "occurrencePeriod.start",
+              "orderDetail.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S17",
@@ -1013,7 +5589,42 @@
       "status": "content",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.4.actor.reference",
+              "start",
+              "status",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S26",
@@ -1021,7 +5632,50 @@
       "status": "content",
       "actualCount": 31,
       "expectedCount": 31,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.1.period.start",
+              "participant.2.period.start",
+              "participant.3.period.start",
+              "start",
+              "status",
+              "supportingInformation.1.reference"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/377d8e6d-3ee4-7509-6f8b-6279da04eb6b",
+            "paths": [
+              "occurrencePeriod.start",
+              "orderDetail.1"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "SIU_S26",
@@ -1029,7 +5683,42 @@
       "status": "content",
       "actualCount": 41,
       "expectedCount": 41,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
+            "paths": [
+              "end",
+              "participant.1.actor.reference",
+              "participant.4.actor.reference",
+              "start",
+              "status",
+              "supportingInformation.1.reference",
+              "supportingInformation.2"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.5.extension.0.valueCodeableConcept.text",
+              "extension.6.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "VXU_V04",
@@ -1037,7 +5726,24 @@
       "status": "content",
       "actualCount": 16,
       "expectedCount": 16,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Immunization/9d7483ec-3273-a9d9-0d6c-da4895472607",
+            "paths": [
+              "encounter"
+            ]
+          },
+          {
+            "key": "Provenance/cab498e7-22e3-614e-b9ff-079c8535c9d8",
+            "paths": [
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "VXU_V04",
@@ -1045,7 +5751,56 @@
       "status": "content",
       "actualCount": 97,
       "expectedCount": 97,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Observation/6586ece7-7d50-e6c0-b0f9-2da3a2c26174",
+            "paths": [
+              "note.0.time"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          },
+          {
+            "key": "ServiceRequest/b078ac32-02fb-9749-1cb5-6c7766185ea9",
+            "paths": [
+              "occurrenceTiming.repeat.boundsPeriod.end",
+              "occurrenceTiming.repeat.boundsPeriod.start"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "VXU_V04",
@@ -1053,7 +5808,43 @@
       "status": "content",
       "actualCount": 84,
       "expectedCount": 84,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
+            "paths": [
+              "costToBeneficiary.1"
+            ]
+          },
+          {
+            "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
+            "paths": [
+              "period.start"
+            ]
+          },
+          {
+            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
+            "paths": [
+              "_birthDate.extension.0.valueDateTime",
+              "deceasedDateTime",
+              "extension.7.extension.0.valueCodeableConcept.text",
+              "extension.8.extension.0.valueCodeableConcept.text",
+              "extension.9.extension.0.valueCodeableConcept.text",
+              "meta.lastUpdated"
+            ]
+          },
+          {
+            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     },
     {
       "template": "VXU_V04",
@@ -1061,7 +5852,38 @@
       "status": "content",
       "actualCount": 19,
       "expectedCount": 19,
-      "byType": []
+      "byType": [],
+      "contentDelta": {
+        "unmatched": [],
+        "fields": [
+          {
+            "key": "Immunization/07ff92a4-c57e-8726-a03a-1241de54a9c3",
+            "paths": [
+              "encounter"
+            ]
+          },
+          {
+            "key": "Immunization/c0f2ddcb-f061-279f-d5e1-7b54b437e9db",
+            "paths": [
+              "encounter"
+            ]
+          },
+          {
+            "key": "Immunization/c82d117c-dc9d-e431-dc92-6ca91243da07",
+            "paths": [
+              "encounter"
+            ]
+          },
+          {
+            "key": "Provenance/87847f45-4a99-9d88-c439-65574d8fd20b",
+            "paths": [
+              "occurredDateTime",
+              "recorded",
+              "text.div"
+            ]
+          }
+        ]
+      }
     }
   ]
 }
