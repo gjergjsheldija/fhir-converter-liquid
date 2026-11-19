@@ -16,3 +16,4 @@ These specs cover Node.js runtime, worker-thread, and test-harness behavior. The
 | --- | --- | --- | --- |
 | 01 | Done | `01-migrate-to-node-26.md` | Node 26 (`>=26 <27`), mocha 12.0.3, `--import` loader hook, Docker `node:26-alpine`, CI matrix `[26]`. |
 | 02 | Done | `02-worker-pool-and-loader-cleanup.md` | Guard `WorkerPool` against `0` reported CPUs (`os.cpus().length === 0`) and migrate the test loader from deprecated `module.register()` to `module.registerHooks()`. |
+| 03 | Done | `03-project-convert-cli.md` | `bin/convert.mjs` converts one message with a local project and `--check-goldens` compares `tests/expected/*.json`; `npm run convert:project`. |
