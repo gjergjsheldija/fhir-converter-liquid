@@ -3,8 +3,8 @@
   "summary": {
     "cases": 132,
     "pass": 29,
-    "count": 2,
-    "content": 101
+    "count": 1,
+    "content": 102
   },
   "cases": [
     {
@@ -753,17 +753,10 @@
     {
       "template": "ORM_O01",
       "dataFile": "ORM-O01-06.hl7",
-      "status": "count",
-      "actualCount": 56,
+      "status": "content",
+      "actualCount": 55,
       "expectedCount": 55,
-      "byType": [
-        {
-          "resourceType": "MedicationRequest",
-          "actual": 2,
-          "expected": 1,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "ORU_R01",

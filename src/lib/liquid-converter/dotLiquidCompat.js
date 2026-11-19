@@ -119,6 +119,11 @@ export function normalizeTripleBraceOutput(content) {
  * - `messageHeaderID` → `messageHeaderId` (49 occurrences)
  * - `PatientId` → `patientId` (1150 occurrences, though many are legitimate
  *   parameter names; only standalone variable references need fixing)
+ * - `medicationRequestID` → `medicationRequestId` (1 occurrence, `ORM_O01.liquid` line 773:
+ *   `{% include 'Resource/MedicationRequest' ORM_ORC_7: …, ORM_RXO: …, ID: medicationRequestID %}`).
+ *   Case-sensitive LiquidJS resolved it to nothing, so the include emitted an id-less
+ *   MedicationRequest (the extra entry in ORM-O01-06); DotLiquid resolves it to
+ *   `medicationRequestId`, so the dosage data merges into the real resource.
  */
 export function normalizeVariableNameTypos(content) {
     // Normalize messageHeaderID -> messageHeaderId (the correct variable name)
@@ -126,6 +131,7 @@ export function normalizeVariableNameTypos(content) {
     // Normalize PatientId -> patientId when it appears as a standalone variable reference
     // (i.e., not part of a compound name like fullPatientId or _PatientId)
     content = content.replace(/\bPatientId\b/g, 'patientId');
+    content = content.replace(/\bmedicationRequestID\b/g, 'medicationRequestId');
     return content;
 }
 

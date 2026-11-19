@@ -278,6 +278,17 @@ describe("dotLiquidCompat", () => {
             const expected = "{{ messageHeaderId }} and {{ patientId }}";
             expect(normalizeVariableNameTypos(input)).to.equal(expected);
         });
+
+        it("normalizes medicationRequestID to medicationRequestId in the ORM_O01 include argument", () => {
+            const input = "{% include 'Resource/MedicationRequest' ORM_ORC_7: orcSegment_7_firstRep, ORM_RXO: rxoSegment, ID: medicationRequestID -%}";
+            const expected = "{% include 'Resource/MedicationRequest' ORM_ORC_7: orcSegment_7_firstRep, ORM_RXO: rxoSegment, ID: medicationRequestId -%}";
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("leaves medicationRequestId and longer names unchanged", () => {
+            const input = "{{ medicationRequestId }} {{ medicationRequestIDx }} {{ fullmedicationRequestID }}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
     });
 
     describe("normalizeRepeatedTagArgumentCommas()", () => {
