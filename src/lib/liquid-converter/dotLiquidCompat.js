@@ -145,6 +145,14 @@ const DEFINES_TEXTSTRING = /\{%-?\s*(?:capture|assign)\s+textstring\b/;
  *   nothing, so the collector PractitionerRole had an empty `practitioner` (MDM-T02-03 PractitionerRole
  *   `9f64bd3b…`: actual absent, expected `Practitioner/ae62dffe…`; `requestor_practitioner1` is nil there
  *   because OBR.16 is empty and that include never renders). DotLiquid resolves the name.
+ * - `AccountId` → `accountId` (`Resource/_Encounter.liquid` lines 743-745 read `AccountId` for
+ *   `account[]`; root templates assign `accountId` and pass `AccountId:accountId` explicitly only to
+ *   their main Encounter include, e.g. `DFT_P11.liquid` line 489). The DG1 Encounter includes of the
+ *   same Encounter id (`DFT_P11.liquid` lines 935, 1732) pass no `AccountId`, so case-sensitive
+ *   LiquidJS rendered no `account`; DotLiquid resolves `AccountId` to the caller's `accountId`
+ *   (traced at DFT-P11-01: line 489 `accountId` = `4ad7c7d0…`, line 935 `4ad7c7d0…`, line 1732
+ *   `72ed164a…`), so the union across renders is `[Account/4ad7c7d0…, Account/72ed164a…]`.
+ *   `AccountId_BLG` is a different, longer name and is not matched.
  * - `textstring` → `textString` (5 reads in `Resource/_MedicationRequest.liquid`, lines 171, 179, 299,
  *   309, 318: `{% capture specomp %}{{ textstring | split: "~" | join: "+" }}{% endcapture %}`
  *   right after `{% capture textString %}…{% endcapture %}`). For ORM-O01-06 `orm_rxo_7.Value` is
@@ -162,6 +170,7 @@ export function normalizeVariableNameTypos(content) {
     content = content.replace(/\bPatientId\b/g, 'patientId');
     content = content.replace(/\bmedicationRequestID\b/g, 'medicationRequestId');
     content = content.replace(/\bAccountId_BLG\b/g, 'accountId_BLG');
+    content = content.replace(/\bAccountId\b/g, 'accountId');
     content = content.replace(/\bdevice_ID_AIG_3\b/g, 'device_Id_AIG_3');
     content = content.replace(/\bpractitionerId_obr_10\b/g, 'practitionerId_OBR_10');
     if (DEFINES_TEXT_STRING.test(content) && !DEFINES_TEXTSTRING.test(content)) {
