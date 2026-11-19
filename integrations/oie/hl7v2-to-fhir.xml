@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Open Integration Engine channel: HL7 v2 over TCP (MLLP) -> FHIR via this converter.
+  The converter itself does not listen on TCP. OIE receives the message and POSTs it.
+  Destination POST body is JSON: {"srcData":"<raw HL7 v2>","template":"<root template>"}
+-->
+<channel version="4.5.0">
+  <name>hl7v2-to-fhir</name>
+  <description>Receive HL7 v2 over TCP and convert it to FHIR through the converter HTTP API.</description>
+  <enabled>true</enabled>
+  <sourceConnector version="4.5.0">
+    <name>sourceConnector</name>
+    <properties>
+      <listenerConnectorProperties>
+        <host>0.0.0.0</host>
+        <port>6661</port>
+      </listenerConnectorProperties>
+      <responseConnectorProperties>
+        <respondAfterProcessing>true</respondAfterProcessing>
+      </responseConnectorProperties>
+    </properties>
+    <transportName>TCP Listener</transportName>
+    <mode>SOURCE</mode>
+    <enabled>true</enabled>
+  </sourceConnector>
+  <destinationConnectors>
+    <connector version="4.5.0">
+      <name>Convert to FHIR</name>
+      <properties>
+        <host>127.0.0.1</host>
+        <port>2019</port>
+        <method>post</method>
+        <path>/api/v1/convert/hl7v2</path>
+        <contentType>application/json</contentType>
+        <content>{"srcData":"${message.encodedData}","template":"ADT_A01"}</content>
+        <description>POST body is JSON {"srcData":"&lt;raw HL7 v2&gt;","template":"&lt;root template&gt;"}. Escape the raw message as a JSON string and set template to the root template name.</description>
+      </properties>
+      <transportName>HTTP Sender</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+    </connector>
+  </destinationConnectors>
+</channel>
