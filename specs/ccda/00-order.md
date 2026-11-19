@@ -16,5 +16,5 @@ These specs add C-CDA conversion and make the editor treat a C-CDA document the 
 | Spec | Status | File | What it changes |
 | --- | --- | --- | --- |
 | 01 | Done | `01-convert-ccda.md` | Sync the pinned Ccda templates and convert a C-CDA document through `msg.ClinicalDocument`. |
-| 02 | Not started | `02-cda-message-coloring-and-parsed-tree.md` | Color the C-CDA message and show its parsed tree in the Debug drawer. |
+| 02 | Done | `02-cda-message-coloring-and-parsed-tree.md` | Color the C-CDA message and show its parsed tree in the Debug drawer. |
 | 03 | Not started | `03-cda-debug-and-send.md` | Hover values, expected diff, Validate, and conditional Send work for a C-CDA result. |

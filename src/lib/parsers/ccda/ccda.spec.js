@@ -9,7 +9,7 @@ import {join} from 'path';
 import {BASE_TEMPLATE_FILES_LOCATION, CCDA_LIQUID_TEMPLATE_LOCATION} from '../../constants/constants.js';
 import dataHandlerFactory from '../../dataHandler/dataHandlerFactory.js';
 import {convertInlineHl7v2} from '../../workers/worker.js';
-import {parseCcda} from './ccda.js';
+import {parseCcda, summarizeCcda} from './ccda.js';
 
 const DOCUMENT = `<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:sdtc="urn:hl7-org:sdtc">
   <id root="1.2.3"/>
@@ -73,6 +73,44 @@ describe('ccda', function () {
         });
         assert.strictEqual(result.status, 200);
         assert.strictEqual(result.resultMsg.debugInfo.parsedHl7v2, null);
+        assert.strictEqual(result.resultMsg.debugInfo.parsedCcda.name, 'ClinicalDocument');
+    });
+
+    it('does not set parsedCcda for an HL7 v2 debug conversion', async function () {
+        const result = await convertInlineHl7v2({
+            srcDataType: 'hl7v2',
+            srcData: 'MSH|^~\\&|A|B|C|D|20200101||ADT^A01|1|P|2.5\rPID|1||123',
+            template: '{"id":"x"}',
+            debug: true
+        });
+        assert.strictEqual(result.status, 200);
+        assert.ok(result.resultMsg.debugInfo.parsedHl7v2);
+        assert.strictEqual('parsedCcda' in result.resultMsg.debugInfo, false);
+    });
+
+    it('summarizes the parsed document into elements, attributes, and text', async function () {
+        const summary = summarizeCcda(await parseCcda(DOCUMENT));
+        assert.strictEqual(summary.name, 'ClinicalDocument');
+        assert.ok('xmlns' in summary.attributes);
+        const byName = (node, name) => node.children.filter((child) => child.name === name);
+        const [id] = byName(summary, 'id');
+        assert.deepStrictEqual(id.attributes, {root: '1.2.3'});
+        assert.strictEqual(id.text, null);
+        const [title] = byName(summary, 'title');
+        assert.strictEqual(title.text, 'Hello');
+        const [recordTarget] = byName(summary, 'recordTarget');
+        const [patient] = byName(byName(recordTarget, 'patientRole')[0], 'patient');
+        const [name] = byName(patient, 'name');
+        const given = byName(name, 'given');
+        assert.strictEqual(given.length, 2);
+        assert.strictEqual(given[0].text, 'Adam');
+        assert.deepStrictEqual(given[1].attributes, {qualifier: 'CL'});
+        assert.strictEqual(JSON.stringify(summary).includes('_originalData'), false);
+    });
+
+    it('skips null elements in the summary', async function () {
+        const summary = summarizeCcda(await parseCcda('<a><b/><c x="1"/></a>'));
+        assert.deepStrictEqual(summary.children.map((child) => child.name), ['c']);
     });
 
     it('rejects an unparsable C-CDA document with a 400', async function () {

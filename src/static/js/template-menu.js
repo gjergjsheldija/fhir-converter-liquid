@@ -10,6 +10,7 @@ function loadData(dataFile, done) {
         fetchProjectFileText(dataFile, function (data) {
             var fam = (typeof getActiveProjectFamily === 'function') ? getActiveProjectFamily() : 'hl7v2';
             dataEditor.setOption('mode', fam === 'ccda' ? 'xml' : 'hl7v2');
+            currentDataType = fam;
             dataEditor.setValue(data);
             var roots = (typeof getActiveProjectRoots === 'function') ? getActiveProjectRoots() : null;
             var prefix = roots && roots.samples ? roots.samples + '/' : '';
@@ -17,13 +18,7 @@ function loadData(dataFile, done) {
                 ? dataFile.substring(prefix.length)
                 : dataFile.substring(dataFile.lastIndexOf('/') + 1);
             $('#message-name').text(displayLabel);
-            if (fam === 'ccda') {
-                if (typeof applyCcdaNoConvertState === 'function') {
-                    applyCcdaNoConvertState();
-                }
-            } else {
-                convertData(true);
-            }
+            convertData(true);
             if (typeof done === 'function') {
                 done(data);
             }
