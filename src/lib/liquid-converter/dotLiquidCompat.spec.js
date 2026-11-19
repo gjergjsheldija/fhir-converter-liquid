@@ -300,6 +300,17 @@ describe("dotLiquidCompat", () => {
             const input = "{{ accountId_BLG }} {{ AccountId_BLGx }} {{ fullAccountId_BLG }}";
             expect(normalizeVariableNameTypos(input)).to.equal(input);
         });
+
+        it("normalizes device_ID_AIG_3 to device_Id_AIG_3 in the Appointment participant reference", () => {
+            const input = '"reference":"Device/{{ device_ID_AIG_3 }}"';
+            const expected = '"reference":"Device/{{ device_Id_AIG_3 }}"';
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("leaves device_Id_AIG_3 and longer names unchanged", () => {
+            const input = "{{ device_Id_AIG_3 }} {{ device_ID_AIG_3x }} {{ fulldevice_ID_AIG_3 }}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
     });
 
     describe("normalizeRepeatedTagArgumentCommas()", () => {

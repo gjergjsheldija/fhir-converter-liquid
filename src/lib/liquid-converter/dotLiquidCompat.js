@@ -129,6 +129,10 @@ export function normalizeTripleBraceOutput(content) {
  *   The id is assigned by `{% evaluate accountId_BLG using 'ID/Account' BLG: … %}`. Case-sensitive
  *   LiquidJS left `ID` empty, so the BLG Account(s) were emitted without an id and merged into one
  *   id-less Account (ORM-O01-03 has two BLG segments, expected two Accounts); DotLiquid resolves it.
+ * - `device_ID_AIG_3` → `device_Id_AIG_3` (1 occurrence, `Resource/_Appointment.liquid` line 191:
+ *   `"reference":"Device/{{ device_ID_AIG_3 }}"`). The id is assigned on line 3 by
+ *   `{% evaluate device_Id_AIG_3 using 'ID/Device' CWE: AIG.3 %}`. Case-sensitive LiquidJS
+ *   rendered `Device/` (empty id) for Appointment participant[1]; DotLiquid resolves the id.
  */
 export function normalizeVariableNameTypos(content) {
     // Normalize messageHeaderID -> messageHeaderId (the correct variable name)
@@ -138,6 +142,7 @@ export function normalizeVariableNameTypos(content) {
     content = content.replace(/\bPatientId\b/g, 'patientId');
     content = content.replace(/\bmedicationRequestID\b/g, 'medicationRequestId');
     content = content.replace(/\bAccountId_BLG\b/g, 'accountId_BLG');
+    content = content.replace(/\bdevice_ID_AIG_3\b/g, 'device_Id_AIG_3');
     return content;
 }
 
