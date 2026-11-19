@@ -26,7 +26,7 @@ Implement `specs/runtime/02`, `specs/web-ui/usability/` (`01` through `20`), `sp
 
 ## Order
 
-Specs 01–11 are implemented.
+Specs 01–12 are implemented.
 
 | Spec | Status | File | What it changes |
 | --- | --- | --- | --- |
@@ -41,6 +41,7 @@ Specs 01–11 are implemented.
 | 09 | Done (2026-11-18) | `09-convert-from-open-project.md` | `POST /api/v1/projects/convert` resolves `{% include %}` and `{% evaluate %}` partials from the open local or GitHub project instead of the server's built-in tree. |
 | 10 | Done (2026-11-18) | `10-save-into-the-open-project.md` | Save writes templates (and user-saved samples) into the open local project; GitHub projects report read-only; Built-in mode stays unchanged. |
 | 11 | Done (2026-11-18) | `11-add-official-hl7v2-samples.md` | A button copies the 139 official HL7 v2 samples into the open local project. |
+| 12 | Done (2026-11-19) | `12-site-pack.md` | Local conversion falls back to the built-in HL7 v2 tree for missing partials, then applies `conceptmaps/*.json` and `identifiers.json` to the result. |
 
 ## Out of this folder
 

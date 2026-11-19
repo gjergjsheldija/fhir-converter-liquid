@@ -50,6 +50,7 @@ Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec.
 23. `specs/web-ui/projects/09-convert-from-open-project.md` — **Done**
 24. `specs/web-ui/projects/10-save-into-the-open-project.md` — **Done**
 25. `specs/web-ui/projects/11-add-official-hl7v2-samples.md` — **Done**
+26. `specs/web-ui/projects/12-site-pack.md` — **Done** (2026-11-19)
 
 ---
 

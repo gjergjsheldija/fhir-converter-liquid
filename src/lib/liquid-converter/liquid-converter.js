@@ -42,6 +42,20 @@ export function instance(
         const overrides = currentContextTemplatesMap || {};
         const strictOverridesOnly = options && options.strictOverridesOnly === true;
         const resolvedRoot = path.resolve(templateFilesLocation || ".");
+        const fallbackRoot = !strictOverridesOnly && options && options.fallbackTemplateDirectory
+            ? path.resolve(options.fallbackTemplateDirectory)
+            : null;
+        // Read-only fallback: the project file wins; otherwise the same relative path under the fallback root.
+        const resolveFallbackPath = (templateFilePath, relativeName) => {
+            if (!fallbackRoot || fs.existsSync(templateFilePath)) {
+                return null;
+            }
+            const candidate = path.resolve(fallbackRoot, relativeName);
+            if (!candidate.startsWith(fallbackRoot + path.sep)) {
+                return null;
+            }
+            return fs.existsSync(candidate) ? candidate : null;
+        };
 
         const engine = new Liquid({
             root: resolvedRoot,
@@ -71,8 +85,9 @@ export function instance(
                     if (strictOverridesOnly) {
                         throw new Error(`ENOENT: template '${relativeName}' was not found in the open project.`);
                     }
+                    const fallbackPath = resolveFallbackPath(templateFilePath, relativeName);
                     return applyDotLiquidCompatTransforms(
-                        fs.readFileSync(templateFilePath, "utf8")
+                        fs.readFileSync(fallbackPath || templateFilePath, "utf8")
                     );
                 },
                 existsSync(templateFilePath) {
@@ -87,7 +102,8 @@ export function instance(
                     if (strictOverridesOnly) {
                         return false;
                     }
-                    return fs.existsSync(templateFilePath);
+                    return fs.existsSync(templateFilePath) ||
+                        resolveFallbackPath(templateFilePath, relativeName) !== null;
                 },
                 resolve(root, file, ext) {
                     // Mirrors upstream's TemplateLocalFileSystem.GetAbsoluteTemplatePath
