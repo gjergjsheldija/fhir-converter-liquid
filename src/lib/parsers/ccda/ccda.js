@@ -73,6 +73,44 @@ export function parseCcda(document) {
     });
 }
 
+function summarizeElement(name, value) {
+    const attributes = {};
+    const children = [];
+    let text = null;
+    for (const [key, item] of Object.entries(value)) {
+        if (key === TEXT_KEY) {
+            if (typeof item === 'string') {
+                text = item;
+            } else if (Array.isArray(item)) {
+                text = item.filter((part) => typeof part === 'string').join(' ');
+            }
+        } else if (typeof item === 'string') {
+            attributes[key] = item;
+        } else if (Array.isArray(item)) {
+            for (const entry of item) {
+                if (entry && typeof entry === 'object') {
+                    children.push(summarizeElement(key, entry));
+                } else if (typeof entry === 'string') {
+                    children.push({name: key, attributes: {}, text: entry, children: []});
+                }
+            }
+        } else if (item && typeof item === 'object') {
+            children.push(summarizeElement(key, item));
+        }
+    }
+    return {name, attributes, text, children};
+}
+
+// Element/attribute summary of a parseCcda result for the Web UI Debug drawer.
+// An array becomes one child per item; a null element is skipped; _originalData is ignored.
+export function summarizeCcda(parsed) {
+    const rootName = Object.keys(parsed || {}).find((key) => key !== '_originalData');
+    if (rootName === undefined) {
+        return null;
+    }
+    return summarizeElement(rootName, parsed[rootName] || {});
+}
+
 export default class ccda extends dataHandler {
     constructor() {
         super('ccda');

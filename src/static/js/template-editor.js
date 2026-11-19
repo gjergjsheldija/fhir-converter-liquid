@@ -275,13 +275,6 @@ function convertData(force) {
         }
 
         var activeProj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
-        if (activeProj && typeof getActiveProjectFamily === 'function' && getActiveProjectFamily() === 'ccda') {
-            if (typeof applyCcdaNoConvertState === 'function') {
-                applyCcdaNoConvertState();
-            }
-            return;
-        }
-
         hideResultError();
         setUnusedLegend(false);
         $('#conversion-status').text('Converting…');

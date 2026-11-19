@@ -18,6 +18,7 @@ import {CCDA_LIQUID_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION} from '../
 import {parentPort} from 'worker_threads';
 import {workerTaskProcessor} from './workerUtils.js';
 import dataHandlerFactory from '../dataHandler/dataHandlerFactory.js';
+import {summarizeCcda} from '../parsers/ccda/ccda.js';
 import pkg2 from 'cls-hooked';
 import {Context, toPromise} from 'liquidjs';
 import {createDebugCollector, serializeHl7v2Debug, DEBUG_COLLECTOR_KEY} from '../liquid-converter/debugCollector.js';
@@ -148,6 +149,9 @@ export function convertInlineHl7v2(msg) {
                                         const resultMsg = Object.assign(metadata, {'fhirResource': result});
                                         if (collector) {
                                             resultMsg.debugInfo = collector.buildDebugInfo(Date.now() - debugStartedAt, isCcda ? null : serializeHl7v2Debug(s, dataContext.msg.v2));
+                                            if (isCcda) {
+                                                resultMsg.debugInfo.parsedCcda = summarizeCcda(dataContext.msg);
+                                            }
                                         }
                                         fulfill({'status': 200, 'resultMsg': resultMsg});
                                     } catch (err) {

@@ -975,7 +975,7 @@ export default function (app) {
             .then((prep) =>
                 workerPool.exec({
                     type: "/api/convert/:srcDataType",
-                    srcDataType: "hl7v2",
+                    srcDataType: prep.srcDataType,
                     srcData: body.srcData,
                     template: body.template,
                     templatesOverride: prep.templatesOverride,

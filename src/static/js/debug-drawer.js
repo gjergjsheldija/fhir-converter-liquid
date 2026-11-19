@@ -338,6 +338,147 @@
         }
     }
 
+    // --- Tab 1 (C-CDA): Parsed CDA element tree --------------------------------------
+
+    function cdaNodeMatches(node, q) {
+        if (node.name.toLowerCase().indexOf(q) !== -1 || String(node.text || '').toLowerCase().indexOf(q) !== -1) {
+            return true;
+        }
+        var attrs = node.attributes || {};
+        if (Object.keys(attrs).some(function (k) {
+            return (k + '=' + attrs[k]).toLowerCase().indexOf(q) !== -1;
+        })) {
+            return true;
+        }
+        return (node.children || []).some(function (child) {
+            return cdaNodeMatches(child, q);
+        });
+    }
+
+    function buildCdaNode(node, path, q) {
+        var wrap = $('<div class="debug-tree-node"></div>');
+        var row = $('<div class="debug-tree-row"></div>');
+        var attrs = node.attributes || {};
+        var attrKeys = Object.keys(attrs);
+        var children = node.children || [];
+        var expandable = attrKeys.length > 0 || children.length > 0 || (node.text !== null && node.text !== undefined);
+
+        var label;
+        if (expandable) {
+            label = $('<button type="button" class="debug-tree-toggle" aria-expanded="false"></button>');
+            label.append($('<span class="debug-tree-chevron" aria-hidden="true">▸</span>'));
+        } else {
+            label = $('<span class="debug-tree-leaf"></span>');
+        }
+        label.append($('<span class="debug-tree-key"></span>').text(node.name));
+        var preview = attrKeys.slice(0, 3).map(function (k) {
+            return k + '=' + JSON.stringify(attrs[k]);
+        }).join(' ');
+        if (node.text !== null && node.text !== undefined) {
+            preview += (preview ? ' ' : '') + JSON.stringify(node.text);
+        }
+        if (preview.length > 90) {
+            preview = preview.slice(0, 90) + '…';
+        }
+        label.append($('<span class="debug-tree-preview"></span>').text(preview));
+
+        var fullPath = 'msg.' + path;
+        var copyBtn = $('<button type="button" class="debug-mini-btn">Copy path</button>');
+        copyBtn.attr('title', fullPath);
+        copyBtn.on('click', function (ev) {
+            ev.stopPropagation();
+            copyToClipboard(fullPath, this);
+        });
+        row.append(label, copyBtn);
+        wrap.append(row);
+        if (!expandable) {
+            return wrap;
+        }
+
+        var kids = $('<div class="debug-tree-children" hidden></div>');
+        var populated = false;
+        function populate() {
+            if (populated) {
+                return;
+            }
+            populated = true;
+            attrKeys.forEach(function (k) {
+                var attrPath = 'msg.' + path + '.' + k;
+                var attrRow = $('<div class="debug-tree-row"></div>');
+                var leaf = $('<span class="debug-tree-leaf"></span>');
+                leaf.append($('<span class="debug-tree-key"></span>').text(k + '=' + JSON.stringify(attrs[k])));
+                var attrCopy = $('<button type="button" class="debug-mini-btn">Copy path</button>');
+                attrCopy.attr('title', attrPath);
+                attrCopy.on('click', function (ev) {
+                    ev.stopPropagation();
+                    copyToClipboard(attrPath, this);
+                });
+                attrRow.append(leaf, attrCopy);
+                kids.append(attrRow);
+            });
+            if (node.text !== null && node.text !== undefined) {
+                var textPath = 'msg.' + path + '._';
+                var textRow = $('<div class="debug-tree-row"></div>');
+                var textLeaf = $('<span class="debug-tree-leaf"></span>');
+                textLeaf.append($('<span class="debug-tree-key"></span>').text('text'));
+                textLeaf.append($('<span class="debug-tree-val"></span>').text(JSON.stringify(node.text)));
+                var textCopy = $('<button type="button" class="debug-mini-btn">Copy path</button>');
+                textCopy.attr('title', textPath);
+                textCopy.on('click', function (ev) {
+                    ev.stopPropagation();
+                    copyToClipboard(textPath, this);
+                });
+                textRow.append(textLeaf, textCopy);
+                kids.append(textRow);
+            }
+            var seen = {};
+            var counts = {};
+            children.forEach(function (child) {
+                counts[child.name] = (counts[child.name] || 0) + 1;
+            });
+            children.forEach(function (child) {
+                var idx = seen[child.name] || 0;
+                seen[child.name] = idx + 1;
+                if (q && !cdaNodeMatches(child, q)) {
+                    return;
+                }
+                var childPath = path + '.' + child.name + (counts[child.name] > 1 ? '[' + idx + ']' : '');
+                kids.append(buildCdaNode(child, childPath, q));
+            });
+        }
+        function setOpen(open) {
+            if (open) {
+                populate();
+            }
+            kids.prop('hidden', !open);
+            label.attr('aria-expanded', String(open));
+            label.find('.debug-tree-chevron').first().text(open ? '▾' : '▸');
+        }
+        label.on('click', function () {
+            setOpen(kids.prop('hidden'));
+        });
+        wrap.append(kids);
+        if (q || path.indexOf('.') === -1) {
+            setOpen(true);
+        }
+        return wrap;
+    }
+
+    function renderCdaPanel(info, filter) {
+        var container = $('#debug-panel-hl7').empty();
+        var root = info && info.parsedCcda;
+        if (!root) {
+            container.append($('<div class="debug-empty">Convert a C-CDA document to inspect elements and attributes.</div>'));
+            return;
+        }
+        var q = (filter || '').trim().toLowerCase();
+        if (q && !cdaNodeMatches(root, q)) {
+            container.append($('<div class="debug-empty">No elements or attributes match that filter.</div>'));
+            return;
+        }
+        container.append(buildCdaNode(root, root.name, q));
+    }
+
     // --- Tab 2: Variables & Console ---------------------------------------------------
 
     function buildObjectTreeNode(keyLabel, value, depth, filter) {
@@ -857,8 +998,17 @@
 
     // --- Orchestration & State --------------------------------------------------------
 
+    function hasParsedCcda(info) {
+        return Boolean(info && info.parsedCcda);
+    }
+
+    function isCcdaProject() {
+        return typeof getActiveProjectFamily === 'function' && getActiveProjectFamily() === 'ccda';
+    }
+
     function renderActivePanel() {
         var info = window.latestDebugInfo || null;
+        $('.debug-drawer-tabs button[data-debug-tab="hl7"]').text(hasParsedCcda(info) ? 'Parsed CDA' : 'Parsed HL7');
         var timingText = (info && typeof info.durationMs === 'number')
             ? ('Converted in ' + info.durationMs + ' ms')
             : '';
@@ -869,7 +1019,11 @@
         }
         var filter = $('#debug-tree-filter').val() || '';
         if (activeTab === 'hl7') {
-            renderHl7Panel(info, filter);
+            if (hasParsedCcda(info) || isCcdaProject()) {
+                renderCdaPanel(info, filter);
+            } else {
+                renderHl7Panel(info, filter);
+            }
         } else if (activeTab === 'vars') {
             renderVarsPanel(info, filter);
         } else if (activeTab === 'diag') {

@@ -244,12 +244,13 @@ describe("projects/convertProject", function () {
             template: rootTemplate,
             templatesOverride: {}
         });
+        assert.strictEqual(prep.srcDataType, "ccda");
         assert.strictEqual(path.basename(prep.templateDirectory), "Ccda");
         assert.strictEqual(prep.fallbackTemplateDirectory, CCDA_LIQUID_TEMPLATE_LOCATION);
         assert.strictEqual(prep.strictOverridesOnly, false);
 
         const result = await convertInlineHl7v2({
-            srcDataType: "ccda",
+            srcDataType: prep.srcDataType,
             srcData: SAMPLE_CCDA,
             template: rootTemplate,
             templatesOverride: prep.templatesOverride,
@@ -277,6 +278,7 @@ describe("projects/convertProject", function () {
             template: "",
             templatesOverride: {}
         });
+        assert.strictEqual(prep.srcDataType, "hl7v2");
         assert.strictEqual(path.basename(prep.templateDirectory), "Hl7v2");
         assert.strictEqual(prep.fallbackTemplateDirectory, HL7V2_LIQUID_TEMPLATE_LOCATION);
     });

@@ -191,25 +191,6 @@
         });
     }
 
-    function applyCcdaNoConvertState() {
-        if (typeof outputCode !== 'undefined' && outputCode) {
-            outputCode.setValue('');
-        }
-        if (typeof hideResultError === 'function') {
-            hideResultError();
-        }
-        if (typeof setUnusedLegend === 'function') {
-            setUnusedLegend(false);
-        }
-        if (typeof clearLatestDebugInfo === 'function') {
-            clearLatestDebugInfo();
-        }
-        $('#conversion-status').text('C-CDA conversion is not available yet.');
-        if (typeof refreshEditors === 'function') {
-            refreshEditors();
-        }
-    }
-
     function stripRootPrefix(relPath, rootPrefix) {
         var prefix = rootPrefix + '/';
         return relPath.indexOf(prefix) === 0 ? relPath.substring(prefix.length) : relPath;
@@ -245,6 +226,7 @@
         if (typeof dataEditor !== 'undefined' && dataEditor) {
             dataEditor.setOption('mode', fam === 'ccda' ? 'xml' : 'hl7v2');
         }
+        currentDataType = fam;
 
         var sampleDone = !startupSampleRel;
         var tplDone = !startupTplRel;
@@ -253,9 +235,7 @@
             if (!sampleDone || !tplDone) {
                 return;
             }
-            if (fam === 'ccda') {
-                applyCcdaNoConvertState();
-            } else if (startupSampleRel) {
+            if (startupSampleRel) {
                 convertData(true);
             }
         }
@@ -484,6 +464,7 @@
     function activateOpenedProject(proj) {
         var startupFam = (proj.manifest && proj.manifest.startup && proj.manifest.startup.family) || 'hl7v2';
         activeProjectFamily = startupFam;
+        currentDataType = startupFam;
         persistProject(proj);
         openedStartupForIdentity = null;
         selectedSample = null;
@@ -500,6 +481,7 @@
         }
         persistProject(null);
         activeProjectFamily = 'hl7v2';
+        currentDataType = 'hl7v2';
         openedStartupForIdentity = null;
         selectedSample = null;
         selectedTemplate = null;
@@ -602,7 +584,6 @@
     window.saveProjectFile = saveProjectFile;
     window.refreshProjectFileBrowser = refreshProjectFileBrowser;
     window.openProjectTemplateClean = openProjectTemplateClean;
-    window.applyCcdaNoConvertState = applyCcdaNoConvertState;
 
     $(document).ready(function () {
         var initial = readStoredProject();

@@ -128,6 +128,7 @@ export async function prepareProjectConversion(body = {}) {
             throw httpError(400, "Invalid path.");
         }
         return {
+            srcDataType: isCcdaOnly ? "ccda" : "hl7v2",
             templateDirectory: tplReal,
             strictOverridesOnly: false,
             fallbackTemplateDirectory: isCcdaOnly ? CCDA_LIQUID_TEMPLATE_LOCATION : HL7V2_LIQUID_TEMPLATE_LOCATION,
@@ -201,6 +202,7 @@ export async function prepareProjectConversion(body = {}) {
     }
 
     return {
+        srcDataType: "hl7v2",
         templateDirectory: undefined,
         strictOverridesOnly: true,
         templatesOverride: mergedOverrides
