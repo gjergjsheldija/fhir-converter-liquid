@@ -334,6 +334,17 @@ describe("dotLiquidCompat", () => {
             expect(normalizeVariableNameTypos(input)).to.equal(input);
         });
 
+        it("normalizes REF_prac to REF_Prac in the REF PRD ServiceRequest include", () => {
+            const input = "{% include 'Resource/ServiceRequest' PRD: prdSegment, REF_prac: full_PractitionerRole_ID_PRD, ID: serviceRequestId_RF1 %}";
+            const expected = "{% include 'Resource/ServiceRequest' PRD: prdSegment, REF_Prac: full_PractitionerRole_ID_PRD, ID: serviceRequestId_RF1 %}";
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("leaves REF_Prac, REF_pract and longer REF_prac names unchanged", () => {
+            const input = "{{ REF_Prac }} {{ REF_pract }} {{ full_REF_prac }}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
+
         it("reads textString where the template captured textString but read textstring (MedicationRequest patientInstruction)", () => {
             const input = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textstring  | split: "~" | join: "+" }}{% endcapture -%}';
             const expected = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textString  | split: "~" | join: "+" }}{% endcapture -%}';

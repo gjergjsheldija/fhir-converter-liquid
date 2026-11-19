@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 125,
+    "pass": 129,
     "count": 0,
-    "content": 7
+    "content": 3
   },
   "cases": [
     {
@@ -962,106 +962,34 @@
     {
       "template": "REF_I12",
       "dataFile": "REF-I12-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 88,
       "expectedCount": 88,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
-            "paths": [
-              "performer.2",
-              "requester"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "REF_I12",
       "dataFile": "REF-I12-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 91,
       "expectedCount": 91,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
-            "paths": [
-              "performer.2",
-              "requester"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "REF_I14",
       "dataFile": "REF-I14-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 86,
       "expectedCount": 86,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/7b0b2ae9-0381-7dd9-e7a7-c4bd1ac4dd1f",
-            "paths": [
-              "performer.2",
-              "requester"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "REF_I14",
       "dataFile": "REF-I14-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 90,
       "expectedCount": 90,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "ServiceRequest/0dde495c-51b7-d47f-febd-19d8e4e764db",
-            "paths": [
-              "performer.2",
-              "requester"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "SIU_S12",
