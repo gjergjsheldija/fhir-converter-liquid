@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 29,
+    "pass": 31,
     "count": 0,
-    "content": 103
+    "content": 101
   },
   "cases": [
     {
@@ -17,12 +17,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -89,24 +83,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/513f3296-d7f1-67cf-3804-626f676bdfe6",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
-          {
-            "key": "Coverage/7b35da63-ce1c-52f4-960b-ae08c5a3410d",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
-          {
-            "key": "Coverage/832bb930-49c3-4505-d1ce-bcade656dba5",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
           {
             "key": "Patient/bab5ca58-f272-4c06-4b3f-f9661e45a22b",
             "paths": [
@@ -224,12 +200,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.7.extension.0.valueCodeableConcept.text",
@@ -296,12 +266,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.7.extension.0.valueCodeableConcept.text",
@@ -360,33 +324,10 @@
     {
       "template": "ADT_A04",
       "dataFile": "ADT04-23.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 21,
       "expectedCount": 21,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Coverage/bcc1f6b5-29eb-234c-e0f0-fe9afcf1a7bf",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
-          {
-            "key": "Coverage/c850f5a3-5de9-908d-e20a-8d2964a02f2a",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
-          {
-            "key": "Provenance/b8bf5f81-bc6a-5fda-5fb2-fd273ac267a8",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A04",
@@ -406,12 +347,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/118533a8-4806-05da-77f9-55e1e8b3cb48",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
           {
             "key": "Patient/f7a9494a-3fac-e0e1-78d8-d7c20410ca33",
             "paths": [
@@ -437,12 +372,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -510,12 +439,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
             "paths": [
               "extension.5.extension.0.valueCodeableConcept.text"
@@ -572,12 +495,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
             "paths": [
               "extension.5.extension.0.valueCodeableConcept.text"
@@ -633,12 +550,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -872,12 +783,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.7.extension.0.valueCodeableConcept.text",
@@ -943,12 +848,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -1081,12 +980,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -1352,12 +1245,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.7.extension.0.valueCodeableConcept.text",
@@ -1489,12 +1376,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -1704,12 +1585,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.7.extension.0.valueCodeableConcept.text",
@@ -1742,12 +1617,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -1932,12 +1801,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.7.extension.0.valueCodeableConcept.text",
@@ -1963,12 +1826,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -2002,12 +1859,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
             "paths": [
               "account.1"
@@ -2039,18 +1890,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/963a930c-4ef6-ff03-ae47-9c2b7edac8d5",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
             "paths": [
@@ -2215,12 +2054,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.5.extension.0.valueCodeableConcept.text",
@@ -2253,12 +2086,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Device/d65fb981-c111-4bb1-b58f-6dde5b80f922",
             "paths": [
               "identifier.1"
@@ -2289,27 +2116,10 @@
     {
       "template": "OML_O21",
       "dataFile": "MDHHS-OML-O21-1.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 21,
       "expectedCount": 21,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Coverage/b4494dc0-e11b-658a-8cce-5241ed1ccdc0",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
-          {
-            "key": "Provenance/a8f237a8-b330-c901-c5c0-5f847b8ecd91",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "OML_O21",
@@ -2321,12 +2131,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/2839c7cc-58ca-f08d-1358-a15fa18660d3",
-            "paths": [
-              "costToBeneficiary"
-            ]
-          },
           {
             "key": "Provenance/2f0f2d7d-7f93-e624-fa21-11d1c490897f",
             "paths": [
@@ -2350,23 +2154,8 @@
       "expectedCount": 64,
       "byType": [],
       "contentDelta": {
-        "unmatched": [
-          {
-            "kind": "missing",
-            "key": "Specimen/0755f744-dafd-776b-bff7-2d023e54406e"
-          },
-          {
-            "kind": "extra",
-            "key": "Specimen/904fd2f7-76fc-4b76-0414-7a375a309f23"
-          }
-        ],
+        "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -2378,12 +2167,6 @@
             "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
             "paths": [
               "text.div"
-            ]
-          },
-          {
-            "key": "Specimen/93cb07c2-034f-56b1-9a47-558f231eeea0",
-            "paths": [
-              "parent.0.reference"
             ]
           }
         ]
@@ -2397,16 +2180,7 @@
       "expectedCount": 50,
       "byType": [],
       "contentDelta": {
-        "unmatched": [
-          {
-            "kind": "missing",
-            "key": "Specimen/0755f744-dafd-776b-bff7-2d023e54406e"
-          },
-          {
-            "kind": "extra",
-            "key": "Specimen/904fd2f7-76fc-4b76-0414-7a375a309f23"
-          }
-        ],
+        "unmatched": [],
         "fields": [
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
@@ -2419,18 +2193,6 @@
             "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
             "paths": [
               "text.div"
-            ]
-          },
-          {
-            "key": "Specimen/0df7b0a3-d581-3f7c-4a37-9aba787cc146",
-            "paths": [
-              "parent.0.reference"
-            ]
-          },
-          {
-            "key": "Specimen/2c6b831e-bbce-171b-2ba6-c9f247ed1ee5",
-            "paths": [
-              "parent.0.reference"
             ]
           }
         ]
@@ -2446,12 +2208,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Device/d65fb981-c111-4bb1-b58f-6dde5b80f922",
             "paths": [
@@ -2516,12 +2272,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
@@ -2727,16 +2477,7 @@
       "expectedCount": 157,
       "byType": [],
       "contentDelta": {
-        "unmatched": [
-          {
-            "kind": "missing",
-            "key": "Specimen/0755f744-dafd-776b-bff7-2d023e54406e"
-          },
-          {
-            "kind": "extra",
-            "key": "Specimen/904fd2f7-76fc-4b76-0414-7a375a309f23"
-          }
-        ],
+        "unmatched": [],
         "fields": [
           {
             "key": "ChargeItem/bf0359a9-c8e5-c91c-a362-3fe4189e62a3",
@@ -2777,12 +2518,6 @@
             "key": "Provenance/4b8e3786-de8b-c12f-345b-3c83fc1c4a0d",
             "paths": [
               "text.div"
-            ]
-          },
-          {
-            "key": "Specimen/e42df22d-2f6d-d024-aa57-9d069936760a",
-            "paths": [
-              "parent.0.reference"
             ]
           }
         ]
@@ -2855,12 +2590,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
             "paths": [
               "dosageInstruction.0.patientInstruction",
@@ -2893,12 +2622,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
             "paths": [
@@ -2940,12 +2663,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
             "paths": [
               "dosageInstruction.0.patientInstruction",
@@ -2978,12 +2695,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "MedicationRequest/1dbb1f11-fb42-d773-10ed-907a2d3caa08",
             "paths": [
@@ -3110,12 +2821,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
             "paths": [
               "extension.5.extension.0.valueCodeableConcept.text"
@@ -3153,12 +2858,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
             "paths": [
@@ -3198,12 +2897,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
             "paths": [
               "extension.5.extension.0.valueCodeableConcept.text"
@@ -3241,12 +2934,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
             "paths": [
@@ -3844,12 +3531,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
-          {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
               "extension.7.extension.0.valueCodeableConcept.text",
@@ -3876,12 +3557,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Coverage/dfab6985-a691-c4f5-d2b2-6481fdfd59e4",
-            "paths": [
-              "costToBeneficiary.1"
-            ]
-          },
           {
             "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
             "paths": [
