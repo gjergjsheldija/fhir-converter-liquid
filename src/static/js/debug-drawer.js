@@ -602,6 +602,195 @@
         container.append(unusedSection);
     }
 
+    // --- Tab 4: Expected diff (editor Spec 06) ----------------------------------------
+
+    // BEGIN bundleResourceDiff (twin of src/lib/projects/bundleResourceDiff.js)
+    function bundleResourceDiff(actual, expected) {
+        function canonicalJson(value) {
+            if (Array.isArray(value)) {
+                return '[' + value.map(canonicalJson).join(',') + ']';
+            }
+            if (value && typeof value === 'object') {
+                return '{' + Object.keys(value).sort().map(function (k) {
+                    return JSON.stringify(k) + ':' + canonicalJson(value[k]);
+                }).join(',') + '}';
+            }
+            return JSON.stringify(value === undefined ? null : value);
+        }
+        function indexBundle(bundle) {
+            var keyed = new Map();
+            var unmatched = [];
+            var entries = bundle && Array.isArray(bundle.entry) ? bundle.entry : [];
+            entries.forEach(function (entry, index) {
+                var resource = (entry && entry.resource) || {};
+                var resourceType = resource.resourceType || 'Resource';
+                var id = resource.id;
+                if (!id && entry && typeof entry.fullUrl === 'string' && entry.fullUrl.indexOf('urn:uuid:') === 0) {
+                    id = entry.fullUrl.substring('urn:uuid:'.length);
+                }
+                if (!id) {
+                    unmatched.push({key: resourceType + '/' + index, resourceType: resourceType, id: ''});
+                    return;
+                }
+                var key = resourceType + '/' + id;
+                if (!keyed.has(key)) {
+                    keyed.set(key, []);
+                }
+                keyed.get(key).push({key: key, resourceType: resourceType, id: id, json: canonicalJson(resource)});
+            });
+            return {keyed: keyed, unmatched: unmatched};
+        }
+        function byKey(a, b) {
+            return a.key < b.key ? -1 : (a.key > b.key ? 1 : 0);
+        }
+        function strip(item) {
+            return {key: item.key, resourceType: item.resourceType, id: item.id};
+        }
+        var act = indexBundle(actual);
+        var exp = indexBundle(expected);
+        var added = act.unmatched.slice();
+        var removed = exp.unmatched.slice();
+        var changed = [];
+        act.keyed.forEach(function (actualList, key) {
+            var expectedList = exp.keyed.get(key) || [];
+            actualList.forEach(function (item, i) {
+                if (i >= expectedList.length) {
+                    added.push(strip(item));
+                } else if (item.json !== expectedList[i].json) {
+                    changed.push(strip(item));
+                }
+            });
+        });
+        exp.keyed.forEach(function (expectedList, key) {
+            var actualList = act.keyed.get(key) || [];
+            expectedList.forEach(function (item, i) {
+                if (i >= actualList.length) {
+                    removed.push(strip(item));
+                }
+            });
+        });
+        return {added: added.sort(byKey), removed: removed.sort(byKey), changed: changed.sort(byKey)};
+    }
+    // END bundleResourceDiff
+
+    // null = control hidden; otherwise {error: string} or {diff: {...}}
+    var expectedState = null;
+    var expectedRequestId = 0;
+
+    function expectedRelativePath() {
+        var proj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
+        var roots = (typeof getActiveProjectRoots === 'function') ? getActiveProjectRoots() : null;
+        var sample = (typeof selectedSample === 'string') ? selectedSample : '';
+        if (!proj || !roots || !roots.samples || sample.indexOf(roots.samples + '/') !== 0) {
+            return '';
+        }
+        var base = sample.substring(sample.lastIndexOf('/') + 1);
+        var dot = base.lastIndexOf('.');
+        if (dot > 0) {
+            base = base.substring(0, dot);
+        }
+        return base ? 'tests/expected/' + base + '.json' : '';
+    }
+
+    function setExpectedState(state) {
+        expectedState = state;
+        $('#debug-expected-tab').prop('hidden', !state);
+        if (state) {
+            var counts = state.diff
+                ? ' (+' + state.diff.added.length + ' \u2212' + state.diff.removed.length + ' ~' + state.diff.changed.length + ')'
+                : '';
+            $('#debug-expected-tab').text('Expected diff' + counts);
+        } else if (activeTab === 'expected') {
+            setDebugTab('hl7');
+            return;
+        }
+        if (isOpen && activeTab === 'expected') {
+            renderActivePanel();
+        }
+    }
+
+    function refreshExpectedDiff() {
+        expectedRequestId += 1;
+        var requestId = expectedRequestId;
+        var info = window.latestDebugInfo || null;
+        var relPath = expectedRelativePath();
+        if (!info || !info.fhirResource || !relPath || typeof fetchProjectFileText !== 'function') {
+            setExpectedState(null);
+            return;
+        }
+        var actual = info.fhirResource;
+        fetchProjectFileText(relPath, function (text) {
+            if (requestId !== expectedRequestId) {
+                return;
+            }
+            var expected;
+            try {
+                expected = JSON.parse(text);
+            } catch (ex) {
+                setExpectedState({error: relPath + ' is not valid JSON: ' + ex.message});
+                return;
+            }
+            if (!expected || typeof expected !== 'object' || Array.isArray(expected)) {
+                setExpectedState({error: relPath + ' is not a JSON object.'});
+                return;
+            }
+            setExpectedState({diff: bundleResourceDiff(actual, expected), path: relPath});
+        }, function (message) {
+            if (requestId !== expectedRequestId) {
+                return;
+            }
+            if (message === 'File not found.') {
+                setExpectedState(null);
+            } else {
+                setExpectedState({error: message || 'Could not read the expected bundle.'});
+            }
+        });
+    }
+
+    function renderExpectedPanel(filter) {
+        var container = $('#debug-panel-expected').empty();
+        if (!expectedState) {
+            container.append($('<div class="debug-empty">No expected bundle for this sample.</div>'));
+            return;
+        }
+        if (expectedState.error) {
+            container.append($('<div class="debug-expected-error" role="alert"></div>').text(expectedState.error));
+            return;
+        }
+        var q = (filter || '').trim().toLowerCase();
+        var diff = expectedState.diff;
+        container.append($('<div class="debug-meta"></div>').text('Compared with ' + expectedState.path));
+        [
+            {name: 'Added', cls: 'is-added', list: diff.added, jump: true},
+            {name: 'Removed', cls: 'is-removed', list: diff.removed, jump: false},
+            {name: 'Changed', cls: 'is-changed', list: diff.changed, jump: true}
+        ].forEach(function (group) {
+            var section = $('<div class="debug-diag-section"></div>');
+            section.append($('<div class="debug-diag-heading"></div>').text(group.name + ' (' + group.list.length + ')'));
+            var shown = group.list.filter(function (item) {
+                return !q || item.key.toLowerCase().indexOf(q) !== -1;
+            });
+            if (shown.length === 0) {
+                section.append($('<div class="debug-empty"></div>').text(group.list.length === 0 ? 'None.' : 'No matches.'));
+            }
+            shown.forEach(function (item) {
+                var row = $(group.jump ? '<button type="button" class="debug-diag-item"></button>' : '<div class="debug-diag-item"></div>');
+                row.append($('<span class="debug-pill"></span>').addClass(group.cls).text(group.name.toLowerCase()));
+                row.append($('<span class="debug-tree-key"></span>').text(item.resourceType));
+                if (item.id) {
+                    row.append($('<span class="debug-tree-preview"></span>').text(item.id));
+                }
+                if (group.jump) {
+                    row.on('click', function () {
+                        jumpToOutputResource(item.resourceType, item.id, null);
+                    });
+                }
+                section.append(row);
+            });
+            container.append(section);
+        });
+    }
+
     // --- Orchestration & State --------------------------------------------------------
 
     function renderActivePanel() {
@@ -621,6 +810,8 @@
             renderVarsPanel(info, filter);
         } else if (activeTab === 'diag') {
             renderDiagPanel(info, filter);
+        } else if (activeTab === 'expected') {
+            renderExpectedPanel(filter);
         }
     }
 
@@ -633,6 +824,7 @@
         $('#debug-panel-hl7').prop('hidden', tabId !== 'hl7');
         $('#debug-panel-vars').prop('hidden', tabId !== 'vars');
         $('#debug-panel-diag').prop('hidden', tabId !== 'diag');
+        $('#debug-panel-expected').prop('hidden', tabId !== 'expected');
         renderActivePanel();
     }
 
@@ -776,6 +968,7 @@
 
         $(document).on('fhir:debug-updated', function () {
             renderActivePanel();
+            refreshExpectedDiff();
         });
     });
 })();

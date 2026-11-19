@@ -114,6 +114,41 @@ describe("projects/projectFiles", function () {
         );
     });
 
+    it("reads tests/expected/<basename>.json and rejects other paths outside the roots", async function () {
+        const created = await createProject({
+            name: "Expected read",
+            parentPath: tempRoot,
+            family: "hl7v2",
+            startingPoint: "empty"
+        });
+        await mkdir(path.join(created.path, "tests/expected"), {recursive: true});
+        await writeFile(path.join(created.path, "tests/expected/ADT-A01-01.json"), "{\"resourceType\":\"Bundle\"}", "utf8");
+        await writeFile(path.join(created.path, "tests/expected/notes.txt"), "no", "utf8");
+        await writeFile(path.join(created.path, "tests/other.json"), "{}", "utf8");
+
+        const text = await readProjectFile({kind: "local", projectPath: created.path, filePath: "tests/expected/ADT-A01-01.json"});
+        assert.strictEqual(text, "{\"resourceType\":\"Bundle\"}");
+
+        for (const bad of [
+            "tests/expected/../other.json",
+            "tests/expected/sub/ADT-A01-01.json",
+            "tests/expected/notes.txt",
+            "tests/other.json",
+            "tests/expected/ADT-A01-01.json/",
+            "../tests/expected/ADT-A01-01.json"
+        ]) {
+            await assert.rejects(
+                () => readProjectFile({kind: "local", projectPath: created.path, filePath: bad}),
+                (err) => err.status === 400 && err.message === "Invalid path.",
+                bad
+            );
+        }
+        await assert.rejects(
+            () => readProjectFile({kind: "local", projectPath: created.path, filePath: "tests/expected/missing.json"}),
+            (err) => err.status === 404
+        );
+    });
+
     it("writes templates and samples under their allowed roots and rejects saving samples as templates", async function () {
         const created = await createProject({
             name: "Save rules",
