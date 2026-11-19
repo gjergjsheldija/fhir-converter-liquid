@@ -7,6 +7,8 @@
 // This module never touches the converter. The decide-whether-it-renders step
 // lives in the generate route so tests can stub the provider in isolation.
 
+import {dispatchProviderChat} from "./providerClients.js";
+
 // Build the prompt for the very first provider call: propose a Liquid template
 // from the raw HL7v2 message.
 export function buildInitialPrompt(message, prompt) {
@@ -37,33 +39,14 @@ export function buildFixPrompt(currentTemplate, errorMessage, unusedSegmentsText
 // The provider call. Accepts a single flat object and returns template text,
 // or throws an error whose message the route places in the 400 envelope.
 // Tests replace this module and never set a real API key.
-export async function callExternalAI({ provider, model, apiKey, baseUrl, temperature, prompt }) {
-    if (!baseUrl) {
-        throw new Error(`AI provider '${provider}' is not configured.`);
-    }
-
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-            model,
-            temperature,
-            messages: [{ role: "user", content: prompt }],
-        }),
+export async function callExternalAI({ provider, apiFormat, model, apiKey, baseUrl, temperature, prompt }) {
+    return dispatchProviderChat({
+        provider,
+        apiFormat,
+        model,
+        apiKey,
+        baseUrl,
+        temperature,
+        prompt
     });
-
-    if (!response.ok) {
-        throw new Error(`AI provider request failed with status ${response.status}.`);
-    }
-
-    const data = await response.json();
-    const content =
-        data && Array.isArray(data.choices) && data.choices.length > 0
-            ? data.choices[0].message.content
-            : "";
-
-    return typeof content === "string" ? content.replace(/^```liquid\n?|```$/g, "").trim() : "";
 }

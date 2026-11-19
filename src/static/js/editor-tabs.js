@@ -9,6 +9,25 @@ function tabLabelHtml(templateName, closeHtml) {
 
 function addTab(templateName, parentName) {
     if (!openTemplates.reduce((isOpen, template) => template.name === templateName ? true : isOpen, false)) {
+        var activeProj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
+        if (activeProj) {
+            var roots = (typeof getActiveProjectRoots === 'function') ? getActiveProjectRoots() : null;
+            var fullRel = (roots && roots.templates ? roots.templates + '/' : '') + templateName;
+            fetchProjectFileText(fullRel, function (data) {
+                currentTemplateReference[templateName] = data;
+
+                var tabs = $('#template-tabs');
+                var closeHtml = parentName
+                    ? "<button type=\"button\" class=\"close\" onclick=\"closeTab('" + templateName + "')\"><span>&times;</span></button>"
+                    : "";
+                var tabHtml = "<a class=\"nav-item nav-link\" onclick=\"changeTab('" + templateName + "')\">" + tabLabelHtml(templateName, closeHtml) + "</a>";
+                tabs.append(tabHtml);
+
+                openTemplates.push({ name: templateName, parent: parentName, data: data, projectPath: fullRel, active: true, marks: [] });
+                changeTab(templateName);
+            });
+            return;
+        }
         $.get(templateFileUrl(templateName), function (data) {
             currentTemplateReference[templateName] = data;
 

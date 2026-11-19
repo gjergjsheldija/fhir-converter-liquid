@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/gjergjsheldija/fhir-converter-liquid/actions/workflows/ci.yml/badge.svg)](https://github.com/gjergjsheldija/fhir-converter-liquid/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
+[![Node](https://img.shields.io/badge/node-26-brightgreen.svg)](package.json)
 
 **HL7v2 &rarr; FHIR R4, powered by [Liquid](https://shopify.github.io/liquid/) templates.**
 
@@ -31,10 +31,19 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 - Diagnostics on demand: `unusedSegments` (data the template ignored) and `invalidAccess` (fields the template reached for but weren't there)
 - Timezone-aware date/time conversion via request header
 
+**Editor**
+
+- Browser workspace for message, Liquid template, and FHIR result, with syntax coloring, folding, and a Liquid formatter
+- Files pane for samples, templates, and partials (Built-in, a local folder, or GitHub), collapsible, with foldable sections
+- Live conversion, plus a debug drawer: parsed HL7 tree, variable console, unused fields, and hover values on Liquid paths and HL7 fields
+- Includes list grouped by folder; open a partial, or start a new one by name
+- Projects: new HL7 v2 baseline or empty example, open a local folder or a GitHub repo, convert and save against that project
+- AI template generation from Settings. Paste an API key for OpenAI, Anthropic, Google Gemini, xAI (Grok), Mistral, DeepSeek, Groq, OpenRouter, or point at a local OpenAI-compatible server
+- Light, dark, and system themes
+
 **Serving & tooling**
 
 - REST API with interactive OpenAPI/Swagger docs (`/api-docs`)
-- Browser-based template editor (CodeMirror) with live message → FHIR preview and sample data/templates to try it against
 - Async, queue-driven conversion over AMQP (Apache ActiveMQ Artemis via `rhea`) for pipeline integration — optional, off by default
 - Prometheus metrics, structured logging, `/health` and `/version` endpoints
 - Multi-stage Docker build (prod / dev / test) with a docker-compose + Makefile workflow
@@ -72,13 +81,64 @@ curl -X POST http://localhost:2019/api/v1/convert/hl7v2/ADT_A01 \
 
 ## Web UI
 
-Open `http://localhost:2019` for the browser-based editor:
+Open `http://localhost:2019`. The screenshot above is that workspace: files on the left, the HL7 message and Liquid template in the middle, the FHIR bundle on the right, and the debug drawer along the bottom.
 
-1. Paste an HL7v2 message, or load one from the sample-data dropdown
-2. Pick a template — the FHIR output re-renders live as you edit either side
-3. Use the **API** tab for the same Swagger UI served at `/api-docs`, and the settings gear for dark mode
+1. Pick a sample, paste a message, or use **New sample** / **Import…** / **Save sample**. Samples you add in Built-in mode go to gitignored `src/service-samples/`, not the vendored `src/sample-data/` tree.
+2. Open a template. With **Convert while typing** on, the FHIR bundle updates as you edit either side. **Convert** runs it immediately.
+3. **Format** pretty-prints the Liquid or JSON in the active editor. **Save** writes the template to the built-in runtime tree, or into the open local project.
+4. **Includes** lists the partials for the open template, grouped by folder. Click one to open it. A name that is not on disk yet opens a new tab; nothing is written until you save.
+5. **Debug** opens the bottom drawer: parsed HL7, a variable console, and diagnostics (unused fields and bundle resources). Hover a Liquid path such as `firstSegments.MSH.10`, or a field in the message, to see the value conversion read.
+6. **API docs** opens the Swagger UI also served at `/api-docs`.
 
-> Edits made in the browser editor are a live preview only — they aren't persisted back to the server (there's no save endpoint). To ship a template change, edit the file under `src/service-templates/` and redeploy, or pass it as a `templatesOverrideBase64` override on the convert call.
+The files pane folds Samples, Templates, and Partials, and collapses to a rail.
+
+### Projects
+
+![New project dialog: HL7 v2 or C-CDA, Microsoft baseline or an empty example](docs/images/new-project.png)
+
+**New project** creates a folder and a `fhir-converter.json` manifest.
+
+| Choice | What you get |
+| --- | --- |
+| HL7 v2, Microsoft baseline | The pinned v7.0 template pack and four sample messages |
+| HL7 v2, empty example | One synthetic ADT message and one Patient template |
+| C-CDA | An XML sample and a template. This server stores the project. Conversion is not available yet |
+
+**Open project** loads a local folder, or a GitHub repository at a ref. Conversion and includes then resolve from that project. A GitHub project is read-only here: Save explains that and does not write. A local HL7 project can later copy in the official 139 HL7 v2 sample messages.
+
+### Includes
+
+![Includes popover grouped by folder, with a filter](docs/images/includes.png)
+
+### Settings and AI generate
+
+![Settings: theme, timezone, and AI template generation](docs/images/settings.png)
+
+**Settings** stores the theme, convert-while-typing, the timezone sent on each conversion, and AI template generation. Light, dark, and system apply as soon as you pick one. The API key stays in this browser.
+
+![The same workspace in the dark theme](docs/images/dark-ui.png)
+
+**Generate** uses the provider and key from Settings and does not ask for them again. Supported providers:
+
+| Provider | What you configure |
+| --- | --- |
+| OpenAI, Anthropic (Claude), Google Gemini, xAI (Grok), Mistral, DeepSeek, Groq, OpenRouter | API key. The server fills the base URL and a default model |
+| Local (oMLX / Ollama) | Base URL. No API key |
+| Custom (OpenAI-compatible) | Base URL and API key |
+
+If the chosen provider needs a key and none is stored, Generate opens Settings on the key field.
+
+### Where Save writes
+
+| Action | Destination |
+| --- | --- |
+| Save, built-in templates | `src/service-templates/Hl7v2/` |
+| Save, local project | That project's template folder |
+| Save, GitHub project | Refused. The checkout stays read-only |
+| Save sample, built-in | `src/service-samples/` (gitignored) |
+| Save sample, local project | That project's samples folder |
+
+Do not hand-edit vendored files under `src/templates/`, `src/sample-data/`, or the official expected-result fixtures. Restore them with the commands in [Working with Liquid templates](#working-with-liquid-templates).
 
 ## API
 
@@ -93,6 +153,16 @@ All endpoints are versioned under `/api/v1`. Full interactive reference: `GET /a
 | GET    | `/api/v1/sample-data/{file}`               | Fetch a specific sample message                                                                                              |
 | POST   | `/api/v1/convert/{srcDataType}`            | Convert data using an inline template (`templateBase64`, plus optional `templatesOverrideBase64`) passed in the request body |
 | POST   | `/api/v1/convert/{srcDataType}/{template}` | Convert data using a template already stored on the server                                                                   |
+| PUT    | `/api/v1/templates/{file}`                 | Save a template into the runtime template tree                                                                               |
+| PUT    | `/api/v1/sample-data/hl7v2/{file}`         | Save a user sample message                                                                                                   |
+| GET    | `/api/v1/ai/providers`                     | List AI providers (label, format, whether a key is required)                                                                 |
+| POST   | `/api/v1/templategenerate`                 | Generate a Liquid template from a message. A known provider takes `provider` and `apiKey`; the server supplies the URL and default model |
+| POST   | `/api/v1/projects`                         | Create a local project                                                                                                       |
+| POST   | `/api/v1/projects/open`                    | Open a local project folder                                                                                                  |
+| POST   | `/api/v1/projects/open-github`             | Open a GitHub project read-only                                                                                              |
+| POST   | `/api/v1/projects/convert`                 | Convert using the open project's templates                                                                                   |
+| PUT    | `/api/v1/projects/file`                    | Save a file into a local project                                                                                             |
+| POST   | `/api/v1/projects/official-samples`        | Copy the official 139 HL7 v2 samples into a local project                                                                    |
 | GET    | `/health`                                  | Liveness check                                                                                                               |
 | GET    | `/version`                                 | Build version                                                                                                                |
 
@@ -100,8 +170,9 @@ Useful query/header options on the convert endpoints:
 
 | Name                  | Where  | Effect                                                                                   |
 | --------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `unusedSegments=true` | query  | Include segments present in the source but never accessed by the template                |
+| `unusedSegments=true` | query  | Include segments present in the source but never accessed by the template               |
 | `invalidAccess=true`  | query  | Include fields the template tried to read that didn't exist                              |
+| `debug=true`          | query  | Include `debugInfo` (timing, parsed HL7, and template scopes) for the editor drawer      |
 | `timezone`            | header | Normalize date/times to a given IANA/offset timezone, e.g. `America/New_York` or `+0400` |
 
 ```bash
@@ -183,13 +254,15 @@ src/
 ├── lib/
 │   ├── parsers/             # hl7v2 source parser
 │   ├── liquid-converter/    # Liquid rendering engine
+│   ├── projects/            # Local and GitHub project open, convert, and save
+│   ├── ai/                  # Template-generation clients (OpenAI-compatible, Anthropic, Gemini)
 │   ├── outputProcessor/     # Post-processing of rendered output into FHIR JSON
 │   ├── workers/             # Worker-pool for CPU-bound conversion
 │   └── message-broker/      # Optional AMQP queue integration
 ├── templates/Hl7v2/         # Base Microsoft Liquid templates
 ├── service-templates/       # Templates served at runtime (regenerated from templates/)
 ├── sample-data/             # Bundled sample HL7v2 messages
-└── static/                  # Web UI (HTML/CSS/JS, CodeMirror editor)
+└── static/                  # Web UI (HTML/CSS/JS, CodeMirror editor, projects, debug drawer)
 ```
 
 ## Contributing

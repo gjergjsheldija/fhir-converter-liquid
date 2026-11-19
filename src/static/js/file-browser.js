@@ -28,6 +28,12 @@ var openSections = { samples: true, templates: true, partials: true };
 })();
 
 function refreshFileBrowser() {
+    if (typeof getActiveProject === 'function' && getActiveProject()) {
+        var shouldOpenProjectStartup = !didOpenStartupExample;
+        didOpenStartupExample = true;
+        refreshProjectFileBrowser({openStartup: shouldOpenProjectStartup});
+        return;
+    }
     $.ajax({url: getUrl('sample-data'), dataType: 'json', cache: false, success: function (sampleList) {
         $.ajax({url: getUrl('templates'), dataType: 'json', cache: false, success: function (templateList) {
             applyTemplateList(templateList.templates || []);
@@ -173,11 +179,11 @@ function folderNameFromHeading(heading) {
 function renderFileBrowser(messages) {
     var filter = ($('#file-filter').val() || '').toLowerCase();
     var samples = messages.filter(function (item) {
-        return item.messageName && item.messageName.toLowerCase().startsWith('hl7v2/');
+        return item && item.messageName && (item.projectSample === true || item.messageName.toLowerCase().startsWith('hl7v2/'));
     }).map(function (item) {
         return {
             full: item.messageName,
-            label: item.messageName.substring(item.messageName.indexOf('/') + 1),
+            label: item.label || item.messageName.substring(item.messageName.indexOf('/') + 1),
             source: item.source
         };
     });

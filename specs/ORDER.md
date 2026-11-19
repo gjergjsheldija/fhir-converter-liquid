@@ -1,17 +1,59 @@
-# Spec order
+# Spec implementation order
 
-Implement in this order. Do not start a later UI spec by editing the Bootstrap page the earlier spec is about to replace.
+Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec. Implement **one numbered spec per change**.
 
-1. **`specs/inline-conversion-plain-json.md`** — Inline convert requests use `srcData`, `template`, and `templatesOverride`. Do this before the generate route, because that route calls the converter with this body. **DONE (2026-11-16).** Base64 removed from the inline-conversion flow: the route handler (`src/routes.js`) and worker (`src/lib/workers/worker.js`) now pass plain `srcData`/`template`/`templatesOverride` strings with string-type validation (see requirement 5: no `*Base64` field names). The browser editor (`src/static/js/template-editor.js`) sends the plain JSON request shape, and the regression helper plus `src/routes.spec.js` were updated to match. Docs updated (`docs/api-summary.md`, `docs/convert-data-concept.md`). Tests: 438 passing, 17 failing (the 17 are known spec-05 cases only, unrelated to this change). ESLint clean. Successful response shape, endpoint paths, diagnostics query options, and timezone header behavior are unchanged; the stored-template endpoint is untouched.
-2. **`specs/web-ui/simple-editor.md`** — The editor page to build. Left file browser, Convert, Settings, New, Save, Copy, and Generate. The generate route is `specs/liquid-template-compat/06-generate-liquid-template-via-ai.md`. Do not implement the other UI specs while doing this.
-3. **`specs/web-ui/git-integration.md`** — After the simple editor. Do not start it during step 2.
+## Completed historical baselines (do not re-implement)
 
-Not scheduled:
+- **Inline conversion plain JSON** (`1eee076`, 2026-11-16): `POST /api/v1/convert/:srcDataType` accepts plain `srcData`, `template`, and `templatesOverride` strings (no Base64).
+- **AI template generation** (`46a9392` / `a8696f9`, 2026-11-17): `POST /api/v1/templategenerate`, `GET /api/v1/ai/providers`, browse routes, and FHIR send route.
+- **Upstream v7.0 pin verification** (`specs/liquid-template-compat/03-pin-and-refresh-upstream-baseline.md`, `17231b1`): pinned to Microsoft FHIR Converter tag `v7.0`, commit `253307fe6063a42b024ef7dbeb6aae157f1c2f61` (`914` `.liquid` + `2` `.json` files in `src/templates/Hl7v2/`, `139` `.hl7` fixtures, `132` official expected JSON bundles).
+- **Node 26 runtime migration** (`specs/runtime/01-migrate-to-node-26.md`, 2026-11-17): Node `>=26 <27`, mocha `12.0.3`, Docker `node:26-alpine`, CI matrix `[26]`. Host test baseline: `360 passing / 109 failing`, `npm run eslint` clean.
+- **Web UI usability 01–16** (`specs/web-ui/usability/01` through `16`, commits `5211de8`..`c0f0e16` + spec 01 pane scroll): viewport-locked scrolling panes, wrapping, startup example, draggable/filterable sidebar, MSH-9 suggestion, button rows, unused-field legend, clear-on-failure, status/confirmations, dirty Save/Cmd-S, inline New template, split Settings, GitHub/Folder help, library filter autocomplete, Included partials panel, 13px coding font.
 
-- **`specs/web-ui/modern-ide-workbench.md`** and **`specs/web-ui/file-browser-sidebar-pane.md`** — Replaced for now by `simple-editor.md`. Do not implement them.
+---
 
+## Implementation queue (Phases 1–5 — ALL DONE as of 2026-11-18)
 
-- **`specs/liquid-template-compat/03-pin-and-refresh-upstream-baseline.md`** — **Verified (2026-11-16).** Pin `v7.0` @ commit `253307fe6063a42b024ef7dbeb6aae157f1c2f61` confirmed immutable and current — it equals upstream `main` HEAD; there is no newer release beyond `v7.0`. Local `UPSTREAM_VERSION.md` already records this commit (no provenance change needed). Content comparison (sha256) of 916 local templates + 139 local samples against the pin: 1050 paths match exactly and 5 are the documented local-only edits (`Extensions/_PatientCitizenship.liquid`, `Extensions/_PatientNationality.liquid`, `Resource/_Coverage.liquid`, `Resource/_Patient.liquid`, `Resource/_PLLocation.liquid`). Manifest (`testcases-hl7v2.json`, 132 cases) resolves fully (0 missing inputs/expected); the 7 extra disk samples are local test-only, not upstream cases. Validation: `npm test` 438 passing / 17 failing (17 = known spec-05 upstream-version-mismatch cases only), `npm run eslint` clean, `git diff --check` clean. No baseline change was made — the pin was verified, not re-synced.
+### Phase 1 — Runtime & test harness (`specs/runtime/00-order.md`) — Done
+1. `specs/runtime/02-worker-pool-and-loader-cleanup.md` — **Done** (`e8cdb5e`)
 
-- **`specs/liquid-template-compat/05-fix-hl7v2-57-failures.md`** — **DONE** (2026-11-16). Both mechanisms implemented engine-only: §2 timezone-offset normalization (38 cases) and §3 empty-resource-id uuid attachment (9 cases). Spec 09's 3 "Observation of an event" divergence cases (OMG_O19-01, OML_O21-03, OUL_R24-01) are left as a **known upstream-version mismatch** — they exercise a feature absent from the pinned v7.0 engine, so no selector was guessed, per spec §8/§9. No tests weakened; `git diff --check` clean, only engine source changed. See `specs/ORDER.md` for the rewrite note that has since been resolved.
-- **`specs/liquid-template-compat/HANDOFF.md`** — Historical notes from 2026-11-15. Specs 01–04 are gone. Follow this file instead.
+### Phase 2 — Sidebar, Includes popover, and Sample management (`specs/web-ui/usability/00-order.md`) — Done
+2. `specs/web-ui/usability/17-collapse-files-pane.md` — **Done** (`5525eec`)
+3. `specs/web-ui/usability/18-fold-samples-templates-and-partials.md` — **Done** (`672e70c`)
+4. `specs/web-ui/usability/19-includes-popover-and-create-include.md` — **Done** (`f9b6d53`)
+5. `specs/web-ui/usability/20-add-and-import-hl7v2-samples.md` — **Done** (`a072704`)
+
+### Phase 3 — Color tokens, unified editor theme, and SVG icons (`specs/web-ui/theme/00-order.md`) — Done
+6. `specs/web-ui/theme/01-color-tokens.md` — **Done** (`869901a`)
+7. `specs/web-ui/theme/02-editor-theme.md` — **Done** (`af07140`)
+8. `specs/web-ui/theme/03-theme-control.md` — **Done** (`43e4df6`)
+9. `specs/web-ui/theme/04-icons.md` — **Done** (`0127da0`)
+
+### Phase 4 — Syntax coloring, folding, beautifier, and Debugger (`specs/web-ui/editor/00-order.md`) — Done
+10. `specs/web-ui/editor/01-syntax-coloring-hl7-liquid-json.md` — **Done** (`5d96194`)
+11. `specs/web-ui/editor/02-liquid-code-folding.md` — **Done** (`a55a2a0`)
+12. `specs/web-ui/editor/03-liquid-beautifier.md` — **Done** (`e42bc41`)
+13. `specs/web-ui/editor/04-debug-trace-and-hover-values.md` — **Done**
+14. `specs/web-ui/editor/05-bottom-debug-drawer.md` — **Done**
+
+### Phase 5 — Local & GitHub conversion projects (`specs/web-ui/projects/00-order.md`) — Done
+15. `specs/web-ui/projects/01-manifest.md` — **Done**
+16. `specs/web-ui/projects/02-create-empty-hl7v2.md` — **Done**
+17. `specs/web-ui/projects/03-create-baseline-hl7v2.md` — **Done**
+18. `specs/web-ui/projects/04-create-empty-ccda.md` — **Done**
+19. `specs/web-ui/projects/05-open-local-project.md` — **Done**
+20. `specs/web-ui/projects/06-open-github-project.md` — **Done**
+21. `specs/web-ui/projects/07-new-and-open-dialog.md` — **Done**
+22. `specs/web-ui/projects/08-open-startup-case.md` — **Done**
+23. `specs/web-ui/projects/09-convert-from-open-project.md` — **Done**
+24. `specs/web-ui/projects/10-save-into-the-open-project.md` — **Done**
+25. `specs/web-ui/projects/11-add-official-hl7v2-samples.md` — **Done**
+
+---
+
+## Separate track — Microsoft v7.0 Liquid template compatibility
+
+Keep compatibility changes strictly separate from Web UI commits (`AGENTS.md`):
+
+- `specs/liquid-template-compat/07-align-generate-uuid-empty-input.md` — Align `generate_uuid` empty/null handling with official Microsoft `v7.0` expected outputs.
+- `specs/liquid-template-compat/HANDOFF.md` — Historical triage notes for the remaining engine/template-drift cases.

@@ -15,9 +15,68 @@
     "defaultMaxIters": 4,
     "providers": {
       "openai": {
+        "label": "OpenAI",
+        "apiFormat": "openai",
         "apiKeyEnv": "AI_OPENAI_API_KEY",
         "baseUrl": "https://api.openai.com/v1",
-        "models": ["gpt-4o-mini", "gpt-4o"]
+        "models": ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o", "o4-mini"]
+      },
+      "anthropic": {
+        "label": "Anthropic (Claude)",
+        "apiFormat": "anthropic",
+        "apiKeyEnv": "AI_ANTHROPIC_API_KEY",
+        "baseUrl": "https://api.anthropic.com/v1",
+        "models": ["claude-sonnet-4-5", "claude-3-7-sonnet-latest", "claude-3-5-haiku-latest", "claude-opus-4-1"]
+      },
+      "google": {
+        "label": "Google Gemini",
+        "apiFormat": "google",
+        "apiKeyEnv": "AI_GOOGLE_API_KEY",
+        "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+        "models": ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"]
+      },
+      "xai": {
+        "label": "xAI (Grok)",
+        "apiFormat": "openai",
+        "apiKeyEnv": "AI_XAI_API_KEY",
+        "baseUrl": "https://api.x.ai/v1",
+        "models": ["grok-3-mini", "grok-3", "grok-4"]
+      },
+      "mistral": {
+        "label": "Mistral",
+        "apiFormat": "openai",
+        "apiKeyEnv": "AI_MISTRAL_API_KEY",
+        "baseUrl": "https://api.mistral.ai/v1",
+        "models": ["codestral-latest", "mistral-large-latest", "mistral-small-latest"]
+      },
+      "deepseek": {
+        "label": "DeepSeek",
+        "apiFormat": "openai",
+        "apiKeyEnv": "AI_DEEPSEEK_API_KEY",
+        "baseUrl": "https://api.deepseek.com/v1",
+        "models": ["deepseek-chat", "deepseek-reasoner"]
+      },
+      "groq": {
+        "label": "Groq",
+        "apiFormat": "openai",
+        "apiKeyEnv": "AI_GROQ_API_KEY",
+        "baseUrl": "https://api.groq.com/openai/v1",
+        "models": ["llama-3.3-70b-versatile", "qwen-qwq-32b"]
+      },
+      "openrouter": {
+        "label": "OpenRouter",
+        "apiFormat": "openai",
+        "apiKeyEnv": "AI_OPENROUTER_API_KEY",
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "models": ["anthropic/claude-sonnet-4", "google/gemini-2.5-flash", "openai/gpt-4.1-mini", "mistralai/codestral-2501"]
+      },
+      "local": {
+        "label": "Local (oMLX / Ollama)",
+        "apiFormat": "openai",
+        "apiKeyEnv": "AI_LOCAL_API_KEY",
+        "requiresApiKey": false,
+        "baseUrl": "http://127.0.0.1:8000/v1",
+        "models": ["Qwen3.8-27B-oQ4e-mtp", "qwen2.5-coder:32b"]
       }
     }
   }

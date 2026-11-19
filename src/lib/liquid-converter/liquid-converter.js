@@ -4,19 +4,31 @@
 // -------------------------------------------------------------------------------------------------
 
 import { Liquid } from "liquidjs";
+import { getNamespace } from "cls-hooked";
 import fs from "fs";
 import path from "path";
 import evaluate from "./tags/evaluate.js";
 import { external as filters } from "./liquid-helpers.js";
 import { applyDotLiquidCompatTransforms } from "./dotLiquidCompat.js";
+import { CLS_NAMESPACE } from "../constants/constants.js";
+import { DEBUG_COLLECTOR_KEY } from "./debugCollector.js";
 
 var liquidInstances = {};
+
+// Per-request debug collector lookup (undefined outside an active ?debug=true conversion).
+// getNamespace returns the namespace the worker registered via createNamespace(CLS_NAMESPACE);
+// if no namespace exists yet (e.g. unit tests that never import worker.js) the hooks are no-ops.
+function getDebugCollector() {
+    const namespace = getNamespace(CLS_NAMESPACE);
+    return namespace ? namespace.get(DEBUG_COLLECTOR_KEY) : undefined;
+}
 
 export function instance(
     createNew,
     dataHandler,
     templateFilesLocation,
-    currentContextTemplatesMap
+    currentContextTemplatesMap,
+    options = {}
 ) {
     if (createNew) {
         liquidInstances = {};
@@ -26,33 +38,54 @@ export function instance(
 
     if (!liquidInstances[dataType]) {
         const overrides = currentContextTemplatesMap || {};
+        const strictOverridesOnly = options && options.strictOverridesOnly === true;
+        const resolvedRoot = path.resolve(templateFilesLocation || ".");
 
         const engine = new Liquid({
-            root: templateFilesLocation,
+            root: resolvedRoot,
             extname: ".liquid",
             strictFilters: true,
             strictVariables: false,
             fs: {
                 readFileSync(templateFilePath) {
-                    let relativeName = templateFilePath
-                        .replace(templateFilesLocation, "")
+                    let relativeName = path.resolve(templateFilePath)
+                        .replace(resolvedRoot, "")
                         .replace(/^[/\\]/, "");
                     // Normalize path separators to forward slashes for override key matching
                     relativeName = relativeName.split(path.sep).join('/');
+                    // Partial-load marker for the opt-in debug collector: in this pipeline the
+                    // ROOT template is parsed from a string, so every fs read during a render is
+                    // a partial ({% include %} / {% evaluate %}). The wrapped renderer (below)
+                    // consumes the marker when that partial's renderTemplates runs.
+                    const collector = getDebugCollector();
+                    if (collector) {
+                        collector.markPartialLoaded(relativeName);
+                    }
                     if (relativeName in overrides) {
-                        return overrides[relativeName];
+                        return relativeName.toLowerCase().endsWith(".json")
+                            ? overrides[relativeName]
+                            : applyDotLiquidCompatTransforms(overrides[relativeName]);
+                    }
+                    if (strictOverridesOnly) {
+                        throw new Error(`ENOENT: template '${relativeName}' was not found in the open project.`);
                     }
                     return applyDotLiquidCompatTransforms(
                         fs.readFileSync(templateFilePath, "utf8")
                     );
                 },
                 existsSync(templateFilePath) {
-                    let relativeName = templateFilePath
-                        .replace(templateFilesLocation, "")
+                    let relativeName = path.resolve(templateFilePath)
+                        .replace(resolvedRoot, "")
                         .replace(/^[/\\]/, "");
                     // Normalize path separators to forward slashes for override key matching
                     relativeName = relativeName.split(path.sep).join('/');
-                    return relativeName in overrides || fs.existsSync(templateFilePath);
+                    if (relativeName in overrides) {
+                        return true;
+                    }
+                    if (strictOverridesOnly) {
+                        return false;
+                    }
+                    return fs.existsSync(templateFilePath);
                 },
                 resolve(root, file, ext) {
                     // Mirrors upstream's TemplateLocalFileSystem.GetAbsoluteTemplatePath
@@ -99,6 +132,22 @@ export function instance(
 
         engine.registerTag("evaluate", evaluate);
         filters.forEach((filter) => engine.registerFilter(filter.name, filter.func));
+
+        // Opt-in debug collector seam (?debug=true, Web UI only). The fs hook above marks
+        // the partial being loaded; the ROOT template is parsed from a string and never
+        // marks. When the marked partial's render runs, snapshot its Context scope so the
+        // Web UI can show per-partial runtime values. Both {% include %} and the custom
+        // {% evaluate %} tag reach here after their fs read (and after their hash values
+        // are assigned to the child scope), so one wrapper covers both. Non-debug requests
+        // pay nothing: getDebugCollector() is undefined outside an active debug conversion.
+        const originalRenderTemplates = engine.renderer.renderTemplates.bind(engine.renderer);
+        engine.renderer.renderTemplates = function (templates, ctx, emitter) {
+            const collector = getDebugCollector();
+            if (collector && collector.pendingPartial) {
+                collector.recordPartialRender(collector.takePendingPartial(), ctx);
+            }
+            return originalRenderTemplates(templates, ctx, emitter);
+        };
 
         liquidInstances[dataType] = engine;
     }

@@ -4,7 +4,7 @@
   "description": "HL7v2 to FHIR R4 converter using Liquid templates",
   "main": "src/index.js",
   "engines": {
-    "node": ">=18"
+    "node": ">=26 <27"
   },
   "repository": {
     "type": "git",
@@ -17,14 +17,14 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "test": "env NODE_ENV=testing AI_OPENAI_API_KEY=test-mock-key NODE_OPTIONS=\"--experimental-loader ./test/mocks/templategenerate-loader.mjs\" nyc node node_modules/mocha/bin/_mocha --reporter-options configFile=mocha.config.json --exit --timeout 10000",
+    "test": "env NODE_ENV=testing AI_OPENAI_API_KEY=test-mock-key NODE_OPTIONS=\"--import ./test/mocks/register-templategenerate-loader.mjs\" nyc node node_modules/mocha/bin/mocha.js --reporter-options configFile=mocha.config.json --exit --timeout 10000",
     "build": "npm install",
     "pretest": "node src/init-service.js",
     "posttest": "eslint {src,test}/**/*.js",
     "prestart": "node src/init-service.js",
     "start": "node src/index.js",
     "eslint": "eslint {src,test}/**/*.js",
-    "test:generate": "env NODE_ENV=testing AI_OPENAI_API_KEY=test-mock-key NODE_OPTIONS=\"--experimental-loader ./test/mocks/templategenerate-loader.mjs\" node node_modules/.bin/nyc --exit --timeout 10000 node node_modules/mocha/bin/_mocha src/routes.spec.js"
+    "test:generate": "env NODE_ENV=testing AI_OPENAI_API_KEY=test-mock-key NODE_OPTIONS=\"--import ./test/mocks/register-templategenerate-loader.mjs\" node node_modules/.bin/nyc --exit --timeout 10000 node node_modules/mocha/bin/mocha.js src/routes.spec.js"
   },
   "eslintConfig": {
     "env": {
@@ -96,7 +96,7 @@
   "devDependencies": {
     "assert": "^2.0.0",
     "eslint": "^8.20.0",
-    "mocha": "10.1.0",
+    "mocha": "12.0.3",
     "mocha-junit-reporter": "^2.0.2",
     "mocha-multi-reporters": "^1.5.1",
     "nyc": "^15.1.0",

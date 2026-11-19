@@ -8,8 +8,14 @@ import supertest from 'supertest';
 import express from 'express';
 import routes from './routes.js';
 import {mkdtemp, rm, unlink, writeFile} from 'fs/promises';
-import {join} from 'path';
+import {readFileSync} from 'fs';
+import {join, dirname} from 'path';
+import {fileURLToPath} from 'url';
 import {tmpdir} from 'os';
+import assert from 'assert';
+import {ExtraDynamicFieldInterceptor} from '../test/e2e-test/util/interceptors.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = routes(express());
 
@@ -837,6 +843,88 @@ describe('POST /api/v1/convert/hl7v2 (inline conversion)', function () {
                 }
             });
     });
+
+    describe('debug=true opt-in metadata', function () {
+        const adtSrcData = readFileSync(join(__dirname, 'sample-data', 'hl7v2', 'ADT04-23.hl7'), 'utf8');
+        const adtTemplate = readFileSync(join(__dirname, 'templates', 'Hl7v2', 'ADT_A04.liquid'), 'utf8');
+
+        it('should not return a debugInfo key when debug is not requested', async function () {
+            const response = await supertest(app)
+                .post("/api/v1/convert/hl7v2?unusedSegments=true")
+                .send({
+                    template: adtTemplate,
+                    srcData: adtSrcData,
+                    templatesOverride: {}
+                })
+                .expect(200);
+            assert(!('debugInfo' in response.body), 'debugInfo must be absent without ?debug=true');
+            assert(Array.isArray(response.body.unusedSegments), 'unusedSegments must still be present');
+        });
+
+        it('should return identical unusedSegments and fhirResource with and without debug=true', async function () {
+            const payload = {
+                template: adtTemplate,
+                srcData: adtSrcData,
+                templatesOverride: {}
+            };
+            const plain = await supertest(app)
+                .post("/api/v1/convert/hl7v2?unusedSegments=true&invalidAccess=true")
+                .send(payload)
+                .expect(200);
+            const debugged = await supertest(app)
+                .post("/api/v1/convert/hl7v2?unusedSegments=true&invalidAccess=true&debug=true")
+                .send(payload)
+                .expect(200);
+            assert.deepStrictEqual(debugged.body.unusedSegments, plain.body.unusedSegments,
+                'unusedSegments must be identical with and without debug=true');
+            assert.deepStrictEqual(debugged.body.invalidAccess, plain.body.invalidAccess,
+                'invalidAccess must be identical with and without debug=true');
+            const interceptor = new ExtraDynamicFieldInterceptor();
+            assert.deepStrictEqual(
+                interceptor.handle(JSON.parse(JSON.stringify(debugged.body.fhirResource))),
+                interceptor.handle(JSON.parse(JSON.stringify(plain.body.fhirResource))),
+                'fhirResource must be identical with and without debug=true'
+            );
+            assert(debugged.body.debugInfo, 'debugInfo must be present with ?debug=true');
+            assert(!('debugInfo' in plain.body), 'debugInfo must be absent without ?debug=true');
+        });
+
+        it('should return parsedHl7v2 and root/partial scopes with debug=true on ADT_A04', async function () {
+            const response = await supertest(app)
+                .post("/api/v1/convert/hl7v2?unusedSegments=true&debug=true")
+                .send({
+                    template: adtTemplate,
+                    srcData: adtSrcData,
+                    templatesOverride: {}
+                })
+                .expect(200);
+            const body = response.body;
+            assert(body.debugInfo, 'debugInfo must be present');
+            assert(typeof body.debugInfo.durationMs === 'number' && body.debugInfo.durationMs >= 0,
+                'debugInfo.durationMs must be a non-negative number');
+
+            const segments = body.debugInfo.parsedHl7v2.segments;
+            assert(Array.isArray(segments) && segments.length > 0, 'parsedHl7v2.segments must be a non-empty array');
+            const names = segments.map((s) => s.name);
+            assert(names.includes('MSH'), 'segments must contain MSH');
+            assert(names.includes('PID'), 'segments must contain PID');
+            const msh = segments.find((s) => s.name === 'MSH');
+            const msh10 = msh.fields.find((f) => f.index === 10);
+            assert(msh10, 'MSH field 10 must be serialized');
+            assert(msh10.accessed === true, 'MSH.10 is read by ADT_A04.liquid and must be marked accessed');
+
+            const scopes = body.debugInfo.scopes;
+            const root = scopes['__root__'];
+            assert(root, 'scopes.__root__ must be present');
+            assert(root.firstSegments, 'scopes.__root__.firstSegments must be captured');
+            assert(typeof root.bundleID === 'string' && root.bundleID.length > 0,
+                'scopes.__root__.bundleID must be a non-empty string');
+            const messageHeader = scopes['Resource/_MessageHeader.liquid'];
+            assert(messageHeader, 'scopes["Resource/_MessageHeader.liquid"] must be captured');
+            assert(messageHeader.callCount >= 1, 'partial callCount must be >= 1');
+            assert(messageHeader.lastScope, 'partial lastScope must be present');
+        });
+    });
 });
 
 describe('POST /api/v1/convert/hl7v2/:template (with stored template)', function () {
@@ -1150,6 +1238,35 @@ describe('POST /api/v1/templategenerate', function () {
                 done();
             });
     });
+
+    it('accepts only an API key for built-in providers (anthropic, google, xai, mistral) and resolves baseUrl and default model automatically', async function () {
+        for (const [prov, expectedHost] of [
+            ['anthropic', 'https://api.anthropic.com/v1'],
+            ['google', 'https://generativelanguage.googleapis.com/v1beta'],
+            ['xai', 'https://api.x.ai/v1'],
+            ['mistral', 'https://api.mistral.ai/v1']
+        ]) {
+            stubState.calls = 0;
+            stubState.candidates = ['{% assign firstSegments = hl7v2Data | get_first_segments: "MSH" -%}{% evaluate bundleID using \'ID/Bundle\' Data: firstSegments.MSH.10 -%}BUNDLE'];
+            stubState.errors = [];
+            stubState.sentInput = null;
+
+            const res = await supertest(app)
+                .post('/api/v1/templategenerate')
+                .send({
+                    sampleDataInline: validMessage,
+                    confirmedExternalSend: true,
+                    provider: prov,
+                    apiKey: 'key-for-' + prov
+                })
+                .expect(200);
+
+            assert.strictEqual(res.body.provider, prov);
+            assert.ok(res.body.model && res.body.model.length > 0, 'expected default model resolved for ' + prov);
+            assert.strictEqual(stubState.sentInput.apiKey, 'key-for-' + prov);
+            assert.strictEqual(stubState.sentInput.baseUrl, expectedHost);
+        }
+    });
 });
 
 describe('PUT /api/v1/templates', function () {
@@ -1277,5 +1394,101 @@ describe('browse and FHIR send', function () {
             .send({baseUrl: 'file:///tmp/fhir', resource: {resourceType: 'Patient'}})
             .expect(400)
             .end(done);
+    });
+});
+
+describe('Project API routes (/api/v1/projects/*)', function () {
+    let tempDir;
+
+    before(async function () {
+        tempDir = await mkdtemp(join(tmpdir(), 'fhir-routes-projects-'));
+    });
+
+    after(async function () {
+        if (tempDir) {
+            await rm(tempDir, {recursive: true, force: true});
+        }
+    });
+
+    it('rejects relative parentPath and unsupported C-CDA baseline on POST /api/v1/projects', async function () {
+        const rel = await supertest(app)
+            .post('/api/v1/projects')
+            .send({name: 'Demo', parentPath: 'relative/path', family: 'hl7v2', startingPoint: 'empty'})
+            .expect(400);
+        assert.strictEqual(rel.body.error.message, 'Enter an absolute folder path.');
+
+        const ccdaBase = await supertest(app)
+            .post('/api/v1/projects')
+            .send({name: 'CcdaBase', parentPath: tempDir, family: 'ccda', startingPoint: 'baseline'})
+            .expect(400);
+        assert.strictEqual(ccdaBase.body.error.message, 'C-CDA baseline is not installed on this server. Create an empty C-CDA project.');
+    });
+
+    it('creates, opens, lists, reads, converts, saves, and imports official samples in a local HL7v2 project', async function () {
+        const createRes = await supertest(app)
+            .post('/api/v1/projects')
+            .send({name: 'Route Project', parentPath: tempDir, family: 'hl7v2', startingPoint: 'empty'})
+            .expect(201);
+        const projPath = createRes.body.path;
+        assert(projPath.endsWith('/route-project'));
+
+        const openRes = await supertest(app)
+            .post('/api/v1/projects/open')
+            .send({path: projPath})
+            .expect(200);
+        assert.strictEqual(openRes.body.opened, true);
+
+        const filesRes = await supertest(app)
+            .post('/api/v1/projects/files')
+            .send({kind: 'local', path: projPath})
+            .expect(200);
+        assert.deepStrictEqual(filesRes.body.samples, ['samples/hl7v2/example.hl7']);
+        assert.deepStrictEqual(filesRes.body.templates, ['templates/Hl7v2/Example.liquid']);
+
+        const sampleRes = await supertest(app)
+            .post('/api/v1/projects/file')
+            .send({project: {kind: 'local', path: projPath}, path: 'samples/hl7v2/example.hl7'})
+            .expect(200);
+        assert(sampleRes.text.includes('DOE^JANE'));
+
+        await supertest(app)
+            .post('/api/v1/projects/file')
+            .send({project: {kind: 'local', path: projPath}, path: '../src/templates/Hl7v2/ADT_A04.liquid'})
+            .expect(400);
+
+        await supertest(app)
+            .put('/api/v1/projects/file')
+            .set('Content-Type', 'text/plain')
+            .set('X-Project-Path', projPath)
+            .set('X-Project-File', 'templates/Hl7v2/Resource/_ProjOnly.liquid')
+            .send('{ "resourceType": "Patient", "id": "route-proj-pat" }')
+            .expect(200);
+
+        const convRes = await supertest(app)
+            .post('/api/v1/projects/convert?unusedSegments=true&debug=true')
+            .send({
+                project: {kind: 'local', path: projPath},
+                srcData: sampleRes.text,
+                template: '{ "resourceType": "Bundle", "type": "batch", "entry": [ { "resource": {% include \'Resource/ProjOnly\' %} } ] }',
+                templatesOverride: {}
+            })
+            .expect(200);
+        assert.strictEqual(convRes.body.fhirResource.entry[0].resource.id, 'route-proj-pat');
+        assert(convRes.body.debugInfo && convRes.body.debugInfo.parsedHl7v2);
+
+        const officialRes = await supertest(app)
+            .post('/api/v1/projects/official-samples')
+            .send({path: projPath})
+            .expect(200);
+        assert.strictEqual(officialRes.body.copied + officialRes.body.unchanged, 139);
+        assert.deepStrictEqual(officialRes.body.kept, ['example.hl7']);
+    });
+
+    it('rejects invalid GitHub refs on POST /api/v1/projects/open-github', async function () {
+        const res = await supertest(app)
+            .post('/api/v1/projects/open-github')
+            .send({repo: 'acme/rules', ref: 'bad ref', token: ''})
+            .expect(400);
+        assert.strictEqual(res.body.error.message, 'Invalid ref.');
     });
 });

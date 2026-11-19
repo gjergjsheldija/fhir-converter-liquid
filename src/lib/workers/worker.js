@@ -19,6 +19,8 @@ import {parentPort} from 'worker_threads';
 import {workerTaskProcessor} from './workerUtils.js';
 import dataHandlerFactory from '../dataHandler/dataHandlerFactory.js';
 import pkg2 from 'cls-hooked';
+import {Context, toPromise} from 'liquidjs';
+import {createDebugCollector, serializeHl7v2Debug, DEBUG_COLLECTOR_KEY} from '../liquid-converter/debugCollector.js';
 
 const {clear, get, put} = pkg;
 
@@ -27,9 +29,17 @@ var session = createNamespace(CLS_NAMESPACE);
 
 var rebuildLiquidCache = true;
 
-function GetLiquidInstance(dataTypeHandler, templatesMap) {
-    let needToUseMap = templatesMap && Object.entries(templatesMap).length > 0 && templatesMap.constructor === Object;
-    var instance = _liquidInstance(needToUseMap ? true : rebuildLiquidCache, dataTypeHandler, HL7V2_LIQUID_TEMPLATE_LOCATION, templatesMap);
+function GetLiquidInstance(dataTypeHandler, templatesMap, templateDirectory, strictOverridesOnly) {
+    const hasCustomProjectContext = Boolean(templateDirectory || strictOverridesOnly);
+    const rootDir = templateDirectory || HL7V2_LIQUID_TEMPLATE_LOCATION;
+    let needToUseMap = hasCustomProjectContext || (templatesMap && Object.entries(templatesMap).length > 0 && templatesMap.constructor === Object);
+    var instance = _liquidInstance(
+        needToUseMap ? true : rebuildLiquidCache,
+        dataTypeHandler,
+        rootDir,
+        templatesMap,
+        {strictOverridesOnly: Boolean(strictOverridesOnly)}
+    );
     rebuildLiquidCache = needToUseMap ? true : false;
 
     return instance;
@@ -38,6 +48,28 @@ function GetLiquidInstance(dataTypeHandler, templatesMap) {
 function expireCache() {
     rebuildLiquidCache = true;
     clear();
+}
+
+// Exact mirror of liquidjs Liquid#parseAndRender (parse + new Context(scope, options,
+// {sync: false}) + renderer.renderTemplates consumed with toPromise) -- produces
+// byte-identical output to liquidInstance.parseAndRender -- but keeps the root Context
+// around so an active debug collector can snapshot the root scope once the render
+// completes (every {% assign %} in the root template is visible at that point). When
+// collector is null this is behaviorally identical to the previous parseAndRender call.
+function renderTemplateWithOptionalDebug(liquidInstance, preProcessedTemplate, dataContext, collector) {
+    // Non-debug requests keep the exact previous code path (parseAndRender) -- zero
+    // behavior or regression risk. Only an active collector needs the root Context.
+    if (!collector) {
+        return liquidInstance.parseAndRender(preProcessedTemplate, dataContext);
+    }
+    const templates = liquidInstance.parse(preProcessedTemplate);
+    const ctx = new Context(dataContext, liquidInstance.options, {sync: false});
+    // renderTemplates returns a generator iterator (not a Promise); toPromise consumes it
+    // exactly like Liquid#parseAndRender does, resolving with the rendered string.
+    return toPromise(liquidInstance.renderer.renderTemplates(templates, ctx)).then((rendered) => {
+        collector.setRootScope(ctx);
+        return rendered;
+    });
 }
 
 export function convertInlineHl7v2(msg) {
@@ -74,8 +106,23 @@ export function convertInlineHl7v2(msg) {
                 var dataTypeHandler = dataHandlerFactory.createDataHandler(msg.srcDataType);
 
                 if (dataTypeHandler.dataType === 'hl7v2') {
-                    let liquidInstance = GetLiquidInstance(dataTypeHandler, templatesMap);
+                    let liquidInstance = GetLiquidInstance(
+                        dataTypeHandler,
+                        templatesMap,
+                        msg.templateDirectory,
+                        msg.strictOverridesOnly
+                    );
                     session.set(TIMEZONE, msg.timezone);
+
+                    // Strictly opt-in debug metadata (Web UI ?debug=true). When active, a per-request
+                    // collector is stored on this request's CLS session so the liquid engine's
+                    // partial-render hooks (debugCollector.js) can attach to it. Non-debug requests
+                    // never create or store a collector and never pay for serialization.
+                    const collector = msg.debug === true ? createDebugCollector(s) : null;
+                    if (collector) {
+                        session.set(DEBUG_COLLECTOR_KEY, collector);
+                    }
+                    const debugStartedAt = collector ? Date.now() : 0;
 
                     dataTypeHandler.parseSrcData(s)
                         .then((parsedData) => {
@@ -85,14 +132,21 @@ export function convertInlineHl7v2(msg) {
                                 fulfill({'status': 200, 'resultMsg': result});
                                 return;
                             }
-                            liquidInstance.parseAndRender(dataTypeHandler.preProcessTemplate(templateString), dataContext)
+                            renderTemplateWithOptionalDebug(liquidInstance, dataTypeHandler.preProcessTemplate(templateString), dataContext, collector)
                                 .then((rendered) => {
                                     try {
                                         var result = dataTypeHandler.postProcessResult(rendered);
-                                        fulfill({
-                                            'status': 200,
-                                            'resultMsg': Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), {'fhirResource': result})
-                                        });
+                                        // getConversionResultMetadata (the unusedSegments report) MUST run before
+                                        // debugInfo is built: serializeHl7v2Debug performs marking reads
+                                        // (field.Repeats) that are only safe once this response's report is
+                                        // already built -- the tracked model is per-request, so those reads
+                                        // cannot influence this response's unusedSegments.
+                                        const metadata = dataTypeHandler.getConversionResultMetadata(dataContext.msg);
+                                        const resultMsg = Object.assign(metadata, {'fhirResource': result});
+                                        if (collector) {
+                                            resultMsg.debugInfo = collector.buildDebugInfo(Date.now() - debugStartedAt, serializeHl7v2Debug(s, dataContext.msg.v2));
+                                        }
+                                        fulfill({'status': 200, 'resultMsg': resultMsg});
                                     } catch (err) {
                                         reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString())});
                                     }

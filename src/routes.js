@@ -33,6 +33,12 @@ import {external as libraryFilters} from "./lib/liquid-converter/liquid-helpers.
 import {convertInlineHl7v2} from "./lib/workers/worker.js";
 import {listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
 import {sendResource} from "./lib/fhir/sendResource.js";
+import {createProject} from "./lib/projects/createProject.js";
+import {openLocalProject} from "./lib/projects/openProject.js";
+import {openGithubProject} from "./lib/projects/openGithubProject.js";
+import {listProjectFiles, readProjectFile, writeProjectFile} from "./lib/projects/projectFiles.js";
+import {prepareProjectConversion} from "./lib/projects/convertProject.js";
+import {copyOfficialHl7v2Samples} from "./lib/projects/officialSamples.js";
 
 const {json, text} = bodyparser;
 
@@ -426,6 +432,9 @@ export default function (app) {
             providers: configured,
             available: Object.keys(providers).map((name) => ({
                 name,
+                label: providers[name].label || name,
+                apiFormat: providers[name].apiFormat || "openai",
+                requiresApiKey: providers[name].requiresApiKey !== false,
                 baseUrl: providers[name].baseUrl || "",
                 models: Array.isArray(providers[name].models) ? providers[name].models : [],
                 configured: configured.includes(name)
@@ -492,27 +501,46 @@ export default function (app) {
                 }
                 const providerName = body.provider || (body.baseUrl ? "custom" : ai.defaultProvider);
                 const providers = ai.providers || {};
+                const knownProvider = providers[providerName] || null;
                 const configured = configuredProviderNames(ai).includes(providerName);
+                const inlineKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
+                const inlineBaseUrl = typeof body.baseUrl === "string" ? body.baseUrl.trim() : "";
+
                 let apiKey = "";
                 let baseUrl = "";
-                if (typeof body.baseUrl === "string" && body.baseUrl && typeof body.apiKey === "string" && body.apiKey) {
-                    apiKey = body.apiKey;
-                    baseUrl = body.baseUrl;
-                } else if (configured) {
-                    apiKey = process.env[providers[providerName].apiKeyEnv];
-                    baseUrl = providers[providerName].baseUrl;
+                let apiFormat = knownProvider && knownProvider.apiFormat ? knownProvider.apiFormat : "openai";
+
+                if (inlineBaseUrl && inlineKey) {
+                    apiKey = inlineKey;
+                    baseUrl = inlineBaseUrl;
+                } else if (knownProvider && inlineKey) {
+                    apiKey = inlineKey;
+                    baseUrl = inlineBaseUrl || knownProvider.baseUrl || "";
+                } else if (knownProvider && knownProvider.requiresApiKey === false && (inlineBaseUrl || knownProvider.baseUrl)) {
+                    apiKey = inlineKey || (knownProvider.apiKeyEnv ? (process.env[knownProvider.apiKeyEnv] || "") : "");
+                    baseUrl = inlineBaseUrl || knownProvider.baseUrl;
+                } else if (configured && knownProvider) {
+                    apiKey = process.env[knownProvider.apiKeyEnv];
+                    baseUrl = inlineBaseUrl || knownProvider.baseUrl;
                 } else {
                     const error = new Error(`AI provider '${providerName}' is not configured.`);
                     error.status = 400;
                     throw error;
                 }
+
+                const defaultModel = knownProvider && Array.isArray(knownProvider.models) && knownProvider.models.length > 0
+                    ? knownProvider.models[0]
+                    : "";
+                const resolvedModel = (typeof body.model === "string" && body.model.trim()) ? body.model.trim() : defaultModel;
+
                 return import("./lib/ai/generateTemplate.js").then((aiModule) => {
                     return runGenerateLoop(aiModule, {
                         message,
                         providerName,
+                        apiFormat,
                         apiKey,
                         baseUrl,
-                        model: body.model,
+                        model: resolvedModel,
                         prompt: body.prompt,
                         timezone: body.timezone,
                         maxIters,
@@ -543,6 +571,7 @@ export default function (app) {
                     : aiModule.buildFixPrompt(currentTemplate, lastError, "");
                 return aiModule.callExternalAI({
                     provider: options.providerName,
+                    apiFormat: options.apiFormat,
                     model: options.model,
                     apiKey: options.apiKey,
                     baseUrl: options.baseUrl,
@@ -686,6 +715,11 @@ export default function (app) {
      *         description: 'Flag about whether to return the "invalidAccess", only used in web portal'
      *         required: false
      *         type: boolean
+     *       - name: debug
+     *         in: query
+     *         description: 'Flag about whether to return the "debugInfo" (runtime debug metadata), only used in web portal'
+     *         required: false
+     *         type: boolean
      *       - name: timezone
      *         in: header
      *         description: The timezone of the incoming message in numeric form, ex. +0400
@@ -702,6 +736,7 @@ export default function (app) {
     app.post("/api/v1/convert/:srcDataType", function (req, res) {
         const retUnusedSegments = req.query.unusedSegments == "true";
         const retInvalidAcces = req.query.invalidAccess == "true";
+        const retDebug = req.query.debug == "true";
         workerPool
             .exec({
                 type: "/api/convert/:srcDataType",
@@ -710,6 +745,7 @@ export default function (app) {
                 template: req.body.template,
                 templatesOverride: req.body.templatesOverride,
                 timezone: req.headers.timezone,
+                debug: retDebug,
             })
             .then((result) => {
                 const resultMessage = result.resultMsg;
@@ -718,6 +754,9 @@ export default function (app) {
                 }
                 if (!retInvalidAcces) {
                     delete resultMessage["invalidAccess"];
+                }
+                if (!retDebug) {
+                    delete resultMessage["debugInfo"];
                 }
                 res.status(result.status);
                 res.json(resultMessage);
@@ -802,6 +841,101 @@ export default function (app) {
                 res.status(result.status);
                 res.json(resultMessage);
             });
+    });
+
+    function sendProjectRouteError(res, err) {
+        const status = err && Number.isInteger(err.status) ? err.status : 400;
+        const code = status === 404 ? errorCodes.NotFound : errorCodes.BadRequest;
+        res.status(status).json(errorMessage(code, err && err.message ? err.message : "Project request failed."));
+    }
+
+    app.post("/api/v1/projects", function (req, res) {
+        createProject(req.body || {})
+            .then((created) => res.status(201).json(created))
+            .catch((err) => sendProjectRouteError(res, err));
+    });
+
+    app.post("/api/v1/projects/open", function (req, res) {
+        openLocalProject(req.body || {})
+            .then((result) => res.status(200).json(result))
+            .catch((err) => sendProjectRouteError(res, err));
+    });
+
+    app.post("/api/v1/projects/open-github", function (req, res) {
+        openGithubProject(req.body || {})
+            .then((result) => res.status(200).json(result))
+            .catch((err) => sendProjectRouteError(res, err));
+    });
+
+    app.post("/api/v1/projects/files", function (req, res) {
+        listProjectFiles(req.body || {})
+            .then((result) => res.status(200).json(result))
+            .catch((err) => sendProjectRouteError(res, err));
+    });
+
+    app.post("/api/v1/projects/file", function (req, res) {
+        readProjectFile(req.body || {})
+            .then((textContent) => {
+                res.setHeader("Content-Type", "text/plain; charset=utf-8");
+                res.status(200).send(textContent);
+            })
+            .catch((err) => sendProjectRouteError(res, err));
+    });
+
+    app.put("/api/v1/projects/file", function (req, res) {
+        const bodyText = typeof req.body === "string"
+            ? req.body
+            : (Buffer.isBuffer(req.body) ? req.body.toString("utf8") : "");
+        writeProjectFile({
+            projectPath: req.headers["x-project-path"],
+            relativeFilePath: req.headers["x-project-file"],
+            target: req.headers["x-project-target"],
+            content: bodyText
+        })
+            .then((result) => res.status(200).json(result))
+            .catch((err) => sendProjectRouteError(res, err));
+    });
+
+    app.post("/api/v1/projects/convert", function (req, res) {
+        const retUnusedSegments = req.query.unusedSegments == "true";
+        const retInvalidAccess = req.query.invalidAccess == "true";
+        const retDebug = req.query.debug == "true";
+        const body = req.body || {};
+
+        prepareProjectConversion(body)
+            .then((prep) =>
+                workerPool.exec({
+                    type: "/api/convert/:srcDataType",
+                    srcDataType: "hl7v2",
+                    srcData: body.srcData,
+                    template: body.template,
+                    templatesOverride: prep.templatesOverride,
+                    templateDirectory: prep.templateDirectory,
+                    strictOverridesOnly: prep.strictOverridesOnly,
+                    timezone: req.headers.timezone,
+                    debug: retDebug
+                })
+            )
+            .then((result) => {
+                const resultMessage = result.resultMsg;
+                if (!retUnusedSegments) {
+                    delete resultMessage["unusedSegments"];
+                }
+                if (!retInvalidAccess) {
+                    delete resultMessage["invalidAccess"];
+                }
+                if (!retDebug) {
+                    delete resultMessage["debugInfo"];
+                }
+                res.status(result.status).json(resultMessage);
+            })
+            .catch((err) => sendProjectRouteError(res, err));
+    });
+
+    app.post("/api/v1/projects/official-samples", function (req, res) {
+        copyOfficialHl7v2Samples(req.body && req.body.path)
+            .then((result) => res.status(200).json(result))
+            .catch((err) => sendProjectRouteError(res, err));
     });
 
     /**

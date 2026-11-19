@@ -14,6 +14,19 @@ function httpError(status, message) {
     return error;
 }
 
+export function isValidGitRef(ref) {
+    if (ref === undefined || ref === null || ref === "") {
+        return true;
+    }
+    if (typeof ref !== "string") {
+        return false;
+    }
+    if (/[\s\r\n]/.test(ref) || ref.includes("..")) {
+        return false;
+    }
+    return true;
+}
+
 export function parseGithubRepo(input) {
     const text = String(input || "").trim().replace(/\.git$/, "").replace(/\/+$/, "");
     const urlMatch = text.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)/i);
@@ -30,7 +43,10 @@ export function parseGithubRepo(input) {
     return {owner, repo};
 }
 
-export function githubContentsUrl(owner, repo, path) {
+export function githubContentsUrl(owner, repo, path, ref) {
+    if (!isValidGitRef(ref)) {
+        return null;
+    }
     const clean = String(path || "").replace(/^\/+/, "").replace(/\/+$/, "");
     if (clean.split("/").includes("..")) {
         return null;
@@ -38,7 +54,8 @@ export function githubContentsUrl(owner, repo, path) {
     const suffix = clean
         ? "/" + clean.split("/").filter(Boolean).map(encodeURIComponent).join("/")
         : "";
-    return `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents${suffix}`;
+    const query = ref ? `?ref=${encodeURIComponent(ref)}` : "";
+    return `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents${suffix}${query}`;
 }
 
 function githubHeaders(token) {
@@ -52,12 +69,15 @@ function githubHeaders(token) {
     return headers;
 }
 
-export async function listGithub(repoInput, path, token) {
+export async function listGithub(repoInput, path, token, ref) {
     const repo = parseGithubRepo(repoInput);
     if (!repo) {
         throw httpError(400, "Enter a GitHub repo as owner/repo or a github.com URL.");
     }
-    const url = githubContentsUrl(repo.owner, repo.repo, path);
+    if (!isValidGitRef(ref)) {
+        throw httpError(400, "Invalid ref.");
+    }
+    const url = githubContentsUrl(repo.owner, repo.repo, path, ref);
     if (!url) {
         throw httpError(400, "Invalid path.");
     }
@@ -90,12 +110,15 @@ export async function listGithub(repoInput, path, token) {
     };
 }
 
-export async function readGithubFile(repoInput, path, token) {
+export async function readGithubFile(repoInput, path, token, ref) {
     const repo = parseGithubRepo(repoInput);
     if (!repo) {
         throw httpError(400, "Enter a GitHub repo as owner/repo or a github.com URL.");
     }
-    const url = githubContentsUrl(repo.owner, repo.repo, path);
+    if (!isValidGitRef(ref)) {
+        throw httpError(400, "Invalid ref.");
+    }
+    const url = githubContentsUrl(repo.owner, repo.repo, path, ref);
     if (!url || !String(path || "").trim()) {
         throw httpError(400, "Invalid path.");
     }
@@ -115,6 +138,50 @@ export async function readGithubFile(repoInput, path, token) {
         throw httpError(400, "File is too large.");
     }
     return text;
+}
+
+export async function listGithubTree(repoInput, token, ref) {
+    const repo = parseGithubRepo(repoInput);
+    if (!repo) {
+        throw httpError(400, "Enter a GitHub repo as owner/repo or a github.com URL.");
+    }
+    if (!isValidGitRef(ref)) {
+        throw httpError(400, "Invalid ref.");
+    }
+    let effectiveRef = typeof ref === "string" ? ref.trim() : "";
+    if (!effectiveRef) {
+        const metaUrl = `https://api.github.com/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.repo)}`;
+        const metaResp = await fetch(metaUrl, {headers: githubHeaders(token)});
+        if (metaResp.status === 404) {
+            throw httpError(404, "Repository or ref not found.");
+        }
+        if (!metaResp.ok) {
+            throw httpError(400, `GitHub request failed with status ${metaResp.status}.`);
+        }
+        const meta = await metaResp.json();
+        effectiveRef = meta && typeof meta.default_branch === "string" && meta.default_branch
+            ? meta.default_branch
+            : "main";
+    }
+    const treeUrl = `https://api.github.com/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.repo)}/git/trees/${encodeURIComponent(effectiveRef)}?recursive=1`;
+    const treeResp = await fetch(treeUrl, {headers: githubHeaders(token)});
+    if (treeResp.status === 404) {
+        throw httpError(404, "Repository or ref not found.");
+    }
+    if (!treeResp.ok) {
+        throw httpError(400, `GitHub request failed with status ${treeResp.status}.`);
+    }
+    const treeData = await treeResp.json();
+    const blobs = Array.isArray(treeData && treeData.tree)
+        ? treeData.tree
+            .filter((item) => item && item.type === "blob" && typeof item.path === "string")
+            .map((item) => item.path)
+        : [];
+    return {
+        repo: `${repo.owner}/${repo.repo}`,
+        ref: effectiveRef,
+        paths: blobs
+    };
 }
 
 export async function listFolder(input) {

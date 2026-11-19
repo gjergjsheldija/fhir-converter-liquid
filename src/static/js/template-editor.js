@@ -14,6 +14,7 @@ var activeTemplate = defaultTemplate;
 var openTemplates = [activeTemplate];
 var currentTemplateReference = {[activeTemplate.name]: activeTemplate.data}; // This is what we set the template to initially
 var latestRequest = 0;
+var latestDebugInfo = null;
 var nextRequestCall;
 var waitForTypingTimeout = 100;
 var bannerFade;
@@ -31,12 +32,28 @@ var currentEditorSettings = {
     fhirUsername: '',
     fhirPassword: '',
     aiProvider: 'openai',
-    aiBaseUrl: 'https://api.openai.com/v1',
-    aiModel: 'gpt-4o-mini',
-    aiApiKey: ''
+    aiBaseUrl: '',
+    aiModel: 'gpt-4.1-mini',
+    aiApiKey: '',
+    aiPrompt: '',
+    aiApiKeys: {},
+    aiModels: {},
+    aiBaseUrls: {}
 };
 try {
     currentEditorSettings = Object.assign(currentEditorSettings, JSON.parse(localStorage.getItem('fhirConverterSettings') || '{}'));
+    if (!currentEditorSettings.aiApiKeys || typeof currentEditorSettings.aiApiKeys !== 'object') {
+        currentEditorSettings.aiApiKeys = {};
+    }
+    if (!currentEditorSettings.aiModels || typeof currentEditorSettings.aiModels !== 'object') {
+        currentEditorSettings.aiModels = {};
+    }
+    if (!currentEditorSettings.aiBaseUrls || typeof currentEditorSettings.aiBaseUrls !== 'object') {
+        currentEditorSettings.aiBaseUrls = {};
+    }
+    if (currentEditorSettings.aiApiKey && currentEditorSettings.aiProvider && !currentEditorSettings.aiApiKeys[currentEditorSettings.aiProvider]) {
+        currentEditorSettings.aiApiKeys[currentEditorSettings.aiProvider] = currentEditorSettings.aiApiKey;
+    }
 } catch (ex) {
     // Keep the defaults when stored settings are not JSON.
 }
@@ -106,7 +123,12 @@ function getUrl(endpoint, fileName) {
 
 function getDataTypeSpecificUrl(endpoint, fileName) {
     const baseUrl = `/api/v1/${endpoint}/${currentDataType}${fileName ? '/' + fileName : ''}`;
-    return `${baseUrl}?unusedSegments=true&invalidAccess=true`;
+    return `${baseUrl}?unusedSegments=true&invalidAccess=true&debug=true`;
+}
+
+function clearLatestDebugInfo() {
+    window.latestDebugInfo = null;
+    $(document).trigger('fhir:debug-updated', [window.latestDebugInfo]);
 }
 
 function showConversionError(message) {
@@ -209,6 +231,15 @@ function convertData(force) {
         if (dataEditor.getValue() && dataEditor.getValue() !== "") {
             reqBody.srcData = dataEditor.getValue();
         } else {
+            clearLatestDebugInfo();
+            return;
+        }
+
+        var activeProj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
+        if (activeProj && typeof getActiveProjectFamily === 'function' && getActiveProjectFamily() === 'ccda') {
+            if (typeof applyCcdaNoConvertState === 'function') {
+                applyCcdaNoConvertState();
+            }
             return;
         }
 
@@ -235,7 +266,12 @@ function convertData(force) {
         if (currentEditorSettings.timezone) {
             headers.timezone = currentEditorSettings.timezone;
         }
-        $.ajax(getDataTypeSpecificUrl('convert'), {
+        var convertEndpointUrl = getDataTypeSpecificUrl('convert');
+        if (activeProj) {
+            convertEndpointUrl = '/api/v1/projects/convert?unusedSegments=true&invalidAccess=true&debug=true';
+            reqBody.project = activeProj;
+        }
+        $.ajax(convertEndpointUrl, {
             'data': JSON.stringify(reqBody),
             'type': 'POST',
             'processData': false,
@@ -244,10 +280,16 @@ function convertData(force) {
             'success': function (data) {
                 if (latestRequest === requestNumber) {
                     hasSuccessfulCallBeenMade = true;
+                    window.latestDebugInfo = (data && data.debugInfo) ? data.debugInfo : null;
+                    if (window.latestDebugInfo) {
+                        window.latestDebugInfo.unusedSegments = data.unusedSegments || [];
+                        window.latestDebugInfo.fhirResource = data.fhirResource || null;
+                    }
                     // Formatting output and splitting on line breaks (taking platform variations into consideration)
                     outputLines = JSON.stringify(data.fhirResource, null, 2).replace(/(?:\r\n|\r|\n)/g, '\n').split('\n');
 
                     outputCode.setValue(outputLines.join('\n'));
+                    $(document).trigger('fhir:debug-updated', [window.latestDebugInfo]);
                     hideResultError();
                     $('#conversion-status').text(conversionStatusLabel(data.fhirResource));
                     hideConversionError();
@@ -323,6 +365,7 @@ function convertData(force) {
                 if (latestRequest !== requestNumber) {
                     return;
                 }
+                clearLatestDebugInfo();
                 var message = 'Conversion failed.';
                 try {
                     var errObj = JSON.parse(err.responseText);
@@ -715,7 +758,7 @@ function changeDataType(dataType) {
 
         switch (dataType) {
             case 'HL7V2':
-                $('#editor-main').addClass('vertical-content');
+                $('#editor-main, #editor-panes').addClass('vertical-content');
 
                 // Create splits for editor areas
                 templateOutputSplit = Split(['.template-area', '.output-area'], {
@@ -736,7 +779,7 @@ function changeDataType(dataType) {
                 dataEditor.setOption("mode", "hl7v2");
                 break;
             case 'CDA':
-                $('#editor-main').removeClass('vertical-content');
+                $('#editor-main, #editor-panes').removeClass('vertical-content');
 
                 // Create splits for editor areas
                 templateOutputSplit = Split(['.template-area', '.output-area'], {
@@ -1054,6 +1097,11 @@ $(document).ready(function () {
         $('#settings-fhir-username').val(settings.fhirUsername || '');
         $('#settings-fhir-password').val(settings.fhirPassword || '');
         showFhirAuthFields();
+        populateAiSettingsModal();
+    });
+
+    $("#settings-modal").on('hidden.bs.modal', function () {
+        $('#settings-ai-notice').text('').prop('hidden', true);
     });
 
     $('input[name="settings-theme"]').on('change', function () {
@@ -1065,6 +1113,11 @@ $(document).ready(function () {
 
     $('#settings-fhir-auth').on('change', showFhirAuthFields);
 
+    $('#settings-ai-provider').on('change', function () {
+        stashCurrentAiModalInputs();
+        syncAiProviderFields($('#settings-ai-provider').val());
+    });
+
     $('#settings-save-button').on('click', function () {
         var settings = getSettings();
         settings.theme = $('input[name="settings-theme"]:checked').val() || settings.theme || 'light';
@@ -1075,6 +1128,7 @@ $(document).ready(function () {
         settings.fhirToken = $('#settings-fhir-token').val();
         settings.fhirUsername = $('#settings-fhir-username').val();
         settings.fhirPassword = $('#settings-fhir-password').val();
+        saveAiFieldsFromModal(settings);
         setSettings(settings);
     });
 
@@ -1084,18 +1138,10 @@ $(document).ready(function () {
 
     $('#format-template-button').on('click', formatActiveTemplate);
     $('#generate-template-button').on('click', function () {
-        $('#generate-modal').modal('show');
-        loadGenerateProviders();
-    });
-
-    $('#generate-provider').on('change', function () {
-        loadGenerateModels();
-    });
-
-    $('#generate-run-button').on('click', function () {
         runGenerateTemplate();
     });
 
+    loadAiProviderCatalog();
     changeDataType('HL7V2');
 });
 
@@ -1232,6 +1278,19 @@ function sampleAjaxError(xhr) {
 }
 
 function putSampleFile(fileName, text, callback) {
+    var activeProj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
+    if (activeProj) {
+        var roots = (typeof getActiveProjectRoots === 'function') ? getActiveProjectRoots() : null;
+        var relSample = ((roots && roots.samples) ? roots.samples : 'samples/hl7v2') + '/' + fileName;
+        saveProjectFile(relSample, 'sample', text, function (err) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            callback(null, relSample);
+        });
+        return;
+    }
     $.ajax({
         url: getUrl('sample-data', 'hl7v2/' + fileName),
         type: 'PUT',
@@ -1447,55 +1506,151 @@ function nextGeneratedName() {
     return 'generated-' + n + '.liquid';
 }
 
-function loadGenerateProviders() {
-    var settings = getSettings();
-    $('#generate-base-url').val(settings.aiBaseUrl || 'https://api.openai.com/v1');
-    $('#generate-model').val(settings.aiModel || 'gpt-4o-mini');
-    $('#generate-api-key').val(settings.aiApiKey || '');
-    $.getJSON('/api/v1/ai/providers', function (data) {
-        var select = $('#generate-provider');
-        var available = data.available || [];
-        select.empty();
-        select.append($('<option>').val('custom').text('Custom'));
-        available.forEach(function (item) {
-            var label = item.configured ? item.name : item.name + ' (needs a key)';
-            select.append($('<option>').val(item.name).text(label).data('provider', item));
+var aiProviderCatalog = {};
+var activeSettingsAiProvider = null;
+var AI_PROVIDER_LABELS = {
+    openai: 'OpenAI',
+    anthropic: 'Anthropic (Claude)',
+    google: 'Google Gemini',
+    xai: 'xAI (Grok)',
+    mistral: 'Mistral',
+    deepseek: 'DeepSeek',
+    groq: 'Groq',
+    openrouter: 'OpenRouter',
+    local: 'Local (oMLX / Ollama)'
+};
+
+function loadAiProviderCatalog(done) {
+    $.getJSON('/api/v1/ai/providers').done(function (data) {
+        var nextCatalog = {};
+        (data && data.available || []).forEach(function (item) {
+            nextCatalog[item.name] = item;
         });
-        if (settings.aiProvider && select.find('option[value="' + settings.aiProvider + '"]').length) {
-            select.val(settings.aiProvider);
-        } else if (available.length) {
-            select.val(available[0].name);
+        aiProviderCatalog = nextCatalog;
+        if (typeof done === 'function') {
+            done();
         }
-        applyGenerateProvider();
-        if (!available.length) {
-            $('#generate-empty').removeAttr('hidden');
-        } else {
-            $('#generate-empty').attr('hidden', true);
+    }).fail(function () {
+        if (typeof done === 'function') {
+            done();
         }
-        $('#generate-run-button').prop('disabled', false);
     });
 }
 
-function applyGenerateProvider() {
-    var item = $('#generate-provider option:selected').data('provider');
-    var list = $('#generate-model-list');
-    list.empty();
-    if (!item) {
+function providerNeedsCustomUrl(providerName) {
+    return providerName === 'custom' || providerName === 'local';
+}
+
+function stashCurrentAiModalInputs() {
+    if (!activeSettingsAiProvider) {
         return;
     }
-    if (item.baseUrl) {
-        $('#generate-base-url').val(item.baseUrl);
+    var settings = getSettings();
+    settings.aiApiKeys = settings.aiApiKeys || {};
+    settings.aiModels = settings.aiModels || {};
+    settings.aiBaseUrls = settings.aiBaseUrls || {};
+    settings.aiApiKeys[activeSettingsAiProvider] = $('#settings-ai-api-key').val() || '';
+    var typedModel = ($('#settings-ai-model').val() || '').trim();
+    if (typedModel) {
+        settings.aiModels[activeSettingsAiProvider] = typedModel;
     }
-    (item.models || []).forEach(function (name) {
-        list.append($('<option>').val(name));
-    });
-    if (item.models && item.models.length) {
-        $('#generate-model').val(item.models[0]);
+    if (providerNeedsCustomUrl(activeSettingsAiProvider)) {
+        settings.aiBaseUrls[activeSettingsAiProvider] = ($('#settings-ai-base-url').val() || '').trim();
     }
 }
 
-function loadGenerateModels() {
-    applyGenerateProvider();
+function syncAiProviderFields(providerName) {
+    activeSettingsAiProvider = providerName || 'openai';
+    var settings = getSettings();
+    var info = aiProviderCatalog[activeSettingsAiProvider] || null;
+    var models = (info && Array.isArray(info.models)) ? info.models : [];
+    var datalist = $('#settings-ai-model-list').empty();
+    models.forEach(function (m) {
+        datalist.append($('<option>').val(m));
+    });
+
+    var savedKey = (settings.aiApiKeys && settings.aiApiKeys[activeSettingsAiProvider]) || '';
+    $('#settings-ai-api-key').val(savedKey);
+
+    if (info && info.requiresApiKey === false) {
+        $('#settings-ai-key-label').text('API key (optional for local server)');
+    } else if (info && info.configured) {
+        $('#settings-ai-key-label').text('API key (server key configured — optional override)');
+    } else {
+        $('#settings-ai-key-label').text('API key');
+    }
+
+    var savedModel = (settings.aiModels && settings.aiModels[activeSettingsAiProvider]) || '';
+    var defaultModel = models[0] || (activeSettingsAiProvider === 'custom' ? (settings.aiModel || '') : '');
+    $('#settings-ai-model').val(savedModel || defaultModel);
+    $('#settings-ai-model').attr('placeholder', defaultModel || 'Model ID');
+
+    var showUrl = providerNeedsCustomUrl(activeSettingsAiProvider);
+    $('#settings-ai-base-url-row').prop('hidden', !showUrl);
+    if (showUrl) {
+        var savedUrl = (settings.aiBaseUrls && settings.aiBaseUrls[activeSettingsAiProvider]) || '';
+        var fallbackUrl = (info && info.baseUrl) || (activeSettingsAiProvider === 'local' ? 'http://127.0.0.1:8000/v1' : (settings.aiBaseUrl || ''));
+        $('#settings-ai-base-url').val(savedUrl || fallbackUrl);
+    }
+}
+
+function populateAiSettingsModal() {
+    var render = function () {
+        var settings = getSettings();
+        var select = $('#settings-ai-provider');
+        var names = Object.keys(aiProviderCatalog);
+        if (names.length > 0) {
+            select.empty();
+            names.forEach(function (name) {
+                var item = aiProviderCatalog[name];
+                var baseLabel = item.label || AI_PROVIDER_LABELS[name] || name;
+                var text = baseLabel + (item.configured ? ' · server key ready' : '');
+                select.append($('<option>').val(name).text(text));
+            });
+            select.append($('<option>').val('custom').text('Custom (OpenAI-compatible)'));
+        }
+        var chosen = settings.aiProvider || 'openai';
+        if (!select.find('option[value="' + chosen + '"]').length) {
+            chosen = select.find('option').first().val() || 'openai';
+        }
+        activeSettingsAiProvider = null;
+        select.val(chosen);
+        $('#settings-ai-prompt').val(settings.aiPrompt || '');
+        syncAiProviderFields(chosen);
+    };
+
+    if (Object.keys(aiProviderCatalog).length === 0) {
+        loadAiProviderCatalog(render);
+    } else {
+        render();
+    }
+}
+
+function saveAiFieldsFromModal(settings) {
+    var provider = $('#settings-ai-provider').val() || 'openai';
+    var apiKey = $('#settings-ai-api-key').val() || '';
+    var model = ($('#settings-ai-model').val() || '').trim();
+    var baseUrl = ($('#settings-ai-base-url').val() || '').trim();
+    var prompt = ($('#settings-ai-prompt').val() || '').trim();
+
+    settings.aiProvider = provider;
+    settings.aiPrompt = prompt;
+    settings.aiApiKeys = settings.aiApiKeys || {};
+    settings.aiModels = settings.aiModels || {};
+    settings.aiBaseUrls = settings.aiBaseUrls || {};
+
+    settings.aiApiKeys[provider] = apiKey;
+    settings.aiApiKey = apiKey;
+    if (model) {
+        settings.aiModels[provider] = model;
+        settings.aiModel = model;
+    }
+    if (providerNeedsCustomUrl(provider)) {
+        settings.aiBaseUrls[provider] = baseUrl;
+        settings.aiBaseUrl = baseUrl;
+    } else {
+        settings.aiBaseUrl = '';
+    }
 }
 
 function sendToFhir() {
@@ -1543,48 +1698,90 @@ function sendToFhir() {
 }
 
 function runGenerateTemplate() {
-    if (!window.confirm('Send the current HL7 message to the selected AI provider?')) {
+    var srcMessage = dataEditor ? dataEditor.getValue() : '';
+    if (!srcMessage || !srcMessage.trim()) {
+        showConversionError('Load or paste an HL7 v2 message before generating a template.');
         return;
     }
-    var settings = getSettings();
-    settings.aiProvider = $('#generate-provider').val();
-    settings.aiBaseUrl = $('#generate-base-url').val().trim();
-    settings.aiModel = $('#generate-model').val().trim();
-    settings.aiApiKey = $('#generate-api-key').val();
-    setSettings(settings);
-    var payload = {
-        sampleDataInline: dataEditor.getValue(),
-        provider: settings.aiProvider,
-        model: settings.aiModel,
-        prompt: $('#generate-prompt').val(),
-        confirmedExternalSend: true
-    };
-    if (settings.aiApiKey) {
-        payload.baseUrl = settings.aiBaseUrl;
-        payload.apiKey = settings.aiApiKey;
-    }
-    $.ajax('/api/v1/templategenerate', {
-        data: JSON.stringify(payload),
-        type: 'POST',
-        processData: false,
-        contentType: 'application/json',
-        success: function (data) {
-            $('#generate-modal').modal('hide');
-            openLocalTemplate(nextGeneratedName(), data.generated || '', true);
-            if (data.fhirResource !== undefined) {
-                outputCode.setValue(JSON.stringify(data.fhirResource, null, 2));
-                $('#conversion-status').text(conversionStatusLabel(data.fhirResource));
-            } else {
-                $('#conversion-status').text('Converted');
-            }
-            hideConversionError();
-        },
-        error: function (err) {
-            var message = 'Conversion failed.';
-            if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message) {
-                message = err.responseJSON.error.message;
-            }
-            showConversionError(message);
+
+    var executeGenerate = function () {
+        var settings = getSettings();
+        var provider = settings.aiProvider || 'openai';
+        var info = aiProviderCatalog[provider] || null;
+        var apiKey = ((settings.aiApiKeys && settings.aiApiKeys[provider]) || settings.aiApiKey || '').trim();
+        var model = ((settings.aiModels && settings.aiModels[provider]) || settings.aiModel || (info && info.models && info.models[0]) || '').trim();
+        var customUrl = providerNeedsCustomUrl(provider)
+            ? (((settings.aiBaseUrls && settings.aiBaseUrls[provider]) || settings.aiBaseUrl || (info && info.baseUrl) || '').trim())
+            : '';
+
+        var hasServerKey = Boolean(info && info.configured);
+        var keyOptional = Boolean(info && info.requiresApiKey === false);
+
+        if ((provider === 'custom' && (!customUrl || !apiKey)) || (!keyOptional && !apiKey && !hasServerKey)) {
+            var displayLabel = (info && info.label) || provider;
+            $('#settings-ai-notice')
+                .text('Paste your ' + displayLabel + ' API key below and click Save, then click Generate.')
+                .prop('hidden', false);
+            $('#settings-modal').modal('show');
+            setTimeout(function () {
+                $('#settings-ai-api-key').focus();
+            }, 250);
+            return;
         }
-    });
+
+        var payload = {
+            sampleDataInline: srcMessage,
+            provider: provider,
+            model: model,
+            prompt: settings.aiPrompt || '',
+            confirmedExternalSend: true
+        };
+        if (apiKey) {
+            payload.apiKey = apiKey;
+        }
+        if (customUrl) {
+            payload.baseUrl = customUrl;
+        }
+
+        var $btn = $('#generate-template-button');
+        $btn.prop('disabled', true).text('Generating…');
+        $('#conversion-status').text('Generating template…');
+        hideConversionError();
+
+        $.ajax('/api/v1/templategenerate', {
+            data: JSON.stringify(payload),
+            type: 'POST',
+            processData: false,
+            contentType: 'application/json',
+            success: function (data) {
+                $btn.prop('disabled', false).text('Generate');
+                openLocalTemplate(nextGeneratedName(), data.generated || '', true);
+                if (data.fhirResource !== undefined) {
+                    outputCode.setValue(JSON.stringify(data.fhirResource, null, 2));
+                    $('#conversion-status').text(conversionStatusLabel(data.fhirResource));
+                } else {
+                    $('#conversion-status').text('Converted');
+                }
+                hideConversionError();
+                if (typeof refreshEditors === 'function') {
+                    refreshEditors();
+                }
+            },
+            error: function (err) {
+                $btn.prop('disabled', false).text('Generate');
+                $('#conversion-status').text('Failed');
+                var message = 'Template generation failed.';
+                if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message) {
+                    message = err.responseJSON.error.message;
+                }
+                showConversionError(message);
+            }
+        });
+    };
+
+    if (Object.keys(aiProviderCatalog).length === 0) {
+        loadAiProviderCatalog(executeGenerate);
+    } else {
+        executeGenerate();
+    }
 }

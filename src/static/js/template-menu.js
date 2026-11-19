@@ -5,6 +5,31 @@
 /* eslint-disable no-undef, no-unused-vars */
 
 function loadData(dataFile, done) {
+    var activeProj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
+    if (activeProj) {
+        fetchProjectFileText(dataFile, function (data) {
+            var fam = (typeof getActiveProjectFamily === 'function') ? getActiveProjectFamily() : 'hl7v2';
+            dataEditor.setOption('mode', fam === 'ccda' ? 'xml' : 'hl7v2');
+            dataEditor.setValue(data);
+            var roots = (typeof getActiveProjectRoots === 'function') ? getActiveProjectRoots() : null;
+            var prefix = roots && roots.samples ? roots.samples + '/' : '';
+            var displayLabel = prefix && dataFile.indexOf(prefix) === 0
+                ? dataFile.substring(prefix.length)
+                : dataFile.substring(dataFile.lastIndexOf('/') + 1);
+            $('#message-name').text(displayLabel);
+            if (fam === 'ccda') {
+                if (typeof applyCcdaNoConvertState === 'function') {
+                    applyCcdaNoConvertState();
+                }
+            } else {
+                convertData(true);
+            }
+            if (typeof done === 'function') {
+                done(data);
+            }
+        });
+        return;
+    }
     $.get(getUrl('sample-data', dataFile), function (data) {
         dataEditor.setValue(data);
         var slash = dataFile.indexOf('/');
@@ -69,6 +94,31 @@ function closeAllTemplates(openDefault = false) {
 function saveTemplate() {
     var reqBody = templateCodeEditor.getValue();
     var templateName = activeTemplate.name;
+
+    var activeProj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
+    if (activeProj) {
+        if (activeProj.kind === 'github') {
+            showConversionError('This GitHub project is open for reading. Save is available for a folder on this server.');
+            return;
+        }
+        var roots = (typeof getActiveProjectRoots === 'function') ? getActiveProjectRoots() : null;
+        var relPath = activeTemplate.projectPath || ((roots && roots.templates ? roots.templates : 'templates/Hl7v2') + '/' + templateName);
+        saveProjectFile(relPath, 'template', reqBody, function (err) {
+            if (err) {
+                showConversionError(err.message);
+                return;
+            }
+            activeTemplate.projectPath = relPath;
+            currentTemplateReference[templateName] = reqBody;
+            activeTemplate.data = reqBody;
+            hideConversionError();
+            updateUnsavedDot();
+            if (typeof refreshFileBrowser === 'function') {
+                refreshFileBrowser();
+            }
+        });
+        return;
+    }
 
     $.ajax(templateFileUrl(templateName), {
         'data': reqBody,

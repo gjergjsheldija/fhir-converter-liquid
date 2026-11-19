@@ -1,7 +1,7 @@
 #########################################
 ### Prod Image                         ##
 #########################################
-FROM node:18-alpine AS runner
+FROM node:26-alpine AS runner
 ARG GIT_TAG
 COPY . /app
 WORKDIR /app
@@ -14,7 +14,7 @@ ENTRYPOINT [ "npm", "start" ]
 #########################################
 ### Dev Image                          ##
 #########################################
-FROM node:18-alpine AS dev
+FROM node:26-alpine AS dev
 ARG GIT_TAG
 COPY . /app
 WORKDIR /app

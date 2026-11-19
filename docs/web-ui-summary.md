@@ -1,29 +1,36 @@
 # Web UI Summary
 
-The FHIR Converter includes a web UI for editing and testing Liquid templates.
+Open `http://localhost:2019` for the browser editor. The annotated screenshots below match the current workspace.
 
-## HL7v2 Web UI
+![Editor with files, message, template, FHIR result, and the debug drawer](images/full-ui.png)
 
-Below is a screenshot of the web UI with an overview of the key functionality.
+| Area | What it does |
+| --- | --- |
+| Files | Samples, templates, and partials. Switch Built-in, GitHub, or a local folder. Sections fold, and the pane collapses |
+| Message | The HL7 v2 message. Paste one, or use New sample, Import, and Save sample |
+| Template | Liquid editor with coloring, folding, Format, Generate, and Save. Includes lists the partials grouped by folder |
+| FHIR result | Live bundle. Send posts it to a FHIR server configured in Settings. Copy puts it on the clipboard |
+| Debug | Bottom drawer: parsed HL7, a variable console, and diagnostics. Hover a path or a field to see the value |
+| New project / Open project | Start or load a local project, or open a GitHub repo read-only |
+| Settings | Light, dark, or system theme, timezone, and AI template generation |
+| API docs | Swagger UI, also at `/api-docs` |
 
-![Web UI2](images/web-ui-summary-hl7v2.png)
+![Includes grouped by folder](images/includes.png)
 
-| Area | Name | Overview of Functionality |
-|------|------|---------------------|
-| 1 | Message Input | Displays the HL7v2 message being converted. You can paste any HL7v2 message or load from the sample messages dropdown |
-| 2 | Display Template | Liquid template based on selection in #7. The template can be edited in this window |
-| 3 | FHIR Output | FHIR bundle output of the message in #1 using the template in #2 |
-| 4 | API | Swagger UI for available APIs |
-| 5 | Settings | UI settings including dark mode and API key configuration |
-| 6 | Load Message | Select pre-loaded test messages for testing |
-| 7 | Load Template | Select available templates |
-| 8 | Current Template | Shows which template is currently displayed; allows renaming for save |
-| 9 | Save Template | Saves updates to the displayed template |
-| Refresh | Refresh | Reloads templates modified in parallel sessions |
+![New project](images/new-project.png)
+
+![Settings and AI providers](images/settings.png)
+
+![Dark theme](images/dark-ui.png)
 
 ## Usage
 
-1. Select or paste an HL7v2 message in the input area
-2. Select a template from the dropdown
-3. View the FHIR output in real-time
-4. Edit the template as needed and save changes
+1. Select or paste an HL7 v2 message.
+2. Open a template. The FHIR bundle updates while you edit when convert-while-typing is on.
+3. Use Includes to jump into a partial, or type a missing name to start one.
+4. Open Debug to inspect the parsed message, variables, and unused fields.
+5. Save writes the template to the built-in runtime tree, or into the open local project. A GitHub project stays read-only.
+
+Generate uses the provider and API key stored in Settings. Keys stay in the browser. Supported providers are OpenAI, Anthropic, Google Gemini, xAI (Grok), Mistral, DeepSeek, Groq, OpenRouter, a local OpenAI-compatible server, and a custom base URL.
+
+C-CDA projects can be created and stored. Conversion for C-CDA is not available yet.
