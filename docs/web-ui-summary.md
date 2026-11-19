@@ -6,7 +6,7 @@ Open `http://localhost:2019` for the browser editor. The annotated screenshots b
 
 | Area | What it does |
 | --- | --- |
-| Files | Samples, templates, and partials. Switch Built-in, GitHub, or a local folder. Sections fold, and the pane collapses |
+| Files | Samples, templates, and partials. Switch Built-in, GitHub, or a local folder. Generate maps writes the field tables. Export map downloads the same files as a zip |
 | Message | The HL7 v2 message. Paste one, or use New sample, Import, and Save sample |
 | Template | Liquid editor with coloring, folding, Format, Generate, and Save. Includes lists the partials grouped by folder |
 | FHIR result | Live bundle. Send posts it to a FHIR server configured in Settings. Copy puts it on the clipboard |

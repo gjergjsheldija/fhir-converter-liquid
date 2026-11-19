@@ -27,11 +27,12 @@ import express from "express";
 import os from "os";
 import {fileURLToPath} from "url";
 import {readFileSync} from "fs";
-import {access, mkdir, readFile, readdir, unlink, writeFile} from "fs/promises";
-import {dirname, join} from "path";
+import {access, mkdir, readFile, readdir, stat, unlink, writeFile} from "fs/promises";
+import {dirname, join, resolve} from "path";
 import {external as libraryFilters} from "./lib/liquid-converter/liquid-helpers.js";
 import {convertInlineHl7v2} from "./lib/workers/worker.js";
 import {chooseLocalFolder, listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
+import {fieldMapArchive, fieldMapFiles} from "../scripts/hl7-fhir-map.mjs";
 import {sendResource} from "./lib/fhir/sendResource.js";
 import {createProject} from "./lib/projects/createProject.js";
 import {openLocalProject} from "./lib/projects/openProject.js";
@@ -645,6 +646,51 @@ export default function (app) {
         chooseLocalFolder()
             .then((result) => res.json(result))
             .catch((err) => browseError(res, err));
+    });
+
+    app.post("/api/v1/field-map", function (req, res) {
+        const requested = req.body && typeof req.body.path === "string" ? req.body.path.trim() : "";
+        const dir = requested || join(BASE_TEMPLATE_FILES_LOCATION, "Hl7v2");
+        stat(dir)
+            .then((info) => {
+                if (!info.isDirectory()) {
+                    res.status(400).json(errorMessage(errorCodes.BadRequest, "Choose a folder of HL7v2 templates."));
+                    return;
+                }
+                if (req.body && req.body.write) {
+                    const files = fieldMapFiles(dir);
+                    if (!files) {
+                        res.status(400).json(errorMessage(errorCodes.BadRequest, "This folder has no HL7v2 message templates."));
+                        return;
+                    }
+                    const outDir = requested
+                        ? join(dir, "mappings")
+                        : resolve(dirname(BASE_TEMPLATE_FILES_LOCATION), "../docs/mappings");
+                    const written = [
+                        ["hl7v2-field-map.md", files.markdown],
+                        ["hl7v2-field-map.html", files.html],
+                        ["hl7v2-field-map.conceptmap.json", files.conceptMap]
+                    ];
+                    mkdir(outDir, {recursive: true})
+                        .then(() => Promise.all(written.map(([name, contents]) => writeFile(join(outDir, name), contents))))
+                        .then(() => res.json({dir: outDir, files: written.map(([name]) => name)}))
+                        .catch(() => {
+                            res.status(400).json(errorMessage(errorCodes.BadRequest, "Could not write the field maps."));
+                        });
+                    return;
+                }
+                const archive = fieldMapArchive(dir);
+                if (!archive) {
+                    res.status(400).json(errorMessage(errorCodes.BadRequest, "This folder has no HL7v2 message templates."));
+                    return;
+                }
+                res.setHeader("Content-Type", "application/zip");
+                res.setHeader("Content-Disposition", "attachment; filename=\"hl7v2-field-map.zip\"");
+                res.send(archive);
+            })
+            .catch(() => {
+                res.status(404).json(errorMessage(errorCodes.NotFound, "Folder not found."));
+            });
     });
 
     app.post("/api/v1/browse/folder", function (req, res) {

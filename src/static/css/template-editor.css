@@ -979,6 +979,8 @@ body {
 #import-sample-button,
 #save-sample-button,
 #save-sample-cancel,
+#field-map-button,
+#generate-maps-button,
 .file-browser-toggle {
     background: var(--surface-muted);
     color: var(--text-muted);
@@ -1005,6 +1007,8 @@ body {
 #import-sample-button:hover,
 #save-sample-button:hover,
 #save-sample-cancel:hover,
+#field-map-button:hover,
+#generate-maps-button:hover,
 .file-browser-toggle:hover {
     background: var(--hover);
     color: var(--text);
@@ -1944,6 +1948,12 @@ li.CodeMirror-hint-active {
 #open-project-go[hidden],
 #open-project-confirm[hidden] {
     display: none;
+}
+
+#field-map-button,
+#generate-maps-button {
+    width: 100%;
+    margin-bottom: 8px;
 }
 
 .project-action-btn {

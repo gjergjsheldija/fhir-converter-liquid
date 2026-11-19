@@ -472,6 +472,110 @@ function openExternalFile(entry) {
     });
 }
 
+function fieldMapFolder() {
+    if (browseSource === 'github') {
+        return {error: 'Field map reads a folder on this server. Choose Folder, or use the built-in templates.'};
+    }
+    if (browseSource === 'folder') {
+        var folder = ($('#folder-path').val() || externalPath || '').trim();
+        if (!folder) {
+            return {error: 'Choose a folder first.'};
+        }
+        return {path: folder};
+    }
+    if (typeof getActiveProject === 'function' && getActiveProject()) {
+        var project = getActiveProject();
+        if (!project || project.kind !== 'local' || !project.path) {
+            return {error: 'Field map reads a folder on this server. Open a local project, or use the built-in templates.'};
+        }
+        var roots = typeof getActiveProjectRoots === 'function' ? getActiveProjectRoots() : null;
+        var templates = roots && roots.templates ? roots.templates : 'templates/Hl7v2';
+        return {path: String(project.path).replace(/\/+$/, '') + '/' + templates};
+    }
+    return {};
+}
+
+function downloadBlob(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+function generateFieldMaps() {
+    var target = fieldMapFolder();
+    if (target.error) {
+        showConversionError(target.error);
+        return;
+    }
+    var $button = $('#generate-maps-button');
+    $button.prop('disabled', true).text('Writing…');
+    $('#conversion-status').text('Writing field maps…');
+    hideConversionError();
+    target.write = true;
+    fetch('/api/v1/field-map', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(target)
+    }).then(function (response) {
+        if (!response.ok) {
+            return response.json().then(function (body) {
+                var message = body && body.error && body.error.message ? body.error.message : 'Could not write the field maps.';
+                throw new Error(message);
+            }, function () {
+                throw new Error('Could not write the field maps.');
+            });
+        }
+        return response.json();
+    }).then(function (result) {
+        $('#conversion-status').text('Wrote ' + result.files.length + ' files to ' + result.dir);
+    }).catch(function (err) {
+        $('#conversion-status').text('Failed');
+        showConversionError(err && err.message ? err.message : 'Could not write the field maps.');
+    }).finally(function () {
+        $button.prop('disabled', false).text('Generate maps');
+    });
+}
+
+function downloadFieldMap() {
+    var target = fieldMapFolder();
+    if (target.error) {
+        showConversionError(target.error);
+        return;
+    }
+    var $button = $('#field-map-button');
+    $button.prop('disabled', true).text('Writing…');
+    $('#conversion-status').text('Writing field map…');
+    hideConversionError();
+    fetch('/api/v1/field-map', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(target)
+    }).then(function (response) {
+        if (!response.ok) {
+            return response.json().then(function (body) {
+                var message = body && body.error && body.error.message ? body.error.message : 'Could not write the field map.';
+                throw new Error(message);
+            }, function () {
+                throw new Error('Could not write the field map.');
+            });
+        }
+        return response.blob();
+    }).then(function (blob) {
+        downloadBlob(blob, 'hl7v2-field-map.zip');
+        $('#conversion-status').text('Map exported');
+    }).catch(function (err) {
+        $('#conversion-status').text('Failed');
+        showConversionError(err && err.message ? err.message : 'Could not write the field map.');
+    }).finally(function () {
+        $button.prop('disabled', false).text('Export map');
+    });
+}
+
 $(document).ready(function () {
     $('#file-filter').on('input', function () {
         if (browseSource === 'builtin') {
@@ -497,6 +601,8 @@ $(document).ready(function () {
     $('#source-switch').on('click', 'button', function () {
         setBrowseSource($(this).data('source'));
     });
+    $('#generate-maps-button').on('click', generateFieldMaps);
+    $('#field-map-button').on('click', downloadFieldMap);
     $('#github-list').on('click', function () {
         externalPath = '';
         loadExternal('');

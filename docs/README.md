@@ -7,6 +7,7 @@ This FHIR Converter uses **Liquid templates** for HL7v2 to FHIR R4 conversion.
 * [Converting data](convert-data-concept.md) - Conceptual guide for data conversion
 * [API summary](api-summary.md) - Available REST API endpoints
 * [Web UI summary](web-ui-summary.md) - Browser-based template editor
+* [HL7v2 field maps](field-maps.md) - One table per message, plus a FHIR ConceptMap, with an ADT A47 sample
 
 ## Templates
 
