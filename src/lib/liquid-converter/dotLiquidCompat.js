@@ -107,6 +107,9 @@ export function normalizeTripleBraceOutput(content) {
     return content.replace(/\{\{\{([^{}]+)\}\}(?!\})/g, '{{$1}}');
 }
 
+const DEFINES_TEXT_STRING = /\{%-?\s*(?:capture|assign)\s+textString\b/;
+const DEFINES_TEXTSTRING = /\{%-?\s*(?:capture|assign)\s+textstring\b/;
+
 /**
  * DotLiquid (upstream's C# Liquid engine) performs case-insensitive variable
  * lookups when configured with CSharpNamingConvention. The vendored upstream
@@ -133,6 +136,14 @@ export function normalizeTripleBraceOutput(content) {
  *   `"reference":"Device/{{ device_ID_AIG_3 }}"`). The id is assigned on line 3 by
  *   `{% evaluate device_Id_AIG_3 using 'ID/Device' CWE: AIG.3 %}`. Case-sensitive LiquidJS
  *   rendered `Device/` (empty id) for Appointment participant[1]; DotLiquid resolves the id.
+ * - `textstring` → `textString` (5 reads in `Resource/_MedicationRequest.liquid`, lines 171, 179, 299,
+ *   309, 318: `{% capture specomp %}{{ textstring | split: "~" | join: "+" }}{% endcapture %}`
+ *   right after `{% capture textString %}…{% endcapture %}`). For ORM-O01-06 `orm_rxo_7.Value` is
+ *   `^1 tablet by oral route 2 times daily.`, so `textString` is `1 tablet by oral route 2 times daily.`
+ *   but `textstring` is empty in case-sensitive LiquidJS; `patientInstruction` (and the RXO.6 part of
+ *   `text`) came out empty. DotLiquid resolves `textstring` to `textString`. Many other templates use
+ *   `textstring` as their own variable, so this applies only to content that captures/assigns
+ *   `textString` and never captures/assigns `textstring`.
  */
 export function normalizeVariableNameTypos(content) {
     // Normalize messageHeaderID -> messageHeaderId (the correct variable name)
@@ -143,6 +154,9 @@ export function normalizeVariableNameTypos(content) {
     content = content.replace(/\bmedicationRequestID\b/g, 'medicationRequestId');
     content = content.replace(/\bAccountId_BLG\b/g, 'accountId_BLG');
     content = content.replace(/\bdevice_ID_AIG_3\b/g, 'device_Id_AIG_3');
+    if (DEFINES_TEXT_STRING.test(content) && !DEFINES_TEXTSTRING.test(content)) {
+        content = content.replace(/\btextstring\b/g, 'textString');
+    }
     return content;
 }
 

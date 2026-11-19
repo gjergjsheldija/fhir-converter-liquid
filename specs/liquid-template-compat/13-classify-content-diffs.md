@@ -63,11 +63,10 @@ The full summary must show 0 unexpected failures. The 103 official compare failu
 
 Filled by the implementer from `classification.json`. Do not leave this section as a placeholder when status is Done.
 
-Refreshed from `classification.json` after spec 20: 132 cases, 110 pass, 0 count, 22 content.
+Refreshed from `classification.json` after spec 21: 132 cases, 117 pass, 0 count, 15 content.
 
 | First path signature | Content cases | Example `dataFile` |
 |---|---|---|
-| `dosageInstruction.0.patientInstruction` | 7 | ORM-O01-06.hl7 |
 | `text.div` | 5 | MDHHS-OML-O21-2.hl7 |
 | `practitioner` | 3 | MDM-T02-03.hl7 |
 | `account.1` | 2 | DFT-P11-01.hl7 |
