@@ -57,4 +57,5 @@ Keep compatibility changes strictly separate from Web UI commits (`AGENTS.md`):
 
 - `specs/liquid-template-compat/07-align-generate-uuid-empty-input.md` — **Done (2026-11-19)** — Align `generate_uuid` empty/null handling with official Microsoft `v7.0` expected outputs.
 - `specs/liquid-template-compat/08-classify-official-bundle-diffs.md` — **Done (2026-11-19)** — Classify every official HL7v2 case as pass/count/content (132 cases: 27 pass, 19 count, 86 content); `Device` is the dominant count family.
+- `specs/liquid-template-compat/09-drop-extra-siu-device.md` — **Done (2026-11-19)** — Dropped the extra SIU `Device` (include path `AIG`: `{% evaluate %}` now shares the caller's scope like upstream `Evaluate.cs`); classification is now 27 pass, 5 count, 100 content.
 - `specs/liquid-template-compat/HANDOFF.md` — Historical triage notes for the remaining engine/template-drift cases.
