@@ -74,13 +74,23 @@
     <div class="container-fluid h-100">
 
         <nav class="navbar navbar-expand-sm" id="navbar">
-            <span class="navbar-brand mb-0">FHIR Converter</span>
-            <button class="btn btn-outline-dark btn-sm navbar-btn ml-2" id="new-project-open" type="button">New project</button>
-            <button class="btn btn-outline-dark btn-sm navbar-btn ml-2" id="open-project-open" type="button">Open project</button>
-            <button class="btn btn-dark navbar-btn ml-auto" id="convert-button" type="button">Convert</button>
-            <button class="btn btn-outline-dark navbar-btn ml-2" id="debug-toggle-button" type="button" aria-expanded="false" aria-controls="debug-drawer" title="Toggle Debug drawer (Ctrl+`)">Debug</button>
-            <button class="btn btn-dark navbar-btn ml-2" id="settings-open" type="button" data-toggle="modal" data-target="#settings-modal">Settings</button>
-            <a class="btn btn-outline-dark navbar-btn ml-2" id="api-docs-link" href="/api-docs">API docs</a>
+            <span class="navbar-brand mb-0">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span class="brand-text">
+                    <span class="brand-name">FHIR Converter</span>
+                    <span class="brand-note">Turn a message into FHIR</span>
+                </span>
+            </span>
+            <div class="nav-cluster">
+                <button class="btn btn-outline-dark btn-sm navbar-btn" id="new-project-open" type="button">New project</button>
+                <button class="btn btn-outline-dark btn-sm navbar-btn" id="open-project-open" type="button">Open project</button>
+            </div>
+            <div class="nav-cluster nav-cluster-end">
+                <button class="btn btn-dark navbar-btn" id="convert-button" type="button">Convert</button>
+                <button class="btn btn-outline-dark navbar-btn" id="debug-toggle-button" type="button" aria-expanded="false" aria-controls="debug-drawer" title="Toggle Debug drawer (Ctrl+`)">Debug</button>
+                <button class="btn btn-dark navbar-btn" id="settings-open" type="button" data-toggle="modal" data-target="#settings-modal">Settings</button>
+                <a class="btn btn-outline-dark navbar-btn" id="api-docs-link" href="/api-docs">API docs</a>
+            </div>
         </nav>
 
         <div id="banner" class="alert" role="alert" style="display: none">
@@ -153,16 +163,18 @@
                 <div id="editor-panes" class="vertical-content">
                 <div class="content split msg-area">
                     <div class="pane-header">
-                        <span><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-message"></use></svg>Message</span>
+                        <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-message"></use></svg>Message</span>
                         <span id="message-name">No sample</span>
-                        <button class="btn btn-sm btn-outline-dark ml-auto" id="new-sample-button" type="button">New sample</button>
-                        <button class="btn btn-sm btn-outline-dark" id="import-sample-button" type="button">Import…</button>
-                        <input id="import-sample-input" type="file" accept=".hl7,.txt,.msg" multiple hidden>
-                        <button class="btn btn-sm btn-outline-dark" id="save-sample-button" type="button">Save sample</button>
-                        <span id="save-sample-form" hidden>
-                            <input id="save-sample-name" class="form-control form-control-sm" type="text" placeholder="Name, .hl7 optional" aria-label="Sample name">
-                            <button type="button" class="btn btn-sm btn-dark" id="save-sample-create">Save</button>
-                            <button type="button" class="btn btn-sm btn-outline-dark" id="save-sample-cancel">Cancel</button>
+                        <span class="pane-actions">
+                            <button class="btn btn-sm btn-outline-dark" id="new-sample-button" type="button">New sample</button>
+                            <button class="btn btn-sm btn-outline-dark" id="import-sample-button" type="button">Import…</button>
+                            <input id="import-sample-input" type="file" accept=".hl7,.txt,.msg" multiple hidden>
+                            <button class="btn btn-sm btn-outline-dark" id="save-sample-button" type="button">Save sample</button>
+                            <span id="save-sample-form" hidden>
+                                <input id="save-sample-name" class="form-control form-control-sm" type="text" placeholder="Name, .hl7 optional" aria-label="Sample name">
+                                <button type="button" class="btn btn-sm btn-dark" id="save-sample-create">Save</button>
+                                <button type="button" class="btn btn-sm btn-outline-dark" id="save-sample-cancel">Cancel</button>
+                            </span>
                         </span>
                     </div>
                     <textarea id="databox"></textarea>
@@ -171,17 +183,19 @@
                 <div class="content split editor-area">
                     <div class="split template-area">
                         <div class="pane-header">
-                            <span><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-template"></use></svg>Template</span>
+                            <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-template"></use></svg>Template</span>
                             <span id="template-open-name" class="sr-only">untitled</span>
-                            <button class="btn btn-sm btn-outline-dark ml-auto" id="new-template-button" type="button">New</button>
-                            <span id="new-template-form" hidden>
-                                <input id="new-template-name" class="form-control form-control-sm" type="text" placeholder="Name, .liquid optional" aria-label="Template name">
-                                <button type="button" class="btn btn-sm btn-dark" id="new-template-create">Create</button>
-                                <button type="button" class="btn btn-sm btn-outline-dark" id="new-template-cancel">Cancel</button>
+                            <span class="pane-actions">
+                                <button class="btn btn-sm btn-outline-dark" id="new-template-button" type="button">New</button>
+                                <span id="new-template-form" hidden>
+                                    <input id="new-template-name" class="form-control form-control-sm" type="text" placeholder="Name, .liquid optional" aria-label="Template name">
+                                    <button type="button" class="btn btn-sm btn-dark" id="new-template-create">Create</button>
+                                    <button type="button" class="btn btn-sm btn-outline-dark" id="new-template-cancel">Cancel</button>
+                                </span>
+                                <button class="btn btn-sm btn-outline-dark" id="format-template-button" type="button">Format</button>
+                                <button class="btn btn-sm btn-outline-dark" id="generate-template-button" type="button">Generate</button>
+                                <button class="btn btn-sm btn-outline-dark" id="template-save-button" type="button"><span class="tab-dirty" hidden></span>Save</button>
                             </span>
-                            <button class="btn btn-sm btn-outline-dark" id="format-template-button" type="button">Format</button>
-                            <button class="btn btn-sm btn-outline-dark" id="generate-template-button" type="button">Generate</button>
-                            <button class="btn btn-sm btn-outline-dark" id="template-save-button" type="button"><span class="tab-dirty" hidden></span>Save</button>
                         </div>
                         <nav class="template-tabs">
                             <div id="template-tabs" class="nav nav-tabs" role="tablist">
@@ -204,10 +218,12 @@
                     </div>
                     <div class="split output-area">
                         <div class="pane-header">
-                            <span><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-json"></use></svg>FHIR result</span>
+                            <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-json"></use></svg>FHIR result</span>
                             <span id="conversion-status"></span>
-                            <button class="btn btn-sm btn-outline-primary ml-auto" id="send-fhir-button" type="button">Send</button>
-                            <button class="btn btn-sm btn-outline-dark" id="copy-result-button" type="button">Copy</button>
+                            <span class="pane-actions">
+                                <button class="btn btn-sm btn-outline-primary" id="send-fhir-button" type="button">Send</button>
+                                <button class="btn btn-sm btn-outline-dark" id="copy-result-button" type="button">Copy</button>
+                            </span>
                         </div>
                         <div id="result-error" hidden></div>
                         <textarea class="form-control" id="resultbox"></textarea>
@@ -364,15 +380,19 @@
         </div>
 
         <div id="settings-modal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-scrollable">
                 <div id="settings-modal-content" class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title">Settings</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <fieldset class="settings-group">
-                            <legend>Editor</legend>
+                        <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+                            <button type="button" class="is-active" role="tab" id="settings-tab-editor" data-settings-tab="editor" aria-controls="settings-panel-editor" aria-selected="true">Editor</button>
+                            <button type="button" role="tab" id="settings-tab-ai" data-settings-tab="ai" aria-controls="settings-panel-ai" aria-selected="false">Generate</button>
+                            <button type="button" role="tab" id="settings-tab-fhir" data-settings-tab="fhir" aria-controls="settings-panel-fhir" aria-selected="false">FHIR server</button>
+                        </div>
+                        <div class="settings-panel" id="settings-panel-editor" role="tabpanel" data-settings-tab="editor" aria-labelledby="settings-tab-editor">
                             <fieldset class="settings-group">
                                 <legend>Theme</legend>
                                 <div class="form-check form-check-inline">
@@ -392,77 +412,80 @@
                                 <input class="form-check-input" type="checkbox" id="settings-convert-while-typing" checked>
                                 <label class="form-check-label" for="settings-convert-while-typing">Convert while typing</label>
                             </div>
-                            <div class="form-group mt-3">
+                            <div class="form-group mt-3 mb-0">
                                 <label for="settings-timezone">Timezone</label>
                                 <input type="text" class="form-control" id="settings-timezone" placeholder="+0000">
                                 <small class="form-text text-muted" id="settings-timezone-help">Offset sent with each conversion. Example: +0200. Leave empty to use the server default.</small>
                             </div>
-                        </fieldset>
-                        <fieldset class="settings-group" id="settings-ai-group">
-                            <legend>AI template generation</legend>
-                            <small class="form-text text-muted mb-2" id="settings-ai-help">Used directly when you click Generate. API keys stay in this browser.</small>
-                            <div id="settings-ai-notice" class="project-modal-error" hidden></div>
-                            <div class="form-group">
-                                <label for="settings-ai-provider">Provider</label>
-                                <select class="form-control" id="settings-ai-provider">
-                                    <option value="openai">OpenAI</option>
-                                    <option value="anthropic">Anthropic (Claude)</option>
-                                    <option value="google">Google Gemini</option>
-                                    <option value="xai">xAI (Grok)</option>
-                                    <option value="mistral">Mistral</option>
-                                    <option value="deepseek">DeepSeek</option>
-                                    <option value="groq">Groq</option>
-                                    <option value="openrouter">OpenRouter</option>
-                                    <option value="local">Local (oMLX / Ollama)</option>
-                                    <option value="custom">Custom (OpenAI-compatible)</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="settings-ai-key-row">
-                                <label for="settings-ai-api-key" id="settings-ai-key-label">API key</label>
-                                <input type="password" class="form-control" id="settings-ai-api-key" placeholder="Paste API key (saved in this browser)" autocomplete="off">
-                            </div>
-                            <div class="form-group">
-                                <label for="settings-ai-model">Model</label>
-                                <input type="text" class="form-control" id="settings-ai-model" placeholder="gpt-4.1-mini" list="settings-ai-model-list">
-                                <datalist id="settings-ai-model-list"></datalist>
-                            </div>
-                            <div class="form-group" id="settings-ai-base-url-row" hidden>
-                                <label for="settings-ai-base-url">Base URL</label>
-                                <input type="text" class="form-control" id="settings-ai-base-url" placeholder="http://127.0.0.1:8000/v1">
-                            </div>
-                            <div class="form-group mb-0">
-                                <label for="settings-ai-prompt">Default guidance (optional)</label>
-                                <input type="text" class="form-control" id="settings-ai-prompt" placeholder="Optional instructions sent when clicking Generate">
-                            </div>
-                        </fieldset>
-                        <fieldset class="settings-group">
-                            <legend>FHIR server</legend>
-                            <small class="form-text text-muted" id="settings-fhir-help">Used only when you click Send. Stored in this browser.</small>
-                            <div class="form-group">
-                                <label for="settings-fhir-url">Base URL</label>
-                                <input type="text" class="form-control" id="settings-fhir-url" placeholder="https://hapi.fhir.org/baseR4">
-                            </div>
-                            <div class="form-group">
-                                <label for="settings-fhir-auth">Authentication</label>
-                                <select class="form-control" id="settings-fhir-auth">
-                                    <option value="none">None</option>
-                                    <option value="bearer">Bearer token</option>
-                                    <option value="basic">Basic</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="settings-fhir-token-row">
-                                <label for="settings-fhir-token">Token</label>
-                                <input type="password" class="form-control" id="settings-fhir-token" autocomplete="off">
-                            </div>
-                            <div class="form-group" id="settings-fhir-user-row">
-                                <label for="settings-fhir-username">Username</label>
-                                <input type="text" class="form-control" id="settings-fhir-username" autocomplete="off">
-                            </div>
-                            <div class="form-group" id="settings-fhir-password-row">
-                                <label for="settings-fhir-password">Password</label>
-                                <input type="password" class="form-control" id="settings-fhir-password" autocomplete="off">
-                            </div>
-                        </fieldset>
+                        </div>
+                        <div class="settings-panel" id="settings-panel-ai" role="tabpanel" data-settings-tab="ai" aria-labelledby="settings-tab-ai" hidden>
+                            <fieldset class="settings-group mb-0" id="settings-ai-group">
+                                <small class="form-text text-muted mb-2" id="settings-ai-help">Used when you click Generate. API keys stay in this browser.</small>
+                                <div id="settings-ai-notice" class="project-modal-error" hidden></div>
+                                <div class="form-group">
+                                    <label for="settings-ai-provider">Provider</label>
+                                    <select class="form-control" id="settings-ai-provider">
+                                        <option value="openai">OpenAI</option>
+                                        <option value="anthropic">Anthropic (Claude)</option>
+                                        <option value="google">Google Gemini</option>
+                                        <option value="xai">xAI (Grok)</option>
+                                        <option value="mistral">Mistral</option>
+                                        <option value="deepseek">DeepSeek</option>
+                                        <option value="groq">Groq</option>
+                                        <option value="openrouter">OpenRouter</option>
+                                        <option value="local">Local (oMLX / Ollama)</option>
+                                        <option value="custom">Custom (OpenAI-compatible)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="settings-ai-key-row">
+                                    <label for="settings-ai-api-key" id="settings-ai-key-label">API key</label>
+                                    <input type="password" class="form-control" id="settings-ai-api-key" placeholder="Paste API key (saved in this browser)" autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label for="settings-ai-model">Model</label>
+                                    <input type="text" class="form-control" id="settings-ai-model" placeholder="gpt-4.1-mini" list="settings-ai-model-list">
+                                    <datalist id="settings-ai-model-list"></datalist>
+                                </div>
+                                <div class="form-group" id="settings-ai-base-url-row" hidden>
+                                    <label for="settings-ai-base-url">Base URL</label>
+                                    <input type="text" class="form-control" id="settings-ai-base-url" placeholder="http://127.0.0.1:8000/v1">
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label for="settings-ai-prompt">Default guidance</label>
+                                    <textarea class="form-control settings-guidance" id="settings-ai-prompt" rows="8" aria-describedby="settings-ai-prompt-help"></textarea>
+                                    <small class="form-text text-muted" id="settings-ai-prompt-help">Sent with each Generate click. Edit it when this message needs a different result.</small>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="settings-panel" id="settings-panel-fhir" role="tabpanel" data-settings-tab="fhir" aria-labelledby="settings-tab-fhir" hidden>
+                            <fieldset class="settings-group mb-0">
+                                <small class="form-text text-muted" id="settings-fhir-help">Used when you click Send. Stored in this browser.</small>
+                                <div class="form-group">
+                                    <label for="settings-fhir-url">Base URL</label>
+                                    <input type="text" class="form-control" id="settings-fhir-url" placeholder="https://hapi.fhir.org/baseR4">
+                                </div>
+                                <div class="form-group">
+                                    <label for="settings-fhir-auth">Authentication</label>
+                                    <select class="form-control" id="settings-fhir-auth">
+                                        <option value="none">None</option>
+                                        <option value="bearer">Bearer token</option>
+                                        <option value="basic">Basic</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="settings-fhir-token-row">
+                                    <label for="settings-fhir-token">Token</label>
+                                    <input type="password" class="form-control" id="settings-fhir-token" autocomplete="off">
+                                </div>
+                                <div class="form-group" id="settings-fhir-user-row">
+                                    <label for="settings-fhir-username">Username</label>
+                                    <input type="text" class="form-control" id="settings-fhir-username" autocomplete="off">
+                                </div>
+                                <div class="form-group mb-0" id="settings-fhir-password-row">
+                                    <label for="settings-fhir-password">Password</label>
+                                    <input type="password" class="form-control" id="settings-fhir-password" autocomplete="off">
+                                </div>
+                            </fieldset>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button id="settings-save-button" type="button" class="btn btn-dark" data-dismiss="modal">Save</button>

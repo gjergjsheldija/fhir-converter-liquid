@@ -22,6 +22,19 @@ var transitionTime = 1000;
 // eslint-disable-next-line no-unused-vars
 var templateNames;
 
+var defaultAiPrompt = [
+    'Return the Liquid template only. No markdown fence and no explanation.',
+    'Write one FHIR R4 Bundle with "type": "batch".',
+    'The message is hl7v2Data.',
+    "First copy of a segment: {% assign firstSegments = hl7v2Data | get_first_segments: 'MSH|PID|PV1' -%}",
+    "Repeating segments: {% assign obxLists = hl7v2Data | get_segment_lists: 'OBX' -%}",
+    'A field is firstSegments.PID.5.Value. A component is firstSegments.PID.5.1.Value. Repeats are firstSegments.PID.3.Repeats.',
+    'Turn an HL7 date into a FHIR date with format_as_date_time.',
+    "Mint an id with a single-quoted partial: {% evaluate patientId using 'ID/Patient' PID: firstSegments.PID, type: 'First' -%}",
+    "Call a partial the same way: {% include 'Resource/Patient' PID: firstSegments.PID, ID: patientId -%}",
+    'Trim tags with {%- and -%}. Leave out a JSON property when its HL7 field is empty.'
+].join('\n');
+
 var currentEditorSettings = {
     darkMode: false,
     convertWhileTyping: true,
@@ -107,6 +120,16 @@ if (themePreference) {
         if (currentThemeChoice === 'system') {
             applyTheme('system');
         }
+    });
+}
+
+function showSettingsTab(name) {
+    $('#settings-modal [role="tab"]').each(function () {
+        var on = $(this).attr('data-settings-tab') === name;
+        $(this).toggleClass('is-active', on).attr('aria-selected', on ? 'true' : 'false');
+    });
+    $('#settings-modal [role="tabpanel"]').each(function () {
+        $(this).prop('hidden', $(this).attr('data-settings-tab') !== name);
     });
 }
 
@@ -1085,6 +1108,10 @@ $(document).ready(function () {
         bannerFade = null;
     });
 
+    $('#settings-modal [role="tab"]').on('click', function () {
+        showSettingsTab($(this).attr('data-settings-tab'));
+    });
+
     $("#settings-modal").on('show.bs.modal', function () {
         var settings = getSettings();
         var themeChoice = resolveStoredTheme();
@@ -1615,7 +1642,7 @@ function populateAiSettingsModal() {
         }
         activeSettingsAiProvider = null;
         select.val(chosen);
-        $('#settings-ai-prompt').val(settings.aiPrompt || '');
+        $('#settings-ai-prompt').val(settings.aiPrompt || defaultAiPrompt);
         syncAiProviderFields(chosen);
     };
 
@@ -1733,7 +1760,7 @@ function runGenerateTemplate() {
             sampleDataInline: srcMessage,
             provider: provider,
             model: model,
-            prompt: settings.aiPrompt || '',
+            prompt: settings.aiPrompt || defaultAiPrompt,
             confirmedExternalSend: true
         };
         if (apiKey) {
