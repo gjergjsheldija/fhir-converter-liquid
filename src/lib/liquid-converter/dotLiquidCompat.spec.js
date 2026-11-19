@@ -345,6 +345,17 @@ describe("dotLiquidCompat", () => {
             expect(normalizeVariableNameTypos(input)).to.equal(input);
         });
 
+        it("passes the obr_34/obr_35 loop variable as the OBR_34/OBR_35 PractitionerRole argument value", () => {
+            const input = "{% include 'Resource/PractitionerRole' OBR_34: OBR_34, ID: practitionerRoleId_obr_34 -%}\n{% include 'Resource/PractitionerRole' OBR_35: OBR_35, ID: practitionerRoleId_obr_35 -%}";
+            const expected = "{% include 'Resource/PractitionerRole' OBR_34: obr_34, ID: practitionerRoleId_obr_34 -%}\n{% include 'Resource/PractitionerRole' OBR_35: obr_35, ID: practitionerRoleId_obr_35 -%}";
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("keeps the OBR_34/OBR_35 argument name and in-partial reads unchanged", () => {
+            const input = "{% if OBR_34 %}{% include 'DataType/NDLPractitionerRole' NDL: OBR_34 -%}{% endif %}{% include 'Resource/Practitioner' CNN_OBR_34_1: obr_34.1 -%}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
+
         it("reads textString where the template captured textString but read textstring (MedicationRequest patientInstruction)", () => {
             const input = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textstring  | split: "~" | join: "+" }}{% endcapture -%}';
             const expected = '{% capture textString %}{{ x | split: "^" | join: "--" }}{% endcapture -%}\n{% capture specomp %}{{ textString  | split: "~" | join: "+" }}{% endcapture -%}';

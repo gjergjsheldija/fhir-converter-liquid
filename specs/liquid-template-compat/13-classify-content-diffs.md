@@ -63,8 +63,8 @@ The full summary must show 0 unexpected failures. The 103 official compare failu
 
 Filled by the implementer from `classification.json`. Do not leave this section as a placeholder when status is Done.
 
-Refreshed from `classification.json` after spec 27: 132 cases, 131 pass, 0 count, 1 content.
+Refreshed from `classification.json` after spec 28: 132 cases, 132 pass, 0 count, 0 content. No content signatures remain (spec 27 left 1: `code`, `ORU-R01-01.hl7`).
 
 | First path signature | Content cases | Example `dataFile` |
 |---|---|---|
-| `code` | 1 | ORU-R01-01.hl7 |
+| (none) | 0 | — |
