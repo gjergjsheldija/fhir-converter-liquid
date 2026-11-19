@@ -17,6 +17,7 @@ Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec.
 ### Phase 1 — Runtime & test harness (`specs/runtime/00-order.md`) — Done
 1. `specs/runtime/02-worker-pool-and-loader-cleanup.md` — **Done** (`e8cdb5e`)
 - `specs/runtime/03-project-convert-cli.md` — **Done (2026-11-19)** — `node bin/convert.mjs --project <dir> --message <file> --template <name>` prints one converted resource (same path as `/api/v1/projects/convert`, site pack applied); `--check-goldens` compares every `tests/expected/*.json` and exits 1 naming the first differing case. `npm run convert:project -- …` forwards arguments.
+- `specs/integrations/01-oie-hl7v2-channel.md` — **Done (2026-11-19)** — `integrations/oie/hl7v2-to-fhir.xml` OIE channel (TCP Listener source, HTTP Sender to `127.0.0.1:2019/api/v1/convert/hl7v2`) and `integrations/oie/README.md` with the MSH-10/MSA-2 ACK example. No TCP listener added to this server.
 
 ### Phase 2 — Sidebar, Includes popover, and Sample management (`specs/web-ui/usability/00-order.md`) — Done
 2. `specs/web-ui/usability/17-collapse-files-pane.md` — **Done** (`5525eec`)
