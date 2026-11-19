@@ -897,10 +897,8 @@ body {
     width: 28px;
     height: 28px;
     flex: 0 0 auto;
-    border-radius: 9px;
-    background:
-        radial-gradient(circle at 30% 28%, rgba(255, 250, 246, 0.45), transparent 42%),
-        var(--accent);
+    display: block;
+    color: var(--accent);
 }
 
 .brand-text {
@@ -948,7 +946,8 @@ body {
 #settings-save-button,
 #new-project-create,
 #open-project-go,
-#open-project-confirm {
+#open-project-confirm,
+#save-project-go {
     background: var(--accent);
     border-color: var(--accent);
     color: var(--accent-text);
@@ -964,6 +963,7 @@ body {
 #debug-toggle-button,
 #new-project-open,
 #open-project-open,
+#save-project-open,
 #open-project-back,
 #project-use-builtin,
 #project-add-samples,
@@ -989,6 +989,7 @@ body {
 #debug-toggle-button:hover,
 #new-project-open:hover,
 #open-project-open:hover,
+#save-project-open:hover,
 #open-project-back:hover,
 #project-use-builtin:hover,
 #project-add-samples:hover,
@@ -1107,6 +1108,30 @@ body {
 
 .source-panel[hidden] {
     display: none;
+}
+
+.folder-path-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.folder-path-row .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+#folder-browse {
+    flex: 0 0 auto;
+    background: var(--surface-muted);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+#folder-browse:hover {
+    background: var(--hover);
 }
 
 #file-browser .file-browser-heading {

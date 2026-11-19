@@ -342,6 +342,145 @@
         });
     }
 
+    function editorFileName(raw, fallback, ext) {
+        var name = String(raw || '').replace(/\s*\(unsaved\)\s*$/i, '').trim();
+        if (!name || name === 'No sample' || name === 'untitled') {
+            name = fallback;
+        }
+        name = name.split('/').pop();
+        if (name.toLowerCase().slice(-ext.length) !== ext) {
+            name += ext;
+        }
+        name = name.replace(/[^A-Za-z0-9._-]/g, '_').replace(/^\.+/, '');
+        return name || (fallback + ext);
+    }
+
+    function putProjectBytes(projectPath, relativePath, targetKind, content, callback) {
+        $.ajax('/api/v1/projects/file', {
+            type: 'PUT',
+            contentType: 'text/plain',
+            processData: false,
+            dataType: 'json',
+            headers: {
+                'X-Project-Path': projectPath,
+                'X-Project-File': relativePath,
+                'X-Project-Target': targetKind
+            },
+            data: content,
+            success: function () {
+                callback(null);
+            },
+            error: function (xhr) {
+                var body = (xhr && xhr.responseJSON) || {};
+                var msg = (body.error && body.error.message) ? body.error.message : 'Could not save project file.';
+                callback(msg);
+            }
+        });
+    }
+
+    function saveIntoOpenLocalProject() {
+        var roots = getActiveProjectRoots() || {};
+        var templateText = (typeof templateCodeEditor !== 'undefined' && templateCodeEditor) ? templateCodeEditor.getValue() : '';
+        var messageText = (typeof dataEditor !== 'undefined' && dataEditor) ? dataEditor.getValue() : '';
+        var templateName = editorFileName(activeTemplate && activeTemplate.name, 'Example', '.liquid');
+        var templateRel = (activeTemplate && activeTemplate.projectPath) || ((roots.templates || 'templates/Hl7v2') + '/' + templateName);
+        saveProjectFile(templateRel, 'template', templateText, function (err) {
+            if (err) {
+                showConversionError(err.message);
+                return;
+            }
+            if (activeTemplate) {
+                activeTemplate.projectPath = templateRel;
+                activeTemplate.data = templateText;
+                currentTemplateReference[activeTemplate.name] = templateText;
+            }
+            function finish() {
+                hideConversionError();
+                if (typeof updateUnsavedDot === 'function') {
+                    updateUnsavedDot();
+                }
+                $('#conversion-status').text('Saved project');
+                if (typeof refreshFileBrowser === 'function') {
+                    refreshFileBrowser();
+                }
+            }
+            if (!String(messageText || '').trim()) {
+                finish();
+                return;
+            }
+            var sampleExt = getActiveProjectFamily() === 'ccda' ? '.xml' : '.hl7';
+            var sampleName = editorFileName($('#message-name').text(), 'example', sampleExt);
+            var sampleRel = (roots.samples || 'samples/hl7v2') + '/' + sampleName;
+            saveProjectFile(sampleRel, 'sample', messageText, function (sampleErr) {
+                if (sampleErr) {
+                    showConversionError(sampleErr.message);
+                    return;
+                }
+                finish();
+            });
+        });
+    }
+
+    function saveEditorsAsNewProject() {
+        hideModalError('#save-project-error');
+        var payload = {
+            name: ($('#save-project-name').val() || '').trim(),
+            parentPath: ($('#save-project-parent').val() || '').trim(),
+            family: (typeof currentDataType === 'string' && currentDataType.toLowerCase() === 'ccda') ? 'ccda' : 'hl7v2',
+            startingPoint: 'empty'
+        };
+        var $btn = $('#save-project-go');
+        $btn.prop('disabled', true).text('Saving…');
+        $.ajax('/api/v1/projects', {
+            type: 'POST',
+            contentType: 'application/json',
+            processData: false,
+            dataType: 'json',
+            data: JSON.stringify(payload),
+            success: function (res) {
+                var manifest = res.manifest || {};
+                var startup = manifest.startup || {};
+                var templateRel = startup.template;
+                var sampleRel = startup.sample;
+                var templateText = (typeof templateCodeEditor !== 'undefined' && templateCodeEditor) ? templateCodeEditor.getValue() : '';
+                var messageText = (typeof dataEditor !== 'undefined' && dataEditor) ? dataEditor.getValue() : '';
+                putProjectBytes(res.path, templateRel, 'template', templateText, function (tplErr) {
+                    if (tplErr) {
+                        $btn.prop('disabled', false).text('Save');
+                        showModalError('#save-project-error', tplErr);
+                        return;
+                    }
+                    var writeSample = function (sampleErr) {
+                        if (sampleErr) {
+                            $btn.prop('disabled', false).text('Save');
+                            showModalError('#save-project-error', sampleErr);
+                            return;
+                        }
+                        $btn.prop('disabled', false).text('Save');
+                        $('#save-project-modal').modal('hide');
+                        activateOpenedProject({
+                            kind: 'local',
+                            path: res.path,
+                            manifest: manifest
+                        });
+                        $('#conversion-status').text('Saved project');
+                    };
+                    if (!String(messageText || '').trim() || !sampleRel) {
+                        writeSample(null);
+                        return;
+                    }
+                    putProjectBytes(res.path, sampleRel, 'sample', messageText, writeSample);
+                });
+            },
+            error: function (xhr) {
+                $btn.prop('disabled', false).text('Save');
+                var body = (xhr && xhr.responseJSON) || {};
+                var msg = (body.error && body.error.message) ? body.error.message : 'Could not save project.';
+                showModalError('#save-project-error', msg);
+            }
+        });
+    }
+
     function activateOpenedProject(proj) {
         var startupFam = (proj.manifest && proj.manifest.startup && proj.manifest.startup.family) || 'hl7v2';
         activeProjectFamily = startupFam;
@@ -473,6 +612,25 @@
         }
         renderFamilyIconsInModals();
         updateProjectChrome();
+
+        $('#save-project-open').on('click', function () {
+            if (activeProject && activeProject.kind === 'local') {
+                saveIntoOpenLocalProject();
+                return;
+            }
+            hideModalError('#save-project-error');
+            var suggested = 'My project';
+            if (typeof activeTemplate !== 'undefined' && activeTemplate && activeTemplate.name && activeTemplate.name !== 'untitled') {
+                suggested = String(activeTemplate.name).replace(/\.liquid$/i, '').replace(/[_-]+/g, ' ');
+            }
+            if (!$('#save-project-name').val()) {
+                $('#save-project-name').val(suggested);
+            }
+            $('#save-project-go').prop('disabled', false).text('Save');
+            $('#save-project-modal').modal('show');
+        });
+
+        $('#save-project-go').on('click', saveEditorsAsNewProject);
 
         $('#new-project-open').on('click', function () {
             hideModalError('#new-project-error');

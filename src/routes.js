@@ -31,7 +31,7 @@ import {access, mkdir, readFile, readdir, unlink, writeFile} from "fs/promises";
 import {dirname, join} from "path";
 import {external as libraryFilters} from "./lib/liquid-converter/liquid-helpers.js";
 import {convertInlineHl7v2} from "./lib/workers/worker.js";
-import {listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
+import {chooseLocalFolder, listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
 import {sendResource} from "./lib/fhir/sendResource.js";
 import {createProject} from "./lib/projects/createProject.js";
 import {openLocalProject} from "./lib/projects/openProject.js";
@@ -639,6 +639,12 @@ export default function (app) {
             }
             res.json(result);
         }).catch((err) => browseError(res, err));
+    });
+
+    app.post("/api/v1/browse/choose-folder", function (req, res) {
+        chooseLocalFolder()
+            .then((result) => res.json(result))
+            .catch((err) => browseError(res, err));
     });
 
     app.post("/api/v1/browse/folder", function (req, res) {

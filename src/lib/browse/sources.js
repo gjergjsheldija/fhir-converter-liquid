@@ -3,6 +3,7 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
+import {execFile} from "node:child_process";
 import {readdir, readFile, stat} from "fs/promises";
 import {resolve} from "path";
 
@@ -229,4 +230,46 @@ export async function readFolderFile(input) {
         throw httpError(400, "File is not text.");
     }
     return bytes.toString("utf8");
+}
+
+function runCommand(command, args) {
+    return new Promise((resolveCommand, reject) => {
+        execFile(command, args, {timeout: 180000}, (err, stdout, stderr) => {
+            if (err) {
+                err.stderr = stderr;
+                reject(err);
+                return;
+            }
+            resolveCommand(stdout);
+        });
+    });
+}
+
+export async function chooseLocalFolder(run = runCommand) {
+    const command = process.platform === "darwin"
+        ? ["osascript", ["-e", "POSIX path of (choose folder with prompt \"Choose a folder\")"]]
+        : process.platform === "linux"
+            ? ["zenity", ["--file-selection", "--directory", "--title=Choose a folder"]]
+            : null;
+    if (!command) {
+        throw httpError(400, "This machine has no folder browser the server can open.");
+    }
+    let stdout;
+    try {
+        stdout = await run(command[0], command[1]);
+    } catch (err) {
+        if (err && err.status) {
+            throw err;
+        }
+        const text = String((err && (err.stderr || err.message)) || "");
+        if (/user canceled|user cancelled|\(-128\)/i.test(text)) {
+            throw httpError(400, "Folder choice was canceled.");
+        }
+        throw httpError(500, "Could not open the folder browser on this machine.");
+    }
+    const folder = String(stdout || "").trim().replace(/\/+$/, "");
+    if (!folder) {
+        throw httpError(400, "No folder was chosen.");
+    }
+    return {path: folder};
 }

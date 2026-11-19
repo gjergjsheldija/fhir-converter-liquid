@@ -505,6 +505,35 @@ $(document).ready(function () {
         externalPath = '';
         loadExternal($('#folder-path').val());
     });
+    $('#folder-browse').on('click', function () {
+        var $button = $(this);
+        $button.prop('disabled', true).text('Opening…');
+        $.ajax('/api/v1/browse/choose-folder', {
+            type: 'POST',
+            contentType: 'application/json',
+            processData: false,
+            dataType: 'json',
+            data: '{}'
+        }).done(function (result) {
+            var chosen = result && result.path ? result.path : '';
+            if (!chosen) {
+                showConversionError('No folder was chosen.');
+                return;
+            }
+            $('#folder-path').val(chosen);
+            externalPath = '';
+            loadExternal(chosen);
+            hideConversionError();
+        }).fail(function (xhr) {
+            var message = 'Could not open the folder browser.';
+            if (xhr.responseJSON && xhr.responseJSON.error && xhr.responseJSON.error.message) {
+                message = xhr.responseJSON.error.message;
+            }
+            showConversionError(message);
+        }).always(function () {
+            $button.prop('disabled', false).text('Browse…');
+        });
+    });
     $('#file-browser').on('keydown', function (event) {
         var target = event.target;
         var $target = $(target);
