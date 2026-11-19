@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 93,
+    "pass": 96,
     "count": 0,
-    "content": 39
+    "content": 36
   },
   "cases": [
     {
@@ -26,52 +26,18 @@
     {
       "template": "ADT_A01",
       "dataFile": "ADT01-23.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 25,
       "expectedCount": 25,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/bab5ca58-f272-4c06-4b3f-f9661e45a22b",
-            "paths": [
-              "address.1"
-            ]
-          },
-          {
-            "key": "Provenance/4e45fbdc-bab9-f433-dde6-a8adf26acf93",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A01",
       "dataFile": "ADT01-28.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 12,
       "expectedCount": 12,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "address.1"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A02",
@@ -140,27 +106,10 @@
     {
       "template": "ADT_A04",
       "dataFile": "ADT04-28.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 18,
       "expectedCount": 18,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/f7a9494a-3fac-e0e1-78d8-d7c20410ca33",
-            "paths": [
-              "address.1"
-            ]
-          },
-          {
-            "key": "Provenance/312fba25-b9c6-151e-8c0c-45a36f66ed03",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A05",
@@ -955,12 +904,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Patient/bab5ca58-f272-4c06-4b3f-f9661e45a22b",
-            "paths": [
-              "address.1"
-            ]
-          },
-          {
             "key": "PractitionerRole/be571888-010e-9a32-e87f-f1ee1bd631a8",
             "paths": [
               "practitioner"
@@ -985,12 +928,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Patient/bab5ca58-f272-4c06-4b3f-f9661e45a22b",
-            "paths": [
-              "address.1"
-            ]
-          },
           {
             "key": "PractitionerRole/be571888-010e-9a32-e87f-f1ee1bd631a8",
             "paths": [
@@ -1628,7 +1565,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1661,7 +1597,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1688,7 +1623,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1721,7 +1655,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1748,7 +1681,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1781,7 +1713,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1808,7 +1739,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]
@@ -1841,7 +1771,6 @@
           {
             "key": "Appointment/b7121f46-cf50-5cec-7cfb-5de8e42b82d2",
             "paths": [
-              "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
             ]

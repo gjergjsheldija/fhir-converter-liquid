@@ -13,6 +13,7 @@ import { applyDotLiquidCompatTransforms } from "./dotLiquidCompat.js";
 import { CLS_NAMESPACE } from "../constants/constants.js";
 import { DEBUG_COLLECTOR_KEY } from "./debugCollector.js";
 import { suppressStringIndexAccess } from "./stringIndexAccess.js";
+import { applyDotLiquidEquality } from "./dotLiquidEquality.js";
 
 var liquidInstances = {};
 
@@ -131,6 +132,7 @@ export function instance(
             }
         });
 
+        applyDotLiquidEquality(engine);
         engine.registerTag("evaluate", evaluate);
         filters.forEach((filter) => engine.registerFilter(filter.name, filter.func));
 
