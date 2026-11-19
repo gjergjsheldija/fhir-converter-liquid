@@ -2,76 +2,26 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 31,
+    "pass": 93,
     "count": 0,
-    "content": 101
+    "content": 39
   },
   "cases": [
     {
       "template": "ADT_A01",
       "dataFile": "ADT-A01-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A01",
       "dataFile": "ADT-A01-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A01",
@@ -126,200 +76,50 @@
     {
       "template": "ADT_A02",
       "dataFile": "ADT-A02-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 87,
       "expectedCount": 87,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A02",
       "dataFile": "ADT-A02-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A03",
       "dataFile": "ADT-A03-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A03",
       "dataFile": "ADT-A03-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A04",
       "dataFile": "ADT-A04-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A04",
       "dataFile": "ADT-A04-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A04",
@@ -365,1072 +165,274 @@
     {
       "template": "ADT_A05",
       "dataFile": "ADT-A05-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A05",
       "dataFile": "ADT-A05-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A06",
       "dataFile": "ADT-A06-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 78,
       "expectedCount": 78,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "RelatedPerson/a00546c4-20d0-1f02-01be-ac602d6ccfa1",
-            "paths": [
-              "address.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A06",
       "dataFile": "ADT-A06-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 27,
       "expectedCount": 27,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A07",
       "dataFile": "ADT-A07-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 71,
       "expectedCount": 71,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "RelatedPerson/a00546c4-20d0-1f02-01be-ac602d6ccfa1",
-            "paths": [
-              "address.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A07",
       "dataFile": "ADT-A07-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 26,
       "expectedCount": 26,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A08",
       "dataFile": "ADT-A08-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A08",
       "dataFile": "ADT-A08-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A09",
       "dataFile": "ADT-A09-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 44,
       "expectedCount": 44,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A09",
       "dataFile": "ADT-A09-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 32,
       "expectedCount": 32,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A10",
       "dataFile": "ADT-A10-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 44,
       "expectedCount": 44,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A10",
       "dataFile": "ADT-A10-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 32,
       "expectedCount": 32,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/aaf37d11-5d66-af8d-c286-16b46b7f9ada",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A11",
       "dataFile": "ADT-A11-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A11",
       "dataFile": "ADT-A11-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A13",
       "dataFile": "ADT-A13-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 119,
       "expectedCount": 119,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A13",
       "dataFile": "ADT-A13-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A14",
       "dataFile": "ADT-A14-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A14",
       "dataFile": "ADT-A14-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A15",
       "dataFile": "ADT-A15-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 75,
       "expectedCount": 75,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A15",
       "dataFile": "ADT-A15-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A16",
       "dataFile": "ADT-A16-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A16",
       "dataFile": "ADT-A16-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A25",
       "dataFile": "ADT-A25-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A25",
       "dataFile": "ADT-A25-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A26",
       "dataFile": "ADT-A26-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 63,
       "expectedCount": 63,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A26",
       "dataFile": "ADT-A26-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 43,
       "expectedCount": 43,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A27",
       "dataFile": "ADT-A27-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A27",
       "dataFile": "ADT-A27-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 54,
       "expectedCount": 54,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A28",
       "dataFile": "ADT-A28-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A28",
       "dataFile": "ADT-A28-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A29",
       "dataFile": "ADT-A29-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 72,
       "expectedCount": 72,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A29",
       "dataFile": "ADT-A29-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A31",
       "dataFile": "ADT-A31-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 107,
       "expectedCount": 107,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A31",
       "dataFile": "ADT-A31-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 47,
       "expectedCount": 47,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "Provenance/9f6be243-c2fa-f8c8-0a7a-d168e98bdd4c",
-            "paths": [
-              "occurredDateTime"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ADT_A40",
@@ -1513,14 +515,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
             "paths": [
               "occurredDateTime"
@@ -1552,14 +546,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
             "paths": [
               "occurredDateTime"
@@ -1577,276 +563,66 @@
     {
       "template": "BAR_P01",
       "dataFile": "BAR-P01-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 108,
       "expectedCount": 108,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "BAR_P01",
       "dataFile": "BAR-P01-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 98,
       "expectedCount": 98,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/07eea8d4-d9d1-105e-9d76-23efad1ef94d",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "BAR_P02",
       "dataFile": "BAR-P02-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 52,
       "expectedCount": 52,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Patient/c1930384-4018-a75c-1bd9-d31eb400b536",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "Provenance/0d294d4d-3c8c-be35-4813-e61ba6e34968",
-            "paths": [
-              "occurredDateTime"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "BAR_P02",
       "dataFile": "BAR-P02-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 53,
       "expectedCount": 53,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Patient/c1930384-4018-a75c-1bd9-d31eb400b536",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/0a7545d7-202f-96e5-31e9-bb7d27ade3c2",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "Provenance/0d294d4d-3c8c-be35-4813-e61ba6e34968",
-            "paths": [
-              "occurredDateTime"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "BAR_P12",
       "dataFile": "BAR-P12-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 74,
       "expectedCount": 74,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "DiagnosticReport/242addc9-9ddc-3aaf-97ca-cdedace9d87c",
-            "paths": [
-              "presentedForm.0.contentType"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/b867d34c-37a2-f79b-bb8a-ee155ab769b7",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/d0039bfd-62c8-0522-802c-02dfd7bc527b",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "BAR_P12",
       "dataFile": "BAR-P12-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 75,
       "expectedCount": 75,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/b867d34c-37a2-f79b-bb8a-ee155ab769b7",
-            "paths": [
-              "occurredDateTime"
-            ]
-          },
-          {
-            "key": "Provenance/d0039bfd-62c8-0522-802c-02dfd7bc527b",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "DFT_P03",
       "dataFile": "DFT-P03-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 96,
       "expectedCount": 96,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "DFT_P03",
       "dataFile": "DFT-P03-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 91,
       "expectedCount": 91,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "Provenance/7ea13aa8-faf2-0187-4bb2-5dea25212fba",
-            "paths": [
-              "occurredDateTime"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "DFT_P11",
@@ -1862,13 +638,6 @@
             "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
             "paths": [
               "account.1"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -1894,13 +663,6 @@
             "key": "Encounter/4b192760-03d2-aec4-b0a6-fde323912e1e",
             "paths": [
               "account.1"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -2046,72 +808,18 @@
     {
       "template": "OMG_O19",
       "dataFile": "OMG-O19-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 128,
       "expectedCount": 128,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "RelatedPerson/aaab79ac-3725-fd40-4a95-90cd8e0603f7",
-            "paths": [
-              "address.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "OMG_O19",
       "dataFile": "OMG-O19-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 88,
       "expectedCount": 88,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Device/d65fb981-c111-4bb1-b58f-6dde5b80f922",
-            "paths": [
-              "identifier.1"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "RelatedPerson/aaab79ac-3725-fd40-4a95-90cd8e0603f7",
-            "paths": [
-              "address.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "OML_O21",
@@ -2149,222 +857,66 @@
     {
       "template": "OML_O21",
       "dataFile": "OML-O21-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 64,
       "expectedCount": 64,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "OML_O21",
       "dataFile": "OML-O21-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 50,
       "expectedCount": 50,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "OML_O21",
       "dataFile": "OML-O21-03.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 127,
       "expectedCount": 127,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Device/d65fb981-c111-4bb1-b58f-6dde5b80f922",
-            "paths": [
-              "identifier.1"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          },
-          {
-            "key": "RelatedPerson/aaab79ac-3725-fd40-4a95-90cd8e0603f7",
-            "paths": [
-              "address.1"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORM_O01",
       "dataFile": "ORM-O01-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 50,
       "expectedCount": 50,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORM_O01",
       "dataFile": "ORM-O01-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 44,
       "expectedCount": 44,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORM_O01",
       "dataFile": "ORM-O01-03.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 46,
       "expectedCount": 46,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORM_O01",
       "dataFile": "ORM-O01-04.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 51,
       "expectedCount": 51,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORM_O01",
       "dataFile": "ORM-O01-05.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 53,
       "expectedCount": 53,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/58988e57-a45e-285b-5942-4480980652df",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORM_O01",
@@ -2381,13 +933,6 @@
             "paths": [
               "dosageInstruction.0.patientInstruction",
               "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -2597,13 +1142,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
             "paths": [
               "text.div"
@@ -2637,13 +1175,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
             "paths": [
               "text.div"
@@ -2667,13 +1198,6 @@
             "paths": [
               "dosageInstruction.0.patientInstruction",
               "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -2710,13 +1234,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
             "paths": [
               "text.div"
@@ -2746,13 +1263,6 @@
             "paths": [
               "dosageInstruction.0.patientInstruction",
               "dosageInstruction.0.text"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -2795,13 +1305,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/7ef3ede5-7daf-eba5-9d3a-c0f3a068af0a",
             "paths": [
               "text.div"
@@ -2820,12 +1323,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
           {
             "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
             "paths": [
@@ -2859,12 +1356,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
             "paths": [
               "text.div"
@@ -2897,12 +1388,6 @@
         "unmatched": [],
         "fields": [
           {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
             "paths": [
               "text.div"
@@ -2934,12 +1419,6 @@
       "contentDelta": {
         "unmatched": [],
         "fields": [
-          {
-            "key": "Patient/d5fe6802-a680-e762-8f43-9659340b00ac",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text"
-            ]
-          },
           {
             "key": "Provenance/7beed73b-5c63-2f47-d793-8e393f68b681",
             "paths": [
@@ -2981,13 +1460,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
             "paths": [
               "text.div"
@@ -3022,13 +1494,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
             "paths": [
               "text.div"
@@ -3053,13 +1518,6 @@
               "participant.1.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -3097,13 +1555,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
             "paths": [
               "text.div"
@@ -3128,13 +1579,6 @@
               "participant.1.actor.reference",
               "supportingInformation.1.reference",
               "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -3172,13 +1616,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
             "paths": [
               "text.div"
@@ -3204,13 +1641,6 @@
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -3249,13 +1679,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
             "paths": [
               "text.div"
@@ -3281,13 +1704,6 @@
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -3326,13 +1742,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
             "paths": [
               "text.div"
@@ -3358,13 +1767,6 @@
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -3403,13 +1805,6 @@
             ]
           },
           {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
             "key": "Provenance/09e54df1-8856-96ca-cdbf-4bdbd94a26a3",
             "paths": [
               "text.div"
@@ -3435,13 +1830,6 @@
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -3477,13 +1865,6 @@
               "status",
               "supportingInformation.1.reference",
               "supportingInformation.2"
-            ]
-          },
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.5.extension.0.valueCodeableConcept.text",
-              "extension.6.extension.0.valueCodeableConcept.text"
             ]
           },
           {
@@ -3523,56 +1904,18 @@
     {
       "template": "VXU_V04",
       "dataFile": "VXU-V04-01.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 97,
       "expectedCount": 97,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "VXU_V04",
       "dataFile": "VXU-V04-02.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 84,
       "expectedCount": 84,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "Patient/9e909e52-61a1-be50-1878-a12ef8c36346",
-            "paths": [
-              "extension.7.extension.0.valueCodeableConcept.text",
-              "extension.8.extension.0.valueCodeableConcept.text",
-              "extension.9.extension.0.valueCodeableConcept.text"
-            ]
-          },
-          {
-            "key": "Provenance/0e3398a6-ab60-d32b-cf54-420d218f2e12",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "VXU_V04",

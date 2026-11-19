@@ -63,20 +63,16 @@ The full summary must show 0 unexpected failures. The 103 official compare failu
 
 Filled by the implementer from `classification.json`. Do not leave this section as a placeholder when status is Done.
 
-Refreshed from `classification.json` after spec 16: 132 cases, 31 pass, 0 count, 101 content.
+Refreshed from `classification.json` after spec 17: 132 cases, 93 pass, 0 count, 39 content.
 
 | First path signature | Content cases | Example `dataFile` |
 |---|---|---|
-| `extension.7.extension.0.valueCodeableConcept.text` | 43 | ADT-A01-01.hl7 |
-| `extension.5.extension.0.valueCodeableConcept.text` | 20 | ADT-A06-01.hl7 |
 | `participant.1.actor.reference` | 14 | SIU-S12-01.hl7 |
 | `dosageInstruction.0.patientInstruction` | 7 | ORM-O01-06.hl7 |
 | `address.1` | 5 | ADT01-23.hl7 |
+| `text.div` | 5 | MDHHS-OML-O21-2.hl7 |
 | `account.1` | 2 | DFT-P11-01.hl7 |
 | `encounter` | 2 | IZ_1_1.1_Admin_Child_Max_Message.hl7 |
-| `identifier.1` | 2 | OMG-O19-02.hl7 |
 | `meta` | 2 | ADT-A60-01.hl7 |
 | `account` | 1 | ORU-R01-01.hl7 |
 | `identifier.1.system` | 1 | MDM-T02-03.hl7 |
-| `presentedForm.0.contentType` | 1 | BAR-P12-01.hl7 |
-| `text.div` | 1 | MDHHS-OML-O21-2.hl7 |
