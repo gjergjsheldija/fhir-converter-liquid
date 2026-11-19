@@ -6,6 +6,7 @@
 import {realpath, stat} from "fs/promises";
 import path from "path";
 import {isValidGitRef, parseGithubRepo, readGithubFile} from "../browse/sources.js";
+import {HL7V2_LIQUID_TEMPLATE_LOCATION} from "../constants/constants.js";
 import {isSafeRelativePath, readManifest, validateManifest} from "./manifest.js";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -124,6 +125,8 @@ export async function prepareProjectConversion(body = {}) {
         return {
             templateDirectory: tplReal,
             strictOverridesOnly: false,
+            fallbackTemplateDirectory: HL7V2_LIQUID_TEMPLATE_LOCATION,
+            projectRoot: rootReal,
             templatesOverride: userOverrides
         };
     }

@@ -1,5 +1,7 @@
 import assert from "assert";
+import {existsSync} from "fs";
 import {mkdir, mkdtemp, rm, writeFile} from "fs/promises";
+import {HL7V2_LIQUID_TEMPLATE_LOCATION} from "../constants/constants.js";
 import os from "os";
 import path from "path";
 import {convertInlineHl7v2} from "../workers/worker.js";
@@ -79,18 +81,89 @@ describe("projects/convertProject", function () {
         assert.strictEqual(projectResult.status, 200);
         assert.strictEqual(projectResult.resultMsg.fhirResource.entry[0].resource.id, "proj-only-1");
 
-        // Referencing Resource/MessageHeader (which exists in service-templates, NOT in this empty project) must fail!
-        const missingInProjTpl = `{ "resourceType": "Bundle", "entry": [ {% include 'Resource/MessageHeader' %} ] }`;
+        // A partial missing from both the project and the built-in tree must still fail.
+        const missingEverywhereTpl = `{ "resourceType": "Bundle", "entry": [ {% include 'Resource/DoesNotExistAnywhere' %} ] }`;
         await assert.rejects(
             () => convertInlineHl7v2({
                 srcDataType: "hl7v2",
                 srcData: SAMPLE_HL7,
-                template: missingInProjTpl,
+                template: missingEverywhereTpl,
                 templatesOverride: {},
-                templateDirectory: prep.templateDirectory
+                templateDirectory: prep.templateDirectory,
+                fallbackTemplateDirectory: prep.fallbackTemplateDirectory
             }),
             (err) => err && err.status === 400
         );
+    });
+
+    it("falls back to the built-in template tree for partials the project does not have", async function () {
+        const created = await createProject({
+            name: "Local fallback test",
+            parentPath: tempRoot,
+            family: "hl7v2",
+            startingPoint: "empty"
+        });
+        const prep = await prepareProjectConversion({
+            project: {kind: "local", path: created.path},
+            template: "",
+            templatesOverride: {}
+        });
+        assert.strictEqual(prep.fallbackTemplateDirectory, HL7V2_LIQUID_TEMPLATE_LOCATION);
+
+        // Resource/MessageHeader exists only in the built-in tree; the empty project falls back to it.
+        const result = await convertInlineHl7v2({
+            srcDataType: "hl7v2",
+            srcData: SAMPLE_HL7,
+            template: `{% include 'Resource/MessageHeader' %}`,
+            templatesOverride: {},
+            templateDirectory: prep.templateDirectory,
+            strictOverridesOnly: prep.strictOverridesOnly,
+            fallbackTemplateDirectory: prep.fallbackTemplateDirectory
+        });
+        assert.strictEqual(result.status, 200);
+        assert.strictEqual(result.resultMsg.fhirResource.resource.resourceType, "MessageHeader");
+
+        // GitHub conversion sets no fallback.
+        const ghPrep = await prepareProjectConversion({
+            project: {kind: "github", repo: "acme/rules", ref: "main", token: "", manifest: emptyHl7v2Manifest("GH")},
+            template: "",
+            templatesOverride: {}
+        });
+        assert.strictEqual(ghPrep.fallbackTemplateDirectory, undefined);
+    });
+
+    it("renders a project-only Z partial that the built-in tree does not have", async function () {
+        const created = await createProject({
+            name: "Local Z partial test",
+            parentPath: tempRoot,
+            family: "hl7v2",
+            startingPoint: "empty"
+        });
+        await mkdir(path.join(created.path, "templates/Hl7v2/Z"), {recursive: true});
+        await writeFile(
+            path.join(created.path, "templates/Hl7v2/Z/_ZDG.liquid"),
+            `{ "resourceType": "Basic", "id": "from-z" }`,
+            "utf8"
+        );
+        assert.strictEqual(existsSync(path.join(HL7V2_LIQUID_TEMPLATE_LOCATION, "Z/_ZDG.liquid")), false);
+
+        const rootTemplate = `{% include 'Z/ZDG' %}`;
+        const prep = await prepareProjectConversion({
+            project: {kind: "local", path: created.path},
+            template: rootTemplate,
+            templatesOverride: {}
+        });
+        const result = await convertInlineHl7v2({
+            srcDataType: "hl7v2",
+            srcData: SAMPLE_HL7,
+            template: rootTemplate,
+            templatesOverride: prep.templatesOverride,
+            templateDirectory: prep.templateDirectory,
+            strictOverridesOnly: prep.strictOverridesOnly,
+            fallbackTemplateDirectory: prep.fallbackTemplateDirectory
+        });
+        assert.strictEqual(result.status, 200);
+        assert.strictEqual(result.resultMsg.fhirResource.id, "from-z");
     });
 
     it("fetches and caches GitHub project partials, applies DotLiquid transforms to overrides, and prioritizes open tabs", async function () {

@@ -29,7 +29,7 @@ var session = createNamespace(CLS_NAMESPACE);
 
 var rebuildLiquidCache = true;
 
-function GetLiquidInstance(dataTypeHandler, templatesMap, templateDirectory, strictOverridesOnly) {
+function GetLiquidInstance(dataTypeHandler, templatesMap, templateDirectory, strictOverridesOnly, fallbackTemplateDirectory) {
     const hasCustomProjectContext = Boolean(templateDirectory || strictOverridesOnly);
     const rootDir = templateDirectory || HL7V2_LIQUID_TEMPLATE_LOCATION;
     let needToUseMap = hasCustomProjectContext || (templatesMap && Object.entries(templatesMap).length > 0 && templatesMap.constructor === Object);
@@ -38,7 +38,7 @@ function GetLiquidInstance(dataTypeHandler, templatesMap, templateDirectory, str
         dataTypeHandler,
         rootDir,
         templatesMap,
-        {strictOverridesOnly: Boolean(strictOverridesOnly)}
+        {strictOverridesOnly: Boolean(strictOverridesOnly), fallbackTemplateDirectory}
     );
     rebuildLiquidCache = needToUseMap ? true : false;
 
@@ -110,7 +110,8 @@ export function convertInlineHl7v2(msg) {
                         dataTypeHandler,
                         templatesMap,
                         msg.templateDirectory,
-                        msg.strictOverridesOnly
+                        msg.strictOverridesOnly,
+                        msg.fallbackTemplateDirectory
                     );
                     session.set(TIMEZONE, msg.timezone);
 
