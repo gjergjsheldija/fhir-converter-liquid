@@ -4,7 +4,10 @@
 // -------------------------------------------------------------------------------------------------
 
 import { expect } from "chai";
+import { Liquid } from "liquidjs";
 import {
+    applyDotLiquidCompatTransforms,
+    normalizeRepeatedTagArgumentCommas,
     stripDoubleBraceInsideTags,
     normalizeDoubleDotToSingleDot,
     normalizeElseifTagName,
@@ -274,6 +277,36 @@ describe("dotLiquidCompat", () => {
             const input = "{{ messageHeaderID }} and {{ PatientId }}";
             const expected = "{{ messageHeaderId }} and {{ patientId }}";
             expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+    });
+
+    describe("normalizeRepeatedTagArgumentCommas()", () => {
+        it("collapses a doubled comma between include arguments (OUL_R23 DiagnosticReport/Encounter)", () => {
+            const input = "{% include 'Reference/DiagnosticReport/Encounter' REF: full_ServiceRequest_Encounter_ID,, ID: diagnosticId  %}";
+            const expected = "{% include 'Reference/DiagnosticReport/Encounter' REF: full_ServiceRequest_Encounter_ID, ID: diagnosticId  %}";
+            expect(normalizeRepeatedTagArgumentCommas(input)).to.equal(expected);
+        });
+
+        it("collapses commas separated by whitespace", () => {
+            const input = "{% include 'Resource/EpisodeOfCare' PV2: a, ,  , ID: b -%}";
+            const expected = "{% include 'Resource/EpisodeOfCare' PV2: a, ID: b -%}";
+            expect(normalizeRepeatedTagArgumentCommas(input)).to.equal(expected);
+        });
+
+        it("leaves single commas, quoted literals and text outside tags untouched", () => {
+            const input = "a,, b {% include 'x' A: ',,', B: \"x,,y\", C: c %} {{ d }},,";
+            expect(normalizeRepeatedTagArgumentCommas(input)).to.equal(input);
+        });
+
+        it("is applied by applyDotLiquidCompatTransforms", () => {
+            expect(applyDotLiquidCompatTransforms("{% include 'x' A: a,, B: b %}")).to.equal("{% include 'x' A: a, B: b %}");
+        });
+
+        it("keeps the ID argument so the include reaches the intended resource", async () => {
+            const engine = new Liquid({ fs: { readFileSync: () => "{{ ID }}|{{ REF }}", existsSync: () => true, exists: async () => true, readFile: async () => "{{ ID }}|{{ REF }}", resolve: (root, file) => file, dirname: () => ".", sep: "/" } });
+            const raw = "{% include 'p' REF: r,, ID: d %}";
+            expect(await engine.parseAndRender(raw, { r: "R", d: "D" })).to.equal("|R");
+            expect(await engine.parseAndRender(applyDotLiquidCompatTransforms(raw), { r: "R", d: "D" })).to.equal("D|R");
         });
     });
 });

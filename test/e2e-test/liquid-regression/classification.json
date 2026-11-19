@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 27,
-    "count": 5,
-    "content": 100
+    "pass": 29,
+    "count": 2,
+    "content": 101
   },
   "cases": [
     {
@@ -162,17 +162,10 @@
     {
       "template": "ADT_A08",
       "dataFile": "ADT-A08-01.hl7",
-      "status": "count",
-      "actualCount": 120,
+      "status": "content",
+      "actualCount": 119,
       "expectedCount": 119,
-      "byType": [
-        {
-          "resourceType": "EpisodeOfCare",
-          "actual": 2,
-          "expected": 1,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "ADT_A08",
@@ -831,32 +824,18 @@
     {
       "template": "OUL_R23",
       "dataFile": "OUL-R23-01.hl7",
-      "status": "count",
-      "actualCount": 109,
+      "status": "pass",
+      "actualCount": 108,
       "expectedCount": 108,
-      "byType": [
-        {
-          "resourceType": "DiagnosticReport",
-          "actual": 6,
-          "expected": 5,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "OUL_R23",
       "dataFile": "OUL-R23-02.hl7",
-      "status": "count",
-      "actualCount": 84,
+      "status": "pass",
+      "actualCount": 83,
       "expectedCount": 83,
-      "byType": [
-        {
-          "resourceType": "DiagnosticReport",
-          "actual": 5,
-          "expected": 4,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "OUL_R24",

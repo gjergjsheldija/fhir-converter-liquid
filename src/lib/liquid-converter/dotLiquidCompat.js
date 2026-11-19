@@ -170,6 +170,24 @@ export function normalizeNullNilLiteralAssignment(content) {
 }
 
 /**
+ * DotLiquid reads `{% include %}`/`{% evaluate %}` named arguments by scanning the tag
+ * markup for `name: value` pairs (`Liquid.TagAttributes`), so a stray repeated comma between
+ * arguments is ignored. liquidjs's hash tokenizer skips exactly one `,` before an argument
+ * name and stops at the second one, silently DROPPING every argument that follows.
+ * Confirmed in `OUL_R23.liquid`:
+ *   `{% include 'Reference/DiagnosticReport/Encounter' REF: x,, ID: diagnosticId %}`
+ * lost `ID`, so the include emitted an id-less `DiagnosticReport` carrying only the encounter
+ * reference instead of merging into the report `diagnosticId` names (the extra entry in
+ * OUL-R23-01/02). Collapses `,<ws>,` runs to a single `,` inside `{% %}` tags only, and
+ * never inside a quoted string literal.
+ */
+export function normalizeRepeatedTagArgumentCommas(content) {
+    return content.replace(/\{%-?[^%]*?-?%\}/g, (tag) => {
+        return tag.replace(/("[^"]*"|'[^']*')|,(?:\s*,)+/g, (match, quoted) => (quoted ? quoted : ","));
+    });
+}
+
+/**
  * Applies every DotLiquid-compat transform above, in the order this module has always applied
  * them for `{% include %}`/`{% evaluate %}`-loaded sub-templates. Root/top-level message-type
  * templates (e.g. `ORM_O01.liquid`) are supplied directly as request payload content rather than
@@ -188,7 +206,9 @@ export function applyDotLiquidCompatTransforms(content) {
                 normalizeTripleBraceOutput(
                     normalizeElseifTagName(
                         normalizeDoubleDotToSingleDot(
-                            stripDoubleBraceInsideTags(content)
+                            normalizeRepeatedTagArgumentCommas(
+                                stripDoubleBraceInsideTags(content)
+                            )
                         )
                     )
                 )
