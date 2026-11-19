@@ -59,6 +59,7 @@ Read `AGENTS.md` and the target folder's `00-order.md` before starting any spec.
 
 - `specs/ccda/01-convert-ccda.md` — **Done (2026-11-19)** — `make sync-ccda-templates` syncs the pinned Microsoft `Ccda` templates (822 files) into `src/templates/Ccda/`; `srcDataType: "ccda"` renders with `msg.ClinicalDocument` (xml2js model that mirrors `CcdaDataParser` + `DictionaryJsonConverter`: attributes without `@`, text on `_`); registered the pinned filters `to_json_string`, `to_array`, `match`, `get_first_ccda_sections_by_template_id`, `batch_render`, `gzip`, `sha1_hash`, `base64_encode`; a ccda-only local project converts with its `templates/Ccda` and falls back to the synced tree. The sample document converts to a Bundle through `CCD.liquid`.
 - `specs/ccda/02-cda-message-coloring-and-parsed-tree.md` — **Done (2026-11-19)** — a C-CDA project converts from the page (`prepareProjectConversion` returns `srcDataType`, `POST /api/v1/projects/convert` passes it to the worker), the message editor uses the `xml` mode, and `debug=true` returns `debugInfo.parsedCcda` (`summarizeCcda`) for the **Parsed CDA** Debug tab with `msg.` copy paths.
+- `specs/ccda/03-cda-debug-and-send.md` — **Done (2026-11-19)** — `ccdaHoverAt` (`src/lib/parsers/ccda/ccdaHover.js`, copied into `debug-hover.js`) shows the `msg.` path and value when hovering a C-CDA message; the editor hover now attaches through the wrapper element (it was never attached before, for HL7 too); the C-CDA AI prompt names `msg`; Expected diff, Validate, and Send work on a C-CDA result.
 
 ---
 
