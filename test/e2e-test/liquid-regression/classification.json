@@ -2,9 +2,9 @@
   "pin": "253307fe6063a42b024ef7dbeb6aae157f1c2f61",
   "summary": {
     "cases": 132,
-    "pass": 117,
+    "pass": 120,
     "count": 0,
-    "content": 15
+    "content": 12
   },
   "cases": [
     {
@@ -658,27 +658,10 @@
     {
       "template": "MDM_T02",
       "dataFile": "MDM-T02-03.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 45,
       "expectedCount": 45,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "PractitionerRole/9f64bd3b-d5e9-678b-2f14-b0d756a4e7f1",
-            "paths": [
-              "practitioner"
-            ]
-          },
-          {
-            "key": "Provenance/ff198209-2ee9-a32c-124f-d63637240f8d",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "MDM_T05",
@@ -868,52 +851,18 @@
     {
       "template": "ORU_R01",
       "dataFile": "LAB-ORU-1.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 25,
       "expectedCount": 25,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "PractitionerRole/be571888-010e-9a32-e87f-f1ee1bd631a8",
-            "paths": [
-              "practitioner"
-            ]
-          },
-          {
-            "key": "Provenance/9f79a1ce-a1d5-c6dd-a0d6-3bc75109716c",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORU_R01",
       "dataFile": "LAB-ORU-2.hl7",
-      "status": "content",
+      "status": "pass",
       "actualCount": 25,
       "expectedCount": 25,
-      "byType": [],
-      "contentDelta": {
-        "unmatched": [],
-        "fields": [
-          {
-            "key": "PractitionerRole/be571888-010e-9a32-e87f-f1ee1bd631a8",
-            "paths": [
-              "practitioner"
-            ]
-          },
-          {
-            "key": "Provenance/9f79a1ce-a1d5-c6dd-a0d6-3bc75109716c",
-            "paths": [
-              "text.div"
-            ]
-          }
-        ]
-      }
+      "byType": []
     },
     {
       "template": "ORU_R01",
@@ -952,12 +901,6 @@
             "paths": [
               "code",
               "location"
-            ]
-          },
-          {
-            "key": "PractitionerRole/9f64bd3b-d5e9-678b-2f14-b0d756a4e7f1",
-            "paths": [
-              "practitioner"
             ]
           },
           {

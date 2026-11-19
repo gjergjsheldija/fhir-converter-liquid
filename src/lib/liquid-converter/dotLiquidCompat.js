@@ -136,6 +136,15 @@ const DEFINES_TEXTSTRING = /\{%-?\s*(?:capture|assign)\s+textstring\b/;
  *   `"reference":"Device/{{ device_ID_AIG_3 }}"`). The id is assigned on line 3 by
  *   `{% evaluate device_Id_AIG_3 using 'ID/Device' CWE: AIG.3 %}`. Case-sensitive LiquidJS
  *   rendered `Device/` (empty id) for Appointment participant[1]; DotLiquid resolves the id.
+ * - `practitionerId_obr_10` → `practitionerId_OBR_10` (17 templates, e.g. `MDM_T02.liquid` line 397,
+ *   `ORU_R01.liquid` line 929: `{% include 'Resource/PractitionerRole' OBR: obrSegment,
+ *   collection_collector_practitioner: practitionerId_obr_10, ID: practitionerRoleId_OBR_10 -%}`).
+ *   The id is assigned just above by `{% evaluate practitionerId_OBR_10 using 'ID/Practitioner' … %}`
+ *   and the lowercase spelling is never assigned anywhere. `_PractitionerRole.liquid` lines 499-501 set
+ *   `practitioner.reference` from `collection_collector_practitioner`; case-sensitive LiquidJS passed
+ *   nothing, so the collector PractitionerRole had an empty `practitioner` (MDM-T02-03 PractitionerRole
+ *   `9f64bd3b…`: actual absent, expected `Practitioner/ae62dffe…`; `requestor_practitioner1` is nil there
+ *   because OBR.16 is empty and that include never renders). DotLiquid resolves the name.
  * - `textstring` → `textString` (5 reads in `Resource/_MedicationRequest.liquid`, lines 171, 179, 299,
  *   309, 318: `{% capture specomp %}{{ textstring | split: "~" | join: "+" }}{% endcapture %}`
  *   right after `{% capture textString %}…{% endcapture %}`). For ORM-O01-06 `orm_rxo_7.Value` is
@@ -154,6 +163,7 @@ export function normalizeVariableNameTypos(content) {
     content = content.replace(/\bmedicationRequestID\b/g, 'medicationRequestId');
     content = content.replace(/\bAccountId_BLG\b/g, 'accountId_BLG');
     content = content.replace(/\bdevice_ID_AIG_3\b/g, 'device_Id_AIG_3');
+    content = content.replace(/\bpractitionerId_obr_10\b/g, 'practitionerId_OBR_10');
     if (DEFINES_TEXT_STRING.test(content) && !DEFINES_TEXTSTRING.test(content)) {
         content = content.replace(/\btextstring\b/g, 'textString');
     }
