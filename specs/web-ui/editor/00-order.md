@@ -24,6 +24,7 @@ Implement `specs/runtime/02`, `specs/web-ui/usability/` (`01` through `20`), and
 | 04 | Done (2026-11-18) | `04-debug-trace-and-hover-values.md` | Opt-in `?debug=true` parsed HL7v2 + Liquid scope snapshots and mouse-over value tooltips on variables and HL7 paths (`firstSegments.MSH.10`). |
 | 05 | Done (2026-11-18) | `05-bottom-debug-drawer.md` | Collapsible, resizable Chrome-DevTools-style bottom Debug drawer with Parsed HL7 tree, Variables & Console evaluator, and Diagnostics/Bundle jump list. |
 | 06 | Done (2026-11-19) | `06-expected-bundle-diff.md` | **Expected diff** tab in the Debug drawer lists Bundle resources added, removed, and changed against `tests/expected/<sample basename>.json` of the open project; hidden in Built-in mode or when that file is missing. |
+| 07 | Done (2026-11-19) | `07-validate-against-fhir-server.md` | **Validate** button posts the result to `{base}/$validate` of the Settings FHIR server (`POST /api/v1/fhir/validate`) and lists OperationOutcome issues in a Debug drawer **Validation** tab; Convert never calls the server.
 
 ## Check
 

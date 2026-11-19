@@ -87,6 +87,8 @@ function setSettings(settings) {
         localStorage.setItem('fhirConverterSettings', JSON.stringify(settings));
     } catch (ex) {
         return;
+    } finally {
+        updateValidateButton();
     }
 }
 
@@ -887,6 +889,7 @@ $(document).ready(function () {
         foldGutter: true,
         gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     });
+    outputCode.on('change', updateValidateButton);
 
     let extrakeysObj = {};
     extrakeysObj["Shift-Alt-F"] = formatActiveTemplate;
@@ -1185,6 +1188,11 @@ $(document).ready(function () {
     $('#send-fhir-button').on('click', function () {
         sendToFhir();
     });
+
+    $('#validate-fhir-button').on('click', function () {
+        validateFhir();
+    });
+    updateValidateButton();
 
     $('#format-template-button').on('click', formatActiveTemplate);
     $('#generate-template-button').on('click', function () {
@@ -1743,6 +1751,84 @@ function sendToFhir() {
                 message = err.responseJSON.error.message;
             }
             showConversionError(message);
+        }
+    });
+}
+
+function parseResultResource() {
+    if (typeof outputCode === 'undefined' || !outputCode) {
+        return null;
+    }
+    var text = outputCode.getValue();
+    if (!text || !text.trim()) {
+        return null;
+    }
+    try {
+        var parsed = JSON.parse(text);
+        return parsed && typeof parsed === 'object' && parsed.resourceType ? parsed : null;
+    } catch (ex) {
+        return null;
+    }
+}
+
+function updateValidateButton() {
+    var button = $('#validate-fhir-button');
+    if (!button.length) {
+        return;
+    }
+    var settings = getSettings();
+    var hasUrl = Boolean(settings && settings.fhirBaseUrl);
+    var enabled = hasUrl && parseResultResource() !== null;
+    button.prop('disabled', !enabled);
+    button.attr('title', enabled ? 'Validate the result at the FHIR server $validate endpoint' : 'Needs a FHIR result and a FHIR server URL in Settings');
+}
+
+// Posts the current result to the server route for {base}/$validate. Never called from convert.
+function validateFhir() {
+    var settings = getSettings();
+    var resource = parseResultResource();
+    if (!settings.fhirBaseUrl || !resource) {
+        updateValidateButton();
+        return;
+    }
+    $('#validate-fhir-button').prop('disabled', true);
+    $('#conversion-status').text('Validating…');
+    $.ajax('/api/v1/fhir/validate', {
+        data: JSON.stringify({
+            baseUrl: settings.fhirBaseUrl,
+            resource: resource,
+            auth: settings.fhirAuth,
+            token: settings.fhirToken,
+            username: settings.fhirUsername,
+            password: settings.fhirPassword
+        }),
+        type: 'POST',
+        processData: false,
+        contentType: 'application/json',
+        success: function (data) {
+            $('#conversion-status').text('Validated');
+            if (typeof window.showValidationResult === 'function') {
+                window.showValidationResult({status: data.status, issues: data.issues || [], body: data.body});
+            }
+        },
+        error: function (err) {
+            $('#conversion-status').text('Validation failed');
+            var message = 'FHIR server request failed.';
+            if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message) {
+                message = err.responseJSON.error.message;
+            }
+            var detail = err.responseJSON && err.responseJSON.detail;
+            if (typeof window.showValidationResult === 'function') {
+                window.showValidationResult({
+                    error: message,
+                    status: detail && detail.status,
+                    issues: (detail && detail.issues) || [],
+                    body: detail && detail.body
+                });
+            }
+        },
+        complete: function () {
+            updateValidateButton();
         }
     });
 }

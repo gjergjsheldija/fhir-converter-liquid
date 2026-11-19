@@ -69,3 +69,47 @@ export async function sendResource(baseUrl, resource, auth) {
     }
     return {ok: true, status: response.status, location: response.headers.get("location") || "", body};
 }
+
+export function validateTarget(baseUrl) {
+    let url;
+    try {
+        url = new URL(baseUrl);
+    } catch (err) {
+        throw httpError(400, "Enter a FHIR server URL.");
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw httpError(400, "FHIR server URL must start with http:// or https://.");
+    }
+    return url.toString().replace(/\/+$/, "") + "/$validate";
+}
+
+export async function validateResource(baseUrl, resource, auth) {
+    const target = validateTarget(baseUrl);
+    if (!resource || typeof resource !== "object" || !resource.resourceType) {
+        throw httpError(400, "Result has no resourceType.");
+    }
+    let response;
+    try {
+        response = await fetch(target, {
+            method: "POST",
+            headers: fhirHeaders(auth),
+            body: JSON.stringify(resource)
+        });
+    } catch (err) {
+        throw httpError(400, `FHIR server request failed: ${err.message}`);
+    }
+    const text = await response.text();
+    let body;
+    try {
+        body = JSON.parse(text);
+    } catch (err) {
+        body = text.slice(0, 500);
+    }
+    const result = {ok: response.ok, status: response.status, issues: []};
+    if (body && typeof body === "object" && body.resourceType === "OperationOutcome") {
+        result.issues = Array.isArray(body.issue) ? body.issue : [];
+    } else {
+        result.body = body;
+    }
+    return result;
+}

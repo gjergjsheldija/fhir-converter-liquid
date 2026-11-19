@@ -33,7 +33,7 @@ import {external as libraryFilters} from "./lib/liquid-converter/liquid-helpers.
 import {convertInlineHl7v2} from "./lib/workers/worker.js";
 import {chooseLocalFolder, listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
 import {fieldMapArchive, fieldMapFiles} from "../scripts/hl7-fhir-map.mjs";
-import {sendResource} from "./lib/fhir/sendResource.js";
+import {sendResource, validateResource} from "./lib/fhir/sendResource.js";
 import {createProject} from "./lib/projects/createProject.js";
 import {openLocalProject} from "./lib/projects/openProject.js";
 import {openGithubProject} from "./lib/projects/openGithubProject.js";
@@ -709,6 +709,22 @@ export default function (app) {
         const body = req.body || {};
         sendResource(body.baseUrl, body.resource, body)
             .then((result) => res.json(result))
+            .catch((err) => browseError(res, err));
+    });
+
+    app.post("/api/v1/fhir/validate", function (req, res) {
+        const body = req.body || {};
+        validateResource(body.baseUrl, body.resource, body)
+            .then((result) => {
+                if (result.ok) {
+                    res.json(result);
+                    return;
+                }
+                const error = new Error(`FHIR server returned ${result.status}.`);
+                error.status = 400;
+                error.detail = result;
+                throw error;
+            })
             .catch((err) => browseError(res, err));
     });
 

@@ -974,6 +974,7 @@ body {
 #generate-template-button,
 #copy-result-button,
 #send-fhir-button,
+#validate-fhir-button,
 .includes-trigger,
 #new-sample-button,
 #import-sample-button,
@@ -1002,6 +1003,7 @@ body {
 #generate-template-button:hover,
 #copy-result-button:hover,
 #send-fhir-button:hover,
+#validate-fhir-button:hover:not(:disabled),
 .includes-trigger:hover,
 #new-sample-button:hover,
 #import-sample-button:hover,
@@ -1020,9 +1022,15 @@ body {
     border-color: var(--accent);
 }
 
-#send-fhir-button {
+#send-fhir-button,
+#validate-fhir-button {
     border-color: var(--accent);
     color: var(--accent);
+}
+
+#validate-fhir-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 #template-save-button {
@@ -1931,6 +1939,11 @@ li.CodeMirror-hint-active {
 
 .debug-diag-item:hover {
     background: var(--hover);
+}
+
+.debug-validation-issue {
+    cursor: default;
+    align-items: baseline;
 }
 
 /* --- Projects Modals & Sidebar Controls (projects Specs 07–11) ---------------------- */

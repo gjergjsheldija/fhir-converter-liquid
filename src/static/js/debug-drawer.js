@@ -791,6 +791,70 @@
         });
     }
 
+    // --- Tab 5: FHIR server validation (editor Spec 07) --------------------------------
+
+    // null until the user clicks Validate; otherwise {error?, status?, issues, body?}
+    var validationState = null;
+
+    function validationIssueText(issue) {
+        return issue.diagnostics || (issue.details && issue.details.text) || '';
+    }
+
+    function renderValidationPanel(filter) {
+        var container = $('#debug-panel-validation').empty();
+        if (!validationState) {
+            container.append($('<div class="debug-empty">Click Validate to check the result at the FHIR server.</div>'));
+            return;
+        }
+        var q = (filter || '').trim().toLowerCase();
+        if (validationState.error) {
+            container.append($('<div class="debug-expected-error" role="alert"></div>').text(validationState.error));
+        }
+        var issues = validationState.issues || [];
+        if (issues.length === 0) {
+            if (!validationState.error) {
+                container.append($('<div class="debug-empty"></div>').text('The server returned no issues.'));
+            }
+            if (validationState.body !== undefined && validationState.body !== null && validationState.body !== '') {
+                var bodyText = typeof validationState.body === 'string' ? validationState.body : JSON.stringify(validationState.body).slice(0, 500);
+                container.append($('<div class="debug-meta"></div>').text('Response: ' + bodyText));
+            }
+            return;
+        }
+        var shown = issues.filter(function (issue) {
+            var haystack = [issue.severity, issue.code, validationIssueText(issue)].join(' ').toLowerCase();
+            return !q || haystack.indexOf(q) !== -1;
+        });
+        if (shown.length === 0) {
+            container.append($('<div class="debug-empty">No matches.</div>'));
+        }
+        shown.forEach(function (issue) {
+            var row = $('<div class="debug-diag-item debug-validation-issue"></div>');
+            var severity = String(issue.severity || 'unknown');
+            var cls = severity === 'fatal' || severity === 'error' ? 'is-removed' : (severity === 'warning' ? 'is-changed' : 'is-read');
+            row.append($('<span class="debug-pill"></span>').addClass(cls).text(severity));
+            row.append($('<span class="debug-tree-key"></span>').text(issue.code || ''));
+            var text = validationIssueText(issue);
+            if (text) {
+                row.append($('<span class="debug-tree-preview"></span>').text(text));
+            }
+            container.append(row);
+        });
+    }
+
+    window.showValidationResult = function (state) {
+        validationState = state || null;
+        $('#debug-validation-tab').prop('hidden', !validationState);
+        if (validationState) {
+            var count = (validationState.issues || []).length;
+            $('#debug-validation-tab').text('Validation (' + count + ')');
+            setDebugDrawerOpen(true);
+            setDebugTab('validation');
+        } else if (activeTab === 'validation') {
+            setDebugTab('hl7');
+        }
+    };
+
     // --- Orchestration & State --------------------------------------------------------
 
     function renderActivePanel() {
@@ -812,6 +876,8 @@
             renderDiagPanel(info, filter);
         } else if (activeTab === 'expected') {
             renderExpectedPanel(filter);
+        } else if (activeTab === 'validation') {
+            renderValidationPanel(filter);
         }
     }
 
@@ -825,6 +891,7 @@
         $('#debug-panel-vars').prop('hidden', tabId !== 'vars');
         $('#debug-panel-diag').prop('hidden', tabId !== 'diag');
         $('#debug-panel-expected').prop('hidden', tabId !== 'expected');
+        $('#debug-panel-validation').prop('hidden', tabId !== 'validation');
         renderActivePanel();
     }
 

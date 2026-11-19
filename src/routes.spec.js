@@ -1395,6 +1395,69 @@ describe('browse and FHIR send', function () {
             .expect(400)
             .end(done);
     });
+
+    it('returns 400 from validate when the FHIR server URL is missing', function (done) {
+        supertest(app)
+            .post('/api/v1/fhir/validate')
+            .send({resource: {resourceType: 'Patient'}})
+            .expect(400)
+            .end(done);
+    });
+
+    describe('POST /api/v1/fhir/validate with mocked fetch', function () {
+        let realFetch;
+
+        beforeEach(function () {
+            realFetch = global.fetch;
+        });
+
+        afterEach(function () {
+            global.fetch = realFetch;
+        });
+
+        it('returns the OperationOutcome issues', async function () {
+            let requested;
+            global.fetch = async (url) => {
+                requested = url;
+                return {
+                    ok: true,
+                    status: 200,
+                    text: async () => JSON.stringify({resourceType: 'OperationOutcome', issue: [{severity: 'information', code: 'informational'}]})
+                };
+            };
+            const res = await supertest(app)
+                .post('/api/v1/fhir/validate')
+                .send({baseUrl: 'https://fhir.example.org/r4', resource: {resourceType: 'Patient'}})
+                .expect(200);
+            assert.strictEqual(requested, 'https://fhir.example.org/r4/$validate');
+            assert.strictEqual(res.body.issues.length, 1);
+        });
+
+        it('returns 400 with the server status for a non-2xx response', async function () {
+            global.fetch = async () => ({
+                ok: false,
+                status: 422,
+                text: async () => JSON.stringify({resourceType: 'OperationOutcome', issue: [{severity: 'error', code: 'invalid'}]})
+            });
+            const res = await supertest(app)
+                .post('/api/v1/fhir/validate')
+                .send({baseUrl: 'https://fhir.example.org/r4', resource: {resourceType: 'Patient'}})
+                .expect(400);
+            assert.ok(/422/.test(res.body.error.message));
+            assert.strictEqual(res.body.detail.issues.length, 1);
+        });
+
+        it('returns 400 for a network failure', async function () {
+            global.fetch = async () => {
+                throw new Error('connect ECONNREFUSED');
+            };
+            const res = await supertest(app)
+                .post('/api/v1/fhir/validate')
+                .send({baseUrl: 'https://fhir.example.org/r4', resource: {resourceType: 'Patient'}})
+                .expect(400);
+            assert.ok(/ECONNREFUSED/.test(res.body.error.message));
+        });
+    });
 });
 
 describe('Project API routes (/api/v1/projects/*)', function () {
