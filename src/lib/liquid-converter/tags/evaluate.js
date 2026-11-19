@@ -32,8 +32,12 @@ export default {
 
         const childCtx = new Context({}, ctx.opts,
             { sync: ctx.sync, globals: ctx.globals, strictVariables: ctx.strictVariables });
-        const scope = childCtx.bottom();
-        __assign(scope, yield hash.render(ctx));
+        // Matches upstream's Evaluate.cs: the partial renders inside `context.Stack`, so it
+        // can read every variable visible at the call site (for example `AIG` inside an
+        // include) in addition to the named arguments, and its assign/capture writes land in
+        // the outermost scope. The named arguments shadow the inherited variables.
+        childCtx.scopes = ctx.scopes.slice();
+        childCtx.push(__assign({}, yield hash.render(ctx)));
 
         // parse sub template, retrieve result and assign to output variable
         const templates = yield liquid._parsePartialFile(filePath, childCtx.sync, this['currentFile']);

@@ -3,8 +3,8 @@
   "summary": {
     "cases": 132,
     "pass": 27,
-    "count": 19,
-    "content": 86
+    "count": 5,
+    "content": 100
   },
   "cases": [
     {
@@ -957,212 +957,114 @@
     {
       "template": "SIU_S12",
       "dataFile": "SIU-S12-01.hl7",
-      "status": "count",
-      "actualCount": 49,
+      "status": "content",
+      "actualCount": 48,
       "expectedCount": 48,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 3,
-          "expected": 2,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S12",
       "dataFile": "SIU-S12-02.hl7",
-      "status": "count",
-      "actualCount": 42,
+      "status": "content",
+      "actualCount": 41,
       "expectedCount": 41,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 4,
-          "expected": 3,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S13",
       "dataFile": "SIU-S13-01.hl7",
-      "status": "count",
-      "actualCount": 32,
+      "status": "content",
+      "actualCount": 31,
       "expectedCount": 31,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 3,
-          "expected": 2,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S13",
       "dataFile": "SIU-S13-02.hl7",
-      "status": "count",
-      "actualCount": 42,
+      "status": "content",
+      "actualCount": 41,
       "expectedCount": 41,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 4,
-          "expected": 3,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S14",
       "dataFile": "SIU-S14-01.hl7",
-      "status": "count",
-      "actualCount": 32,
+      "status": "content",
+      "actualCount": 31,
       "expectedCount": 31,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 3,
-          "expected": 2,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S14",
       "dataFile": "SIU-S14-02.hl7",
-      "status": "count",
-      "actualCount": 42,
+      "status": "content",
+      "actualCount": 41,
       "expectedCount": 41,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 4,
-          "expected": 3,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S15",
       "dataFile": "SIU-S15-01.hl7",
-      "status": "count",
-      "actualCount": 32,
+      "status": "content",
+      "actualCount": 31,
       "expectedCount": 31,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 3,
-          "expected": 2,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S15",
       "dataFile": "SIU-S15-02.hl7",
-      "status": "count",
-      "actualCount": 42,
+      "status": "content",
+      "actualCount": 41,
       "expectedCount": 41,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 4,
-          "expected": 3,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S16",
       "dataFile": "SIU-S16-01.hl7",
-      "status": "count",
-      "actualCount": 32,
+      "status": "content",
+      "actualCount": 31,
       "expectedCount": 31,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 3,
-          "expected": 2,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S16",
       "dataFile": "SIU-S16-02.hl7",
-      "status": "count",
-      "actualCount": 42,
+      "status": "content",
+      "actualCount": 41,
       "expectedCount": 41,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 4,
-          "expected": 3,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S17",
       "dataFile": "SIU-S17-01.hl7",
-      "status": "count",
-      "actualCount": 32,
+      "status": "content",
+      "actualCount": 31,
       "expectedCount": 31,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 3,
-          "expected": 2,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S17",
       "dataFile": "SIU-S17-02.hl7",
-      "status": "count",
-      "actualCount": 42,
+      "status": "content",
+      "actualCount": 41,
       "expectedCount": 41,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 4,
-          "expected": 3,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S26",
       "dataFile": "SIU-S26-01.hl7",
-      "status": "count",
-      "actualCount": 32,
+      "status": "content",
+      "actualCount": 31,
       "expectedCount": 31,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 3,
-          "expected": 2,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "SIU_S26",
       "dataFile": "SIU-S26-02.hl7",
-      "status": "count",
-      "actualCount": 42,
+      "status": "content",
+      "actualCount": 41,
       "expectedCount": 41,
-      "byType": [
-        {
-          "resourceType": "Device",
-          "actual": 4,
-          "expected": 3,
-          "delta": 1
-        }
-      ]
+      "byType": []
     },
     {
       "template": "VXU_V04",
