@@ -3,6 +3,7 @@ import {generateIdInput} from "./filters/generateIdInput.js";
 import { getFirstSegments, getSegmentLists, getRelatedSegmentList, getParentSegment, hasSegments, splitDataBySegments } from "./filters/segmentFilters.js";
 import { addHyphensDate, formatAsDateTime, nowFilter, dateAdd } from "./filters/dateFilters.js";
 import { getProperty } from "./filters/getProperty.js";
+import { append } from "./filters/append.js";
 
 export const external = [
     {
@@ -96,5 +97,10 @@ export const external = [
             if (str == null) return [];
             return String(str).split(delimiter).filter(s => s !== '');
         }
+    },
+    {
+        name: 'append',
+        description: 'Appends a string; returns null for a nil input like DotLiquid (DotLiquid compat)',
+        func: append
     },
 ];
