@@ -289,6 +289,17 @@ describe("dotLiquidCompat", () => {
             const input = "{{ medicationRequestId }} {{ medicationRequestIDx }} {{ fullmedicationRequestID }}";
             expect(normalizeVariableNameTypos(input)).to.equal(input);
         });
+
+        it("normalizes AccountId_BLG to accountId_BLG in the BLG Account include argument", () => {
+            const input = "{% include 'Resource/Account' BLG: blgSegment, ID: AccountId_BLG -%}";
+            const expected = "{% include 'Resource/Account' BLG: blgSegment, ID: accountId_BLG -%}";
+            expect(normalizeVariableNameTypos(input)).to.equal(expected);
+        });
+
+        it("leaves accountId_BLG and longer names unchanged", () => {
+            const input = "{{ accountId_BLG }} {{ AccountId_BLGx }} {{ fullAccountId_BLG }}";
+            expect(normalizeVariableNameTypos(input)).to.equal(input);
+        });
     });
 
     describe("normalizeRepeatedTagArgumentCommas()", () => {

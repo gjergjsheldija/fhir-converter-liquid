@@ -124,6 +124,11 @@ export function normalizeTripleBraceOutput(content) {
  *   Case-sensitive LiquidJS resolved it to nothing, so the include emitted an id-less
  *   MedicationRequest (the extra entry in ORM-O01-06); DotLiquid resolves it to
  *   `medicationRequestId`, so the dosage data merges into the real resource.
+ * - `AccountId_BLG` → `accountId_BLG` (3 occurrences: `ORM_O01.liquid` line 978, `OML_O21.liquid`
+ *   line 1374, `OMG_O19.liquid` line 1401: `{% include 'Resource/Account' BLG: blgSegment, ID: AccountId_BLG -%}`).
+ *   The id is assigned by `{% evaluate accountId_BLG using 'ID/Account' BLG: … %}`. Case-sensitive
+ *   LiquidJS left `ID` empty, so the BLG Account(s) were emitted without an id and merged into one
+ *   id-less Account (ORM-O01-03 has two BLG segments, expected two Accounts); DotLiquid resolves it.
  */
 export function normalizeVariableNameTypos(content) {
     // Normalize messageHeaderID -> messageHeaderId (the correct variable name)
@@ -132,6 +137,7 @@ export function normalizeVariableNameTypos(content) {
     // (i.e., not part of a compound name like fullPatientId or _PatientId)
     content = content.replace(/\bPatientId\b/g, 'patientId');
     content = content.replace(/\bmedicationRequestID\b/g, 'medicationRequestId');
+    content = content.replace(/\bAccountId_BLG\b/g, 'accountId_BLG');
     return content;
 }
 
