@@ -23,6 +23,6 @@ These specs are the leftovers from the market analysis after the fidelity, edito
 | 05 | Done (2026-11-20) | `05-declared-segment-list.md` | A project segment list reports segment ids the message used that are not on the list. |
 | 06 | Done (2026-11-20) | `06-failure-log.md` | A failed conversion is listed with its MSH-10, without storing the raw message by default. |
 | 07 | Done (2026-11-20) | `07-convert-api-key-and-audit.md` | An optional API key on convert, plus an audit line that records MSH-10 and not the body. |
-| 08 | Not started | `08-conditional-update.md` | A separate send option updates the resource that already has the identifier. |
+| 08 | Done (2026-11-20) | `08-conditional-update.md` | A separate send option updates the resource that already has the identifier. |
 | 09 | Not started | `09-oie-archive-msh10.md` | The OIE channel archives the raw message under MSH-10. This server still has no TCP listener. |
 | 10 | Not started | `10-ccda-expected-outputs.md` | Sync official C-CDA expected JSON only if the pinned Microsoft tree has it. |

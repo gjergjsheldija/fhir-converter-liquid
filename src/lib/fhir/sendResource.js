@@ -63,8 +63,34 @@ export function conditionalTransaction(resource) {
     return copy;
 }
 
+export function conditionalUpdate(resource) {
+    if (!resource || resource.resourceType !== "Bundle" || (resource.type !== "batch" && resource.type !== "collection")) {
+        return resource;
+    }
+    const copy = JSON.parse(JSON.stringify(resource));
+    copy.type = "transaction";
+    copy.entry = (Array.isArray(copy.entry) ? copy.entry : []).map((entry) => {
+        const entryResource = entry && entry.resource;
+        const request = {method: "POST", url: entryResource && entryResource.resourceType};
+        const identifier = entryResource && Array.isArray(entryResource.identifier) ? entryResource.identifier[0] : undefined;
+        if (identifier && typeof identifier === "object" &&
+            typeof identifier.system === "string" && identifier.system !== "" &&
+            typeof identifier.value === "string" && identifier.value !== "") {
+            request.method = "PUT";
+            request.url = entryResource.resourceType + "?identifier=" + encodeURIComponent(identifier.system) + "|" + encodeURIComponent(identifier.value);
+        }
+        return Object.assign({}, entry, {request});
+    });
+    return copy;
+}
+
 export async function sendResource(baseUrl, resource, auth, options) {
-    const payload = options && options.conditional === true ? conditionalTransaction(resource) : resource;
+    let payload = resource;
+    if (options && options.update === true) {
+        payload = conditionalUpdate(resource);
+    } else if (options && options.conditional === true) {
+        payload = conditionalTransaction(resource);
+    }
     const target = fhirTarget(baseUrl, payload);
     let response;
     try {

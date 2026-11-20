@@ -63,6 +63,7 @@ var currentEditorSettings = {
     fhirUsername: '',
     fhirPassword: '',
     fhirConditional: false,
+    fhirUpdate: false,
     fhirProfile: '',
     aiProvider: 'openai',
     aiBaseUrl: '',
@@ -1158,7 +1159,9 @@ $(document).ready(function () {
         $('#settings-fhir-token').val(settings.fhirToken || '');
         $('#settings-fhir-username').val(settings.fhirUsername || '');
         $('#settings-fhir-password').val(settings.fhirPassword || '');
-        $('#settings-fhir-conditional').prop('checked', settings.fhirConditional === true);
+        var updateOn = settings.fhirUpdate === true;
+        $('#settings-fhir-conditional').prop('checked', settings.fhirConditional === true && !updateOn);
+        $('#settings-fhir-update').prop('checked', updateOn);
         $('#settings-fhir-profile').val(settings.fhirProfile || '');
         showFhirAuthFields();
         populateAiSettingsModal();
@@ -1183,6 +1186,16 @@ $(document).ready(function () {
     });
 
     $('#settings-fhir-auth').on('change', showFhirAuthFields);
+    $('#settings-fhir-conditional').on('change', function () {
+        if (this.checked) {
+            $('#settings-fhir-update').prop('checked', false);
+        }
+    });
+    $('#settings-fhir-update').on('change', function () {
+        if (this.checked) {
+            $('#settings-fhir-conditional').prop('checked', false);
+        }
+    });
 
     $('#settings-ai-provider').on('change', function () {
         stashCurrentAiModalInputs();
@@ -1202,6 +1215,7 @@ $(document).ready(function () {
         settings.fhirUsername = $('#settings-fhir-username').val();
         settings.fhirPassword = $('#settings-fhir-password').val();
         settings.fhirConditional = $('#settings-fhir-conditional').prop('checked');
+        settings.fhirUpdate = $('#settings-fhir-update').prop('checked');
         settings.fhirProfile = $('#settings-fhir-profile').val().trim();
         saveAiFieldsFromModal(settings);
         setSettings(settings);
@@ -1758,7 +1772,9 @@ function sendToFhir() {
         username: settings.fhirUsername,
         password: settings.fhirPassword
     };
-    if (settings.fhirConditional === true) {
+    if (settings.fhirUpdate === true) {
+        sendBody.update = true;
+    } else if (settings.fhirConditional === true) {
         sendBody.conditional = true;
     }
     $.ajax('/api/v1/fhir/send', {

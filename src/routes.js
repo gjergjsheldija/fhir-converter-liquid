@@ -710,7 +710,11 @@ export default function (app) {
 
     app.post("/api/v1/fhir/send", function (req, res) {
         const body = req.body || {};
-        sendResource(body.baseUrl, body.resource, body, {conditional: body.conditional === true})
+        if (body.conditional === true && body.update === true) {
+            browseError(res, Object.assign(new Error("Choose create or update, not both."), {status: 400}));
+            return;
+        }
+        sendResource(body.baseUrl, body.resource, body, {conditional: body.conditional === true, update: body.update === true})
             .then((result) => res.json(result))
             .catch((err) => browseError(res, err));
     });

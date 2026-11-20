@@ -4,7 +4,7 @@
 // -------------------------------------------------------------------------------------------------
 
 import assert from 'assert';
-import {validateTarget, validateResource, sendResource, conditionalTransaction} from './sendResource.js';
+import {validateTarget, validateResource, sendResource, conditionalTransaction, conditionalUpdate} from './sendResource.js';
 
 describe('FHIR conditional send', function () {
     let realFetch;
@@ -80,6 +80,44 @@ describe('FHIR conditional send', function () {
         assert.strictEqual(collection.type, 'collection');
         const searchset = {resourceType: 'Bundle', type: 'searchset'};
         assert.strictEqual(conditionalTransaction(searchset), searchset);
+    });
+
+    it('posts one transaction of conditional PUTs when update is on', async function () {
+        const bundle = batchBundle();
+        await sendResource('https://fhir.example.org/baseR4', bundle, undefined, {update: true});
+        assert.strictEqual(calls.length, 1);
+        assert.strictEqual(calls[0].options.method, 'POST');
+        assert.strictEqual(calls[0].url, 'https://fhir.example.org/baseR4');
+        const posted = JSON.parse(calls[0].options.body);
+        assert.strictEqual(posted.type, 'transaction');
+        assert.strictEqual(posted.entry[0].request.method, 'PUT');
+        assert.strictEqual(decodeURIComponent(posted.entry[0].request.url), 'Patient?identifier=http://hospital.example/mrn|12345');
+        assert.strictEqual(posted.entry[0].request.ifNoneExist, undefined);
+        assert.deepStrictEqual(posted.entry[1].request, {method: 'POST', url: 'Observation'});
+        assert.strictEqual(bundle.type, 'batch');
+        assert.strictEqual(bundle.entry[0].request, undefined);
+    });
+
+    it('update wins over conditional in sendResource and conditional create is unchanged', async function () {
+        await sendResource('https://fhir.example.org/baseR4', batchBundle(), undefined, {conditional: true, update: true});
+        assert.strictEqual(JSON.parse(calls[0].options.body).entry[0].request.method, 'PUT');
+        await sendResource('https://fhir.example.org/baseR4', batchBundle(), undefined, {conditional: true, update: false});
+        assert.strictEqual(JSON.parse(calls[1].options.body).entry[0].request.method, 'POST');
+    });
+
+    it('leaves the Bundle as batch when update is off', async function () {
+        await sendResource('https://fhir.example.org/baseR4', batchBundle(), undefined, {update: false});
+        assert.strictEqual(JSON.parse(calls[0].options.body).type, 'batch');
+    });
+
+    it('conditionalUpdate keeps POST without an identifier and returns other Bundle types as-is', function () {
+        const collection = {resourceType: 'Bundle', type: 'collection', entry: [{resource: {resourceType: 'Patient', identifier: [{system: 'http://a', value: ''}]}}]};
+        const result = conditionalUpdate(collection);
+        assert.strictEqual(result.type, 'transaction');
+        assert.deepStrictEqual(result.entry[0].request, {method: 'POST', url: 'Patient'});
+        assert.strictEqual(collection.type, 'collection');
+        const searchset = {resourceType: 'Bundle', type: 'searchset'};
+        assert.strictEqual(conditionalUpdate(searchset), searchset);
     });
 });
 

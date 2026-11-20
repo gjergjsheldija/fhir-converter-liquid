@@ -1,6 +1,6 @@
 # Spec 08: Conditional update on identifier
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, `.agents/skills/codemirror5-vanilla-ui/SKILL.md`, and `AGENTS.md`. Editor spec 08 is Done. Do not start another gap spec in this change.
+**Status:** Done (2026-11-20). Verified: sendResource.spec.js 19 passing, test-summary 759 passing, 0 unexpected failures, eslint 0, diff check 0, browser boxes start unchecked and clear each other. Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, `.agents/skills/codemirror5-vanilla-ui/SKILL.md`, and `AGENTS.md`. Editor spec 08 is Done. Do not start another gap spec in this change.
 
 ## 1. Goal
 
