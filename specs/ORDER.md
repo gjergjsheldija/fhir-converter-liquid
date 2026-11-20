@@ -98,7 +98,7 @@ Keep compatibility changes strictly separate from Web UI commits (`AGENTS.md`):
 Not started. One spec per change. Specs 14 and 22 stay blocked and are not in this queue. Patient matching, FHIR-to-v2, and a TCP listener in this process are out of scope.
 
 - `specs/gap/01-ig-coverage-score.md` — **Done (2026-11-20)** — Score one generated field-map ConceptMap against an IG ConceptMap the user loads. No IG package is vendored.
-- `specs/gap/02-validate-with-profile.md` — **Not started** — Optional profile canonical URL on the existing `{base}/$validate` call. No embedded HL7 validator.
+- `specs/gap/02-validate-with-profile.md` — **Done (2026-11-20)** — Optional profile canonical URL on the existing `{base}/$validate` call. No embedded HL7 validator.
 - `specs/gap/03-unmapped-code-queue.md` — **Not started** — List Codings the site pack did not rewrite. The list stays outside the FHIR resource.
 - `specs/gap/04-result-lineage.md` — **Not started** — A click in the FHIR result names the include and source path recorded while debug is on.
 - `specs/gap/05-declared-segment-list.md` — **Not started** — A project `structures/segments.txt` reports segment ids the message used that are not on the list. Conversion still succeeds.
