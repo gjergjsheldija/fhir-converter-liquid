@@ -39,7 +39,7 @@ import {openLocalProject} from "./lib/projects/openProject.js";
 import {openGithubProject} from "./lib/projects/openGithubProject.js";
 import {listProjectFiles, readProjectFile, writeProjectFile} from "./lib/projects/projectFiles.js";
 import {prepareProjectConversion} from "./lib/projects/convertProject.js";
-import {applySitePack, loadSitePack} from "./lib/projects/sitePack.js";
+import {applySitePack, collectUnmapped, loadSitePack} from "./lib/projects/sitePack.js";
 import {copyOfficialHl7v2Samples} from "./lib/projects/officialSamples.js";
 
 const {json, text} = bodyparser;
@@ -987,6 +987,7 @@ export default function (app) {
                 }).then(async (result) => {
                     if (prep.projectRoot && result.status === 200 && result.resultMsg && result.resultMsg.fhirResource) {
                         const pack = await loadSitePack(prep.projectRoot);
+                        result.resultMsg.unmapped = collectUnmapped(result.resultMsg.fhirResource, pack);
                         result.resultMsg.fhirResource = applySitePack(result.resultMsg.fhirResource, pack);
                     }
                     return result;
