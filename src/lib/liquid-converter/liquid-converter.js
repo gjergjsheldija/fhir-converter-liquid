@@ -12,6 +12,7 @@ import { external as filters } from "./liquid-helpers.js";
 import { applyDotLiquidCompatTransforms } from "./dotLiquidCompat.js";
 import { CLS_NAMESPACE } from "../constants/constants.js";
 import { DEBUG_COLLECTOR_KEY } from "./debugCollector.js";
+import { traceRender } from "./lineage.js";
 import { suppressStringIndexAccess } from "./stringIndexAccess.js";
 import { applyDotLiquidEquality } from "./dotLiquidEquality.js";
 
@@ -162,10 +163,18 @@ export function instance(
         const originalRenderTemplates = engine.renderer.renderTemplates.bind(engine.renderer);
         engine.renderer.renderTemplates = function (templates, ctx, emitter) {
             const collector = getDebugCollector();
+            let partialName = null;
             if (collector && collector.pendingPartial) {
-                collector.recordPartialRender(collector.takePendingPartial(), ctx);
+                partialName = collector.takePendingPartial();
+                collector.recordPartialRender(partialName, ctx);
             }
-            return originalRenderTemplates(templates, suppressStringIndexAccess(ctx), emitter);
+            const rendering = originalRenderTemplates(templates, suppressStringIndexAccess(ctx), emitter);
+            // Result lineage (debug only): an include that writes into a shared output buffer has
+            // its text span recorded. {% evaluate %} renders into its own emitter and is not traced.
+            if (partialName && emitter && typeof emitter.buffer === 'string') {
+                return traceRender(collector, partialName, emitter, rendering);
+            }
+            return rendering;
         };
 
         liquidInstances[dataType] = engine;

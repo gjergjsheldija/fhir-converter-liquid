@@ -22,6 +22,7 @@ import {summarizeCcda} from '../parsers/ccda/ccda.js';
 import pkg2 from 'cls-hooked';
 import {Context, toPromise} from 'liquidjs';
 import {createDebugCollector, serializeHl7v2Debug, DEBUG_COLLECTOR_KEY} from '../liquid-converter/debugCollector.js';
+import {buildLineage} from '../liquid-converter/lineage.js';
 
 const {clear, get, put} = pkg;
 
@@ -152,6 +153,7 @@ export function convertInlineHl7v2(msg) {
                                             if (isCcda) {
                                                 resultMsg.debugInfo.parsedCcda = summarizeCcda(dataContext.msg);
                                             }
+                                            resultMsg.debugInfo.lineage = buildLineage(collector.lineageRenders, rendered, result);
                                         }
                                         fulfill({'status': 200, 'resultMsg': resultMsg});
                                     } catch (err) {
