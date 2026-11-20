@@ -91,7 +91,7 @@ describe("projects/createProject", function () {
         assert.strictEqual(await sha256File(sourceTplPath), sourceTplShaBefore);
     });
 
-    it("creates an empty C-CDA project and refuses a C-CDA baseline without creating a directory", async function () {
+    it("creates an empty C-CDA project and a C-CDA baseline copy of the vendored pack", async function () {
         const res = await createProject({
             name: "Continuity care",
             parentPath: tempRoot,
@@ -104,10 +104,19 @@ describe("projects/createProject", function () {
         assert.ok(xmlText.includes("<given>Jane</given>"));
         assert.strictEqual(existsSync(path.join(res.path, "templates/Ccda/Example.liquid")), true);
 
-        await assert.rejects(
-            () => createProject({name: "Refused Ccda Baseline", parentPath: tempRoot, family: "ccda", startingPoint: "baseline"}),
-            (err) => err.status === 400 && err.message === "C-CDA baseline is not installed on this server. Create an empty C-CDA project."
-        );
-        assert.strictEqual(existsSync(path.join(tempRoot, "refused-ccda-baseline")), false);
+        const sourceRoot = path.join(BASE_TEMPLATE_FILES_LOCATION, "Ccda", "CCD.liquid");
+        const sourceSha = await sha256File(sourceRoot);
+        const baseline = await createProject({
+            name: "Ccda Baseline",
+            parentPath: tempRoot,
+            family: "ccda",
+            startingPoint: "baseline"
+        });
+        assert.strictEqual(validateManifest(baseline.manifest), null);
+        assert.strictEqual(baseline.manifest.roots.ccda.baseline.commit, PINNED_HL7V2_BASELINE.commit);
+        assert.strictEqual(baseline.manifest.startup.template, "templates/Ccda/CCD.liquid");
+        assert.strictEqual(await sha256File(path.join(baseline.path, "templates/Ccda/CCD.liquid")), sourceSha);
+        assert.ok((await readFile(path.join(baseline.path, "samples/ccda/example.xml"), "utf8")).includes("IDE-CCD-1"));
+        assert.strictEqual(await sha256File(sourceRoot), sourceSha);
     });
 });

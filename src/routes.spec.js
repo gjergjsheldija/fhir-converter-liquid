@@ -8,7 +8,7 @@ import supertest from 'supertest';
 import express from 'express';
 import routes from './routes.js';
 import {mkdtemp, rm, unlink, writeFile} from 'fs/promises';
-import {readFileSync} from 'fs';
+import {existsSync, readFileSync} from 'fs';
 import {join, dirname} from 'path';
 import {fileURLToPath} from 'url';
 import {tmpdir} from 'os';
@@ -1473,7 +1473,7 @@ describe('Project API routes (/api/v1/projects/*)', function () {
         }
     });
 
-    it('rejects relative parentPath and unsupported C-CDA baseline on POST /api/v1/projects', async function () {
+    it('rejects a relative parentPath and creates a C-CDA baseline on POST /api/v1/projects', async function () {
         const rel = await supertest(app)
             .post('/api/v1/projects')
             .send({name: 'Demo', parentPath: 'relative/path', family: 'hl7v2', startingPoint: 'empty'})
@@ -1483,8 +1483,9 @@ describe('Project API routes (/api/v1/projects/*)', function () {
         const ccdaBase = await supertest(app)
             .post('/api/v1/projects')
             .send({name: 'CcdaBase', parentPath: tempDir, family: 'ccda', startingPoint: 'baseline'})
-            .expect(400);
-        assert.strictEqual(ccdaBase.body.error.message, 'C-CDA baseline is not installed on this server. Create an empty C-CDA project.');
+            .expect(201);
+        assert.strictEqual(ccdaBase.body.manifest.startup.template, 'templates/Ccda/CCD.liquid');
+        assert.strictEqual(existsSync(join(tempDir, 'ccdabase', 'templates', 'Ccda', 'CCD.liquid')), true);
     });
 
     it('creates, opens, lists, reads, converts, saves, and imports official samples in a local HL7v2 project', async function () {

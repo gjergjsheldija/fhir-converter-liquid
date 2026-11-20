@@ -12,6 +12,7 @@ import {
     TEMPLATE_FILES_LOCATION
 } from "../constants/constants.js";
 import {
+    baselineCcdaManifest,
     baselineHl7v2Manifest,
     emptyCcdaManifest,
     emptyHl7v2Manifest,
@@ -79,7 +80,7 @@ const SYNTHETIC_CCDA_SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
 `;
 
 const SYNTHETIC_CCDA_TEMPLATE = `{% comment %}
-Empty C-CDA starter. This server does not convert C-CDA yet.
+Empty C-CDA starter.
 The document title in the sample is "Synthetic continuity of care document".
 {% endcomment %}
 `;
@@ -132,12 +133,9 @@ export async function createProject(options = {}) {
     const family = options.family;
     const startingPoint = options.startingPoint;
 
-    if (family === "ccda" && startingPoint === "baseline") {
-        throw httpError(400, "C-CDA baseline is not installed on this server. Create an empty C-CDA project.");
-    }
     const validCombo =
-        (family === "hl7v2" && (startingPoint === "empty" || startingPoint === "baseline")) ||
-        (family === "ccda" && startingPoint === "empty");
+        (family === "hl7v2" || family === "ccda") &&
+        (startingPoint === "empty" || startingPoint === "baseline");
     if (!validCombo) {
         throw httpError(400, "This server cannot create that project yet.");
     }
@@ -206,6 +204,25 @@ export async function createProject(options = {}) {
             for (const sampleName of BASELINE_SAMPLE_FILES) {
                 await cp(path.join(sourceSamplesDir, sampleName), path.join(destSamplesDir, sampleName));
             }
+            return {path: projectPath, manifest};
+        }
+
+        if (family === "ccda" && startingPoint === "baseline") {
+            const sourceTemplatesDir = path.join(BASE_TEMPLATE_FILES_LOCATION, "Ccda");
+            const sourceRoot = path.join(sourceTemplatesDir, "CCD.liquid");
+            const tplInfo = await stat(sourceTemplatesDir).catch(() => null);
+            const rootInfo = await stat(sourceRoot).catch(() => null);
+            if (!tplInfo || !tplInfo.isDirectory() || !rootInfo || !rootInfo.isFile()) {
+                throw httpError(500, "The C-CDA baseline is not installed on this server.");
+            }
+            const manifest = baselineCcdaManifest(rawName);
+            await writeManifest(projectPath, manifest);
+            const destTemplatesDir = path.join(projectPath, "templates", "Ccda");
+            const destSamplesDir = path.join(projectPath, "samples", "ccda");
+            await mkdir(path.dirname(destTemplatesDir), {recursive: true});
+            await mkdir(destSamplesDir, {recursive: true});
+            await cp(sourceTemplatesDir, destTemplatesDir, {recursive: true});
+            await writeFile(path.join(destSamplesDir, "example.xml"), SYNTHETIC_CCDA_SAMPLE, "utf8");
             return {path: projectPath, manifest};
         }
 

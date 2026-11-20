@@ -37,13 +37,17 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 - Files pane for samples, templates, and partials (Built-in, a local folder, or GitHub), collapsible, with foldable sections
 - Live conversion, plus a debug drawer: parsed HL7 tree, variable console, unused fields, and hover values on Liquid paths and HL7 fields
 - Includes list grouped by folder; open a partial, or start a new one by name
-- Projects: new HL7 v2 baseline or empty example, open a local folder or a GitHub repo, convert and save against that project
+- Projects: HL7 v2 or C-CDA, from the Microsoft baseline or an empty example. Open a local folder or a GitHub repo, convert and save against that project
+- C-CDA editor: XML coloring, parsed CDA tree, hover paths, and expected-bundle diff
+- Validate the FHIR result against `{base}/$validate`, and optionally send a bundle as conditional creates matched by identifier
 - AI template generation from Settings. Paste an API key for OpenAI, Anthropic, Google Gemini, xAI (Grok), Mistral, DeepSeek, Groq, OpenRouter, or point at a local OpenAI-compatible server
 - Light, dark, and system themes
 
 **Serving & tooling**
 
 - REST API with interactive OpenAPI/Swagger docs (`/api-docs`)
+- Project CLI (`npm run convert:project`) for one conversion or a golden-file check
+- An Open Integration Engine channel that posts HL7 v2 at this API
 - Async, queue-driven conversion over AMQP (Apache ActiveMQ Artemis via `rhea`) for pipeline integration — optional, off by default
 - Prometheus metrics, structured logging, `/health` and `/version` endpoints
 - Multi-stage Docker build (prod / dev / test) with a docker-compose + Makefile workflow
@@ -102,9 +106,12 @@ The files pane folds Samples, Templates, and Partials, and collapses to a rail.
 | --- | --- |
 | HL7 v2, Microsoft baseline | The pinned v7.0 template pack and four sample messages |
 | HL7 v2, empty example | One synthetic ADT message and one Patient template |
-| C-CDA | An XML sample and a template. This server stores the project. Conversion is not available yet |
+| C-CDA, Microsoft baseline | The pinned v7.0 C-CDA template pack and one sample document |
+| C-CDA, empty example | One synthetic C-CDA document and one example template |
 
 **Open project** loads a local folder, or a GitHub repository at a ref. Conversion and includes then resolve from that project. A GitHub project is read-only here: Save explains that and does not write. A local HL7 project can later copy in the official 139 HL7 v2 sample messages.
+
+Screenshots of C-CDA, validate, conditional send, the site pack, the project CLI, and the OIE channel are in [docs/features.md](docs/features.md).
 
 ### Includes
 
@@ -163,6 +170,9 @@ All endpoints are versioned under `/api/v1`. Full interactive reference: `GET /a
 | POST   | `/api/v1/projects/convert`                 | Convert using the open project's templates                                                                                   |
 | PUT    | `/api/v1/projects/file`                    | Save a file into a local project                                                                                             |
 | POST   | `/api/v1/projects/official-samples`        | Copy the official 139 HL7 v2 samples into a local project                                                                    |
+| POST   | `/api/v1/convert/ccda`                     | Convert a C-CDA document with an inline template                                                                             |
+| POST   | `/api/v1/fhir/validate`                    | POST the FHIR result to `{base}/$validate` and return the OperationOutcome issues                                           |
+| POST   | `/api/v1/fhir/send`                        | POST the FHIR result to the configured server. `conditional: true` sends a batch or collection as identifier-matched creates |
 | GET    | `/health`                                  | Liveness check                                                                                                               |
 | GET    | `/version`                                 | Build version                                                                                                                |
 

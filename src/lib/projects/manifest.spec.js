@@ -10,6 +10,7 @@ import {
     emptyHl7v2Manifest,
     emptyCcdaManifest,
     baselineHl7v2Manifest,
+    baselineCcdaManifest,
     readManifest,
     writeManifest
 } from "./manifest.js";
@@ -35,6 +36,7 @@ describe("projects/manifest", function () {
         assert.strictEqual(validateManifest(emptyHl7v2Manifest("Adt rules")), null);
         assert.strictEqual(validateManifest(emptyCcdaManifest("Ccda rules")), null);
         assert.strictEqual(validateManifest(baselineHl7v2Manifest("Baseline rules")), null);
+        assert.strictEqual(validateManifest(baselineCcdaManifest("Ccda baseline")), null);
 
         const dual = {
             manifestVersion: 1,
