@@ -41,7 +41,8 @@ import {listProjectFiles, readProjectFile, writeProjectFile} from "./lib/project
 import {prepareProjectConversion} from "./lib/projects/convertProject.js";
 import {applySitePack, collectUnmapped, loadSitePack} from "./lib/projects/sitePack.js";
 import {copyOfficialHl7v2Samples} from "./lib/projects/officialSamples.js";
-import {appendFailure, listFailures} from "./lib/conversions/failureLog.js";
+import {appendFailure, controlIdOf, listFailures} from "./lib/conversions/failureLog.js";
+import {appendAudit, authorizeConvert} from "./lib/conversions/convertAudit.js";
 
 const {json, text} = bodyparser;
 
@@ -743,7 +744,39 @@ export default function (app) {
     // Failure log for POST /api/v1/convert/:srcDataType and POST /api/v1/projects/convert only.
     const conversionCounts = {failed: 0, succeeded: 0};
 
+    // One audit line per convert attempt: status, template, MSH-10. Never the body or the key.
+    function auditConvert(status, template, srcData) {
+        try {
+            appendAudit({
+                status,
+                template: typeof template === "string" ? template : "",
+                controlId: controlIdOf(srcData)
+            });
+        } catch (err) {
+            // an audit write problem must not change the convert response
+        }
+    }
+
+    // CONVERT_API_KEY is read on each request. Empty or unset leaves the three convert routes open.
+    function requireConvertKey(templateOf) {
+        return function (req, res, next) {
+            if (authorizeConvert(process.env.CONVERT_API_KEY, req.headers.authorization)) {
+                next();
+                return;
+            }
+            // 401: the request body is not read, so MSH-10 stays empty.
+            const template = templateOf ? templateOf(req) : "";
+            try {
+                appendAudit({status: 401, template});
+            } catch (err) {
+                // an audit write problem must not change the response
+            }
+            res.status(401).json(errorMessage(errorCodes.Unauthorized, "Convert API key is required."));
+        };
+    }
+
     function recordConversion(status, resultMessage, srcData, template) {
+        auditConvert(status, template, srcData);
         if (status === 200) {
             conversionCounts.succeeded++;
             return;
@@ -828,7 +861,7 @@ export default function (app) {
      *       401:
      *         description: Unauthorized
      */
-    app.post("/api/v1/convert/:srcDataType", function (req, res) {
+    app.post("/api/v1/convert/:srcDataType", requireConvertKey(), function (req, res) {
         const retUnusedSegments = req.query.unusedSegments == "true";
         const retInvalidAcces = req.query.invalidAccess == "true";
         const retDebug = req.query.debug == "true";
@@ -915,13 +948,14 @@ export default function (app) {
      *       404:
      *         description: Template not found
      */
-    app.post("/api/v1/convert/:srcDataType/:template(*)", function (req, res) {
+    app.post("/api/v1/convert/:srcDataType/:template(*)", requireConvertKey((req) => req.params.template), function (req, res) {
         const retUnusedSegments = req.query.unusedSegments == "true";
         const retInvalidAcces = req.query.invalidAccess == "true";
+        const srcData = req.body.toString();
         workerPool
             .exec({
                 type: "/api/convert/:srcDataType/:template",
-                srcData: req.body.toString(),
+                srcData,
                 srcDataType: req.params.srcDataType,
                 templateName: req.params.template,
                 timezone: req.headers.timezone,
@@ -934,6 +968,7 @@ export default function (app) {
                 if (!retInvalidAcces) {
                     delete resultMessage["invalidAccess"];
                 }
+                auditConvert(result.status, req.params.template, srcData);
                 res.status(result.status);
                 res.json(resultMessage);
             });
@@ -992,7 +1027,7 @@ export default function (app) {
             .catch((err) => sendProjectRouteError(res, err));
     });
 
-    app.post("/api/v1/projects/convert", function (req, res) {
+    app.post("/api/v1/projects/convert", requireConvertKey(), function (req, res) {
         const retUnusedSegments = req.query.unusedSegments == "true";
         const retInvalidAccess = req.query.invalidAccess == "true";
         const retDebug = req.query.debug == "true";
