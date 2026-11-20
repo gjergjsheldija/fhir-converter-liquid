@@ -1,6 +1,6 @@
 # Spec 05: Declared segment list
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
+**Status:** Done (2026-11-20). Verified with 6 focused tests, an end-to-end local-project check (no file: no property; `PID`/`PV1` list with `ZDG` in message: `["ZDG"]`; debug off: no property), and `node scripts/test-summary.mjs` (743 passing, 0 unexpected failures, eslint and diff check clean). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
 
 ## 1. Goal
 
@@ -19,6 +19,7 @@ If a segment allow list is already applied, stop and report the file name.
 - `src/lib/parsers/hl7v2/declaredSegments.js` and `declaredSegments.spec.js` (create both)
 - `src/lib/projects/convertProject.js` to pass the list through for a local HL7 v2 project
 - `src/lib/workers/worker.js` to set `debugInfo.undeclaredSegments` when debug is on
+- `src/routes.js` for `POST /api/v1/projects/convert` only, to copy `prep.declaredSegments` onto the worker message
 - This spec's `**Status:**` line, the row in `specs/gap/00-order.md`, and the bullet in `specs/ORDER.md`
 
 Do not edit the parser's field splitting. Do not edit templates or samples. Do not add a dependency. Do not fail conversion because a segment is missing from the list.
