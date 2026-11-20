@@ -171,6 +171,31 @@ export function emptyCcdaManifest(name) {
     };
 }
 
+export function baselineCcdaManifest(name) {
+    return {
+        manifestVersion: 1,
+        name: String(name || "").trim(),
+        fhirVersion: "R4",
+        families: ["ccda"],
+        startup: {
+            family: "ccda",
+            sample: "samples/ccda/example.xml",
+            template: "templates/Ccda/CCD.liquid"
+        },
+        roots: {
+            ccda: {
+                templates: "templates/Ccda",
+                samples: "samples/ccda",
+                baseline: {
+                    repository: PINNED_HL7V2_BASELINE.repository,
+                    tag: PINNED_HL7V2_BASELINE.tag,
+                    commit: PINNED_HL7V2_BASELINE.commit
+                }
+            }
+        }
+    };
+}
+
 export function baselineHl7v2Manifest(name) {
     return {
         manifestVersion: 1,

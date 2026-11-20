@@ -9,8 +9,8 @@ Open `http://localhost:2019` for the browser editor. The annotated screenshots b
 | Files | Samples, templates, and partials. Switch Built-in, GitHub, or a local folder. Generate maps writes the field tables. Export map downloads the same files as a zip |
 | Message | The HL7 v2 message. Paste one, or use New sample, Import, and Save sample |
 | Template | Liquid editor with coloring, folding, Format, Generate, and Save. Includes lists the partials grouped by folder |
-| FHIR result | Live bundle. Send posts it to a FHIR server configured in Settings. Copy puts it on the clipboard |
-| Debug | Bottom drawer: parsed HL7, a variable console, and diagnostics. Hover a path or a field to see the value |
+| FHIR result | Live bundle. Send posts it to a FHIR server configured in Settings. Validate posts it to `{base}/$validate`. Copy puts it on the clipboard |
+| Debug | Bottom drawer: parsed HL7 or parsed CDA, a variable console, diagnostics, expected diff, and validation. Hover a path or a field to see the value |
 | New project / Open project | Start or load a local project, or open a GitHub repo read-only |
 | Settings | Light, dark, or system theme, timezone, and AI template generation |
 | API docs | Swagger UI, also at `/api-docs` |
@@ -33,4 +33,4 @@ Open `http://localhost:2019` for the browser editor. The annotated screenshots b
 
 Generate uses the provider and API key stored in Settings. Keys stay in the browser. Supported providers are OpenAI, Anthropic, Google Gemini, xAI (Grok), Mistral, DeepSeek, Groq, OpenRouter, a local OpenAI-compatible server, and a custom base URL.
 
-C-CDA projects can be created and stored. Conversion for C-CDA is not available yet.
+C-CDA projects convert. Choose C-CDA in **New project**, including the Microsoft baseline. The message is colored as XML, and the debug drawer shows **Parsed CDA**. Details and screenshots are in [Features](features.md).

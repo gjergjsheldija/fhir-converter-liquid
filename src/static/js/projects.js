@@ -506,16 +506,16 @@
         var fam = $('input[name="new-project-family"]:checked').val() || 'hl7v2';
         var baselineRadio = $('#new-project-start-baseline');
         var emptyRadio = $('#new-project-start-empty');
+        baselineRadio.prop('disabled', false);
+        if (!baselineRadio.prop('checked') && !emptyRadio.prop('checked')) {
+            baselineRadio.prop('checked', true);
+        }
         if (fam === 'ccda') {
-            baselineRadio.prop('checked', false).prop('disabled', true);
-            emptyRadio.prop('checked', true);
-            $('#new-project-baseline-help').text('C-CDA baseline is not installed on this server.');
+            $('#new-project-baseline-help').text('Copies the pinned v7.0 C-CDA template pack and one sample document.');
+            emptyRadio.closest('label').find('.form-text').text('One synthetic C-CDA document and one example template.');
         } else {
-            baselineRadio.prop('disabled', false);
-            if (!baselineRadio.prop('checked') && !emptyRadio.prop('checked')) {
-                baselineRadio.prop('checked', true);
-            }
             $('#new-project-baseline-help').text('Copies the pinned v7.0 template pack and four sample messages.');
+            emptyRadio.closest('label').find('.form-text').text('One synthetic ADT message and one Patient template.');
         }
     }
 
