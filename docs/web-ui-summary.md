@@ -6,9 +6,9 @@ Open `http://localhost:2019` for the browser editor. The annotated screenshots b
 
 | Area | What it does |
 | --- | --- |
-| Files | Samples, templates, and partials. Switch Built-in, GitHub, or a local folder. Generate maps writes the field tables. Export map downloads the same files as a zip |
-| Message | The HL7 v2 message. Paste one, or use New sample, Import, and Save sample |
-| Template | Liquid editor with coloring, folding, Format, Generate, and Save. Includes lists the partials grouped by folder |
+| Files | Samples, this customer's templates, and partials. Partials start collapsed. Menu opens customer, settings, and docs commands |
+| Message | A short strip. Show full message expands it. Paste one, or use New sample, Import, and Save sample |
+| Template | Liquid editor with coloring and folding. The header icons are New template, Format, Generate, and Save template. Save turns clay when the template has unsaved edits. Includes lists the partials grouped by folder |
 | FHIR result | Live bundle. Send posts it to a FHIR server configured in Settings. Validate posts it to `{base}/$validate`. Copy puts it on the clipboard |
 | Debug | Bottom drawer: parsed HL7 or parsed CDA, a variable console, diagnostics, expected diff, and validation. Hover a path or a field to see the value |
 | New project / Open project | Start or load a local project, or open a GitHub repo read-only |

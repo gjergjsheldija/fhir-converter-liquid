@@ -37,7 +37,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 
-    <title>FHIR Converter API</title>
+    <title>FHIR Converter · Liquid Studio</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -86,26 +86,35 @@
                     <path d="M20 7.5c2.6 0 4 1.5 4 3.8v2.4c0 1.1.6 1.7 2.4 2.1-1.8.4-2.4 1-2.4 2.1v2.4c0 2.3-1.4 3.8-4 3.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
                 <span class="brand-text">
-                    <span class="brand-name">FHIR Converter</span>
-                    <span class="brand-note">Turn a message into FHIR</span>
+                    <span class="brand-kicker">FHIR Converter</span>
+                    <span class="brand-row">
+                        <span class="brand-name" id="project-label">Starter pack</span>
+                        <span class="brand-note" id="project-readonly" hidden>Read only</span>
+                    </span>
                 </span>
             </span>
-            <div class="nav-cluster">
-                <button class="btn btn-outline-dark btn-sm navbar-btn" id="new-project-open" type="button">New project</button>
-                <button class="btn btn-outline-dark btn-sm navbar-btn" id="open-project-open" type="button">Open project</button>
-                <button class="btn btn-outline-dark btn-sm navbar-btn" id="save-project-open" type="button">Save project</button>
-            </div>
+            <p class="session-pitch" id="session-pitch">This message is now a FHIR bundle.</p>
             <div class="nav-cluster nav-cluster-end">
-                <button class="btn btn-dark navbar-btn" id="convert-button" type="button">Convert</button>
-                <button class="btn btn-outline-dark navbar-btn" id="debug-toggle-button" type="button" aria-expanded="false" aria-controls="debug-drawer" title="Toggle Debug drawer (Ctrl+`)">Debug</button>
+                <button class="btn btn-outline-dark navbar-btn" id="command-search" type="button" aria-expanded="false" aria-controls="command-palette">Menu <kbd>⌘K</kbd></button>
+            </div>
+        </nav>
+        <div id="command-palette" hidden>
+            <input id="command-filter" class="form-control form-control-sm" type="text" placeholder="Filter menu" aria-label="Filter menu">
+            <div id="command-list">
+                <button class="btn btn-outline-dark btn-sm navbar-btn" id="new-project-open" type="button">New customer</button>
+                <button class="btn btn-outline-dark btn-sm navbar-btn" id="open-project-open" type="button">Open customer</button>
+                <button class="btn btn-outline-dark btn-sm navbar-btn" id="save-project-open" type="button">Save as new customer…</button>
+                <button type="button" id="project-use-builtin" class="btn btn-sm navbar-btn" hidden>Open starter pack</button>
                 <button class="btn btn-dark navbar-btn" id="settings-open" type="button" data-toggle="modal" data-target="#settings-modal">Settings</button>
                 <a class="btn btn-outline-dark navbar-btn" id="user-guide-link" href="/guide">User guide</a>
                 <a class="btn btn-outline-dark navbar-btn" id="api-docs-link" href="/api-docs">API docs</a>
             </div>
-        </nav>
+        </div>
 
         <div id="banner" class="alert" role="alert" style="display: none">
-            <span id="banner-close" class="font-weight-bold pr-2 btn banner-btn">X</span>
+            <button type="button" id="banner-close" class="result-icon-btn banner-btn" aria-label="Dismiss alert" title="Dismiss">
+                <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-close"></use></svg>
+            </button>
             <span id="banner-message"></span>
         </div>
 
@@ -113,9 +122,15 @@
             <button type="button" id="file-browser-expand" class="file-browser-rail" hidden aria-expanded="false" aria-controls="file-browser" aria-label="Expand files pane" title="Show files (Cmd/Ctrl+B)">▸ Files</button>
             <div id="file-browser">
                 <div class="file-browser-title">
-                    <span class="file-browser-title-text" id="project-label">Built-in</span>
-                    <button type="button" id="project-use-builtin" class="btn btn-sm project-mini-btn" hidden>Built-in</button>
-                    <button type="button" id="file-browser-collapse" class="file-browser-toggle" aria-expanded="true" aria-controls="file-browser" aria-label="Collapse files pane" title="Hide files (Cmd/Ctrl+B)">‹</button>
+                    <span class="file-browser-title-text">Files</span>
+                    <button type="button" id="file-browser-collapse" class="file-browser-toggle" aria-expanded="true" aria-controls="file-browser" aria-label="Collapse files pane" title="Hide files (Cmd/Ctrl+B)">
+                        <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-chevron-left"></use></svg>
+                    </button>
+                </div>
+                <div class="source-switch" id="source-switch">
+                    <button type="button" data-source="builtin" class="is-active">Starter pack</button>
+                    <button type="button" data-source="github">GitHub</button>
+                    <button type="button" data-source="folder">Folder</button>
                 </div>
                 <div id="project-controls" hidden>
                     <select id="project-family" class="form-control form-control-sm" aria-label="Project family" hidden>
@@ -123,13 +138,6 @@
                         <option value="ccda">C-CDA</option>
                     </select>
                     <button type="button" id="project-add-samples" class="btn btn-sm project-action-btn" hidden>Add official samples (139)</button>
-                </div>
-                <button type="button" id="generate-maps-button" class="btn btn-sm">Generate maps</button>
-                <button type="button" id="field-map-button" class="btn btn-sm">Export map</button>
-                <div class="source-switch" id="source-switch">
-                    <button type="button" data-source="builtin" class="is-active"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-builtin"></use></svg>Built-in</button>
-                    <button type="button" data-source="github"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-repo"></use></svg>GitHub</button>
-                    <button type="button" data-source="folder"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-folder"></use></svg>Folder</button>
                 </div>
                 <div id="source-github" class="source-panel" hidden>
                     <p class="source-help" id="github-help">Repository as owner/name. The token is optional. It is sent to this app so it can list private files. It is not stored on the server.</p>
@@ -154,15 +162,15 @@
                         </button>
                         <div id="samples-list" class="file-browser-section-body"></div>
                     </div>
-                    <div class="file-browser-section open" data-section="templates">
+                    <div class="file-browser-section open" data-section="templates" id="templates-section">
                         <button type="button" class="file-browser-heading file-browser-section-toggle" aria-expanded="true" aria-controls="templates-list">
                             <span class="file-browser-chevron" aria-hidden="true"></span>
-                            <span class="file-browser-section-label" id="templates-heading-label">Templates</span>
+                            <span class="file-browser-section-label" id="templates-heading-label">Starter pack</span>
                         </button>
                         <div id="templates-list" class="file-browser-section-body"></div>
                     </div>
-                    <div class="file-browser-section open" data-section="partials">
-                        <button type="button" class="file-browser-heading file-browser-section-toggle" aria-expanded="true" aria-controls="partials-list">
+                    <div class="file-browser-section" data-section="partials">
+                        <button type="button" class="file-browser-heading file-browser-section-toggle" aria-expanded="false" aria-controls="partials-list">
                             <span class="file-browser-chevron" aria-hidden="true"></span>
                             <span class="file-browser-section-label" id="partials-heading-label">Partials</span>
                         </button>
@@ -173,6 +181,14 @@
                     <div id="external-path" class="file-browser-heading"></div>
                     <div id="external-list"></div>
                 </div>
+                <div id="ig-coverage-slot" class="ig-coverage-slot">
+                    <button type="button" id="generate-maps-button" class="btn btn-sm btn-outline-dark">Build field map</button>
+                    <button type="button" id="field-map-button" class="btn btn-sm btn-outline-dark">Export map</button>
+                    <button type="button" id="ig-guide-open" class="btn btn-sm btn-outline-dark">Compare with a guide…</button>
+                    <input type="file" id="ig-guide-file" accept="application/json,.json" hidden>
+                    <div id="ig-guide-name" class="ig-coverage-name"></div>
+                    <div id="ig-coverage-score" role="status"></div>
+                </div>
             </div>
             <div id="file-browser-resizer" role="separator" aria-orientation="vertical" aria-label="Resize file list"></div>
             <div id="editor-main">
@@ -182,15 +198,21 @@
                         <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-message"></use></svg>Message</span>
                         <span id="message-name">No sample</span>
                         <span class="pane-actions">
-                            <button class="btn btn-sm btn-outline-dark" id="new-sample-button" type="button">New sample</button>
-                            <button class="btn btn-sm btn-outline-dark" id="import-sample-button" type="button">Import…</button>
-                            <input id="import-sample-input" type="file" accept=".hl7,.txt,.msg" multiple hidden>
-                            <button class="btn btn-sm btn-outline-dark" id="save-sample-button" type="button">Save sample</button>
-                            <span id="save-sample-form" hidden>
-                                <input id="save-sample-name" class="form-control form-control-sm" type="text" placeholder="Name, .hl7 optional" aria-label="Sample name">
-                                <button type="button" class="btn btn-sm btn-dark" id="save-sample-create">Save</button>
-                                <button type="button" class="btn btn-sm btn-outline-dark" id="save-sample-cancel">Cancel</button>
-                            </span>
+                            <button class="btn btn-sm btn-outline-dark" id="message-expand" type="button" aria-expanded="false">Show full message</button>
+                            <details class="pane-menu" id="sample-menu">
+                                <summary>Sample <span aria-hidden="true">▾</span></summary>
+                                <div class="pane-menu-panel">
+                                    <button class="btn btn-sm btn-outline-dark" id="new-sample-button" type="button">New sample</button>
+                                    <button class="btn btn-sm btn-outline-dark" id="import-sample-button" type="button">Import…</button>
+                                    <input id="import-sample-input" type="file" accept=".hl7,.txt,.msg" multiple hidden>
+                                    <button class="btn btn-sm btn-outline-dark" id="save-sample-button" type="button">Save sample</button>
+                                    <span id="save-sample-form" hidden>
+                                        <input id="save-sample-name" class="form-control form-control-sm" type="text" placeholder="Name, .hl7 optional" aria-label="Sample name">
+                                        <button type="button" class="btn btn-sm btn-dark" id="save-sample-create">Save</button>
+                                        <button type="button" class="btn btn-sm btn-outline-dark" id="save-sample-cancel">Cancel</button>
+                                    </span>
+                                </div>
+                            </details>
                         </span>
                     </div>
                     <textarea id="databox"></textarea>
@@ -200,17 +222,32 @@
                     <div class="split template-area">
                         <div class="pane-header">
                             <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-template"></use></svg>Template</span>
-                            <span id="template-open-name" class="sr-only">untitled</span>
+                            <span id="template-open-name">untitled</span>
                             <span class="pane-actions">
-                                <button class="btn btn-sm btn-outline-dark" id="new-template-button" type="button">New</button>
+                                <button class="result-icon-btn" id="new-template-button" type="button" aria-label="New template" title="New template">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M8 3.2v9.6M3.2 8h9.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                    </svg>
+                                </button>
+                                <button class="result-icon-btn" id="format-template-button" type="button" aria-label="Format" title="Format">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M3 3.5h10M3 6.5h6.5M3 9.5h10M3 12.5h6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                    </svg>
+                                </button>
+                                <button class="result-icon-btn" id="generate-template-button" type="button" aria-label="Generate" title="Generate">
+                                    <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-sparkle"></use></svg>
+                                </button>
                                 <span id="new-template-form" hidden>
                                     <input id="new-template-name" class="form-control form-control-sm" type="text" placeholder="Name, .liquid optional" aria-label="Template name">
                                     <button type="button" class="btn btn-sm btn-dark" id="new-template-create">Create</button>
                                     <button type="button" class="btn btn-sm btn-outline-dark" id="new-template-cancel">Cancel</button>
                                 </span>
-                                <button class="btn btn-sm btn-outline-dark" id="format-template-button" type="button">Format</button>
-                                <button class="btn btn-sm btn-outline-dark" id="generate-template-button" type="button">Generate</button>
-                                <button class="btn btn-sm btn-outline-dark" id="template-save-button" type="button"><span class="tab-dirty" hidden></span>Save</button>
+                                <button class="result-icon-btn" id="template-save-button" type="button" aria-label="Save template" title="Save template">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M3.2 2.6h7.2L12.8 5v8.4H3.2V2.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+                                        <path d="M5.4 2.6v3.4h4.2M5.4 13.4v-3.2h5.2v3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
                             </span>
                         </div>
                         <nav class="template-tabs">
@@ -218,7 +255,7 @@
                                 <a class="nav-item nav-link font-weight-bold" onclick="changeTab('untitled')">untitled<span class="tab-dirty" hidden></span></a>
                             </div>
                             <div id="includes-menu-wrap" hidden>
-                                <button type="button" id="includes-menu-button" class="btn btn-sm includes-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="includes-popover">
+                                <button type="button" id="includes-menu-button" class="btn btn-sm includes-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="includes-popover" title="Partials used by this template">
                                     <span id="includes-menu-label">Includes (0)</span>
                                     <span aria-hidden="true">▾</span>
                                 </button>
@@ -235,11 +272,23 @@
                     <div class="split output-area">
                         <div class="pane-header">
                             <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-json"></use></svg>FHIR result</span>
-                            <span id="conversion-status"></span>
                             <span class="pane-actions">
-                                <button class="btn btn-sm btn-outline-primary" id="send-fhir-button" type="button">Send</button>
-                                <button class="btn btn-sm btn-outline-primary" id="validate-fhir-button" type="button" disabled>Validate</button>
-                                <button class="btn btn-sm btn-outline-dark" id="copy-result-button" type="button">Copy</button>
+                                <button id="convert-button" type="button" aria-label="Convert now" title="Convert now">
+                                    <svg width="14" height="14" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-play"></use></svg>
+                                    <span class="convert-button-label">Run</span>
+                                </button>
+                                <button class="result-icon-btn" id="send-fhir-button" type="button" hidden aria-label="Send" title="Send">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M8 2.4v7.2M5.2 5.1 8 2.4l2.8 2.7M3.4 9.2v2.3c0 .7.6 1.3 1.3 1.3h6.6c.7 0 1.3-.6 1.3-1.3V9.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" id="validate-fhir-button" type="button" disabled hidden>Validate</button>
+                                <button class="result-icon-btn" id="copy-result-button" type="button" aria-label="Copy" title="Copy">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <rect x="5.6" y="5.6" width="8" height="8" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+                                        <path d="M10.4 5.6V3.6A1.1 1.1 0 0 0 9.3 2.5H3.6A1.1 1.1 0 0 0 2.5 3.6v5.7A1.1 1.1 0 0 0 3.6 10.4H5.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
                             </span>
                         </div>
                         <div id="result-error" hidden></div>
@@ -247,19 +296,27 @@
                     </div>
                 </div>
                 </div>
+                <button type="button" id="problems-rail" class="problems-rail" hidden aria-expanded="false" aria-controls="debug-drawer" title="Show debug (Ctrl+`)">
+                    <span>Debug</span>
+                    <span class="problems-rail-affordance" aria-hidden="true">
+                        <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-chevron-up"></use></svg>
+                    </span>
+                </button>
                 <div id="debug-drawer-resizer" role="separator" aria-orientation="horizontal" aria-label="Resize debug drawer" hidden></div>
                 <section id="debug-drawer" aria-label="Conversion debugger" hidden>
                     <div class="debug-drawer-header">
                         <div class="debug-drawer-tabs" role="tablist">
                             <button type="button" role="tab" data-debug-tab="hl7" aria-selected="true" class="is-active">Parsed HL7</button>
                             <button type="button" role="tab" data-debug-tab="vars" aria-selected="false">Variables &amp; Console</button>
-                            <button type="button" role="tab" data-debug-tab="diag" aria-selected="false">Diagnostics &amp; Bundle</button>
+                            <button type="button" role="tab" data-debug-tab="diag" aria-selected="false">Problems</button>
                             <button type="button" role="tab" id="debug-expected-tab" data-debug-tab="expected" aria-selected="false" hidden>Expected diff</button>
                             <button type="button" role="tab" id="debug-validation-tab" data-debug-tab="validation" aria-selected="false" hidden>Validation</button>
                         </div>
                         <input id="debug-tree-filter" class="form-control form-control-sm" type="text" placeholder="Filter tree…" aria-label="Filter debug view">
                         <span id="debug-timing" class="debug-meta"></span>
-                        <button type="button" id="debug-drawer-close" class="file-browser-toggle" aria-label="Close debug drawer" title="Close (Ctrl+`)">&times;</button>
+                        <button type="button" id="debug-drawer-close" class="file-browser-toggle" aria-label="Minimize debug" title="Minimize (Ctrl+`)">
+                            <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-chevron-down"></use></svg>
+                        </button>
                     </div>
                     <div class="debug-drawer-body">
                         <div id="debug-panel-hl7" class="debug-panel"></div>
@@ -277,6 +334,7 @@
                         <div id="debug-panel-validation" class="debug-panel" hidden></div>
                     </div>
                 </section>
+                <div id="conversion-status" class="status-line" role="status" aria-live="polite"></div>
             </div>
         </div>
         <div id="conversion-error" hidden></div>
@@ -285,7 +343,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Save project</h4>
+                        <h4 class="modal-title">Save as new customer</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -296,7 +354,7 @@
                             <input type="text" class="form-control" id="save-project-name" placeholder="Adt rules">
                         </div>
                         <div class="form-group mb-1">
-                            <label for="save-project-parent">Folder on this server</label>
+                            <label for="save-project-parent">Create the customer folder in</label>
                             <input type="text" class="form-control" id="save-project-parent" placeholder="Absolute path. The project folder is created inside it.">
                             <small class="form-text text-muted">In Docker this is a path inside the container. The folder must sit outside this server's templates.</small>
                         </div>
@@ -313,7 +371,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">New project</h4>
+                        <h4 class="modal-title">New customer</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -357,7 +415,7 @@
                             <input type="text" class="form-control" id="new-project-name" placeholder="Adt rules">
                         </div>
                         <div class="form-group mb-1">
-                            <label for="new-project-parent">Folder on this server</label>
+                            <label for="new-project-parent">Create the customer folder in</label>
                             <input type="text" class="form-control" id="new-project-parent" placeholder="Absolute path. The project folder is created inside it.">
                             <small class="form-text text-muted" id="new-project-help">In Docker this is a path inside the container. The folder must sit outside this server's templates.</small>
                         </div>
@@ -374,7 +432,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Open project</h4>
+                        <h4 class="modal-title">Open customer</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -479,7 +537,7 @@
                             </fieldset>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="settings-convert-while-typing" checked>
-                                <label class="form-check-label" for="settings-convert-while-typing">Convert while typing</label>
+                                <label class="form-check-label" for="settings-convert-while-typing">Update the FHIR result as you type</label>
                             </div>
                             <div class="form-group mt-3 mb-0">
                                 <label for="settings-timezone">Timezone</label>
@@ -511,14 +569,14 @@
                                         <option value="custom">Custom (OpenAI-compatible)</option>
                                     </select>
                                 </div>
-                                <div class="form-group" id="settings-ai-key-row">
-                                    <label for="settings-ai-api-key" id="settings-ai-key-label">API key</label>
-                                    <input type="password" class="form-control" id="settings-ai-api-key" placeholder="Paste API key (saved in this browser)" autocomplete="off">
-                                </div>
                                 <div class="form-group">
                                     <label for="settings-ai-model">Model</label>
                                     <input type="text" class="form-control" id="settings-ai-model" placeholder="gpt-4.1-mini" list="settings-ai-model-list">
                                     <datalist id="settings-ai-model-list"></datalist>
+                                </div>
+                                <div class="form-group" id="settings-ai-key-row">
+                                    <label for="settings-ai-api-key" id="settings-ai-key-label">API key</label>
+                                    <input type="password" class="form-control" id="settings-ai-api-key" placeholder="Paste API key (saved in this browser)" autocomplete="off">
                                 </div>
                                 <div class="form-group" id="settings-ai-base-url-row" hidden>
                                     <label for="settings-ai-base-url">Base URL</label>
@@ -526,7 +584,7 @@
                                 </div>
                                 <div class="form-group mb-0">
                                     <label for="settings-ai-prompt">Default guidance</label>
-                                    <textarea class="form-control settings-guidance" id="settings-ai-prompt" rows="8" aria-describedby="settings-ai-prompt-help"></textarea>
+                                    <textarea id="settings-ai-prompt" aria-describedby="settings-ai-prompt-help"></textarea>
                                     <small class="form-text text-muted" id="settings-ai-prompt-help">Sent with each Generate click. Edit it when this message needs a different result.</small>
                                 </div>
                             </fieldset>
@@ -575,7 +633,25 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button id="settings-cancel-button" type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
                         <button id="settings-save-button" type="button" class="btn btn-dark" data-dismiss="modal">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="generate-key-modal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Cannot generate</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="generate-key-message" class="mb-0"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>

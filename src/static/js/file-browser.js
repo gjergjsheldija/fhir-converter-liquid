@@ -10,11 +10,11 @@ var didOpenStartupExample = false;
 var cachedSamples = [];
 var openFolders = {};
 var suggestedTemplate = null;
-var openSections = { samples: true, templates: true, partials: true };
+var openSections = { samples: true, templates: true, partials: false };
 (function hydrateOpenSections() {
     var stored;
     try {
-        stored = JSON.parse(localStorage.getItem('fhirConverterFileSections') || '{}');
+        stored = JSON.parse(localStorage.getItem('fhirConverterFileSectionsV2') || '{}');
     } catch (storageError) {
         stored = null;
     }
@@ -105,7 +105,7 @@ function highlightMatchingTemplate(text) {
     if (suggestedTemplate && openSections.templates === false) {
         openSections.templates = true;
         try {
-            localStorage.setItem('fhirConverterFileSections', JSON.stringify(openSections));
+            localStorage.setItem('fhirConverterFileSectionsV2', JSON.stringify(openSections));
         } catch (storageError) {
             // storage unavailable; keep working without persistence
         }
@@ -304,9 +304,10 @@ function renderFileBrowser(messages) {
         $('#partials-list').append(block);
     });
 
-    $('#samples-heading-label').text('Samples (' + renderedSamplesCount + ')');
-    $('#templates-heading-label').text('Templates (' + renderedRootsCount + ')');
-    $('#partials-heading-label').text('Partials (' + renderedPartialsFileCount + ')');
+    var templateGroup = (typeof getActiveProject === 'function' && getActiveProject()) ? 'This customer' : 'Starter pack';
+    $('#samples-heading-label').text('Samples · ' + renderedSamplesCount);
+    $('#templates-heading-label').text(templateGroup + ' · ' + renderedRootsCount);
+    $('#partials-heading-label').text('Partials · ' + renderedPartialsFileCount);
     var sectionCounts = {
         samples: renderedSamplesCount,
         templates: renderedRootsCount,
@@ -474,7 +475,7 @@ function openExternalFile(entry) {
 
 function fieldMapFolder() {
     if (browseSource === 'github') {
-        return {error: 'Field map reads a folder on this server. Choose Folder, or use the built-in templates.'};
+        return {error: 'Field map reads a folder on this server. Browse a folder, or use the starter pack.'};
     }
     if (browseSource === 'folder') {
         var folder = ($('#folder-path').val() || externalPath || '').trim();
@@ -486,7 +487,7 @@ function fieldMapFolder() {
     if (typeof getActiveProject === 'function' && getActiveProject()) {
         var project = getActiveProject();
         if (!project || project.kind !== 'local' || !project.path) {
-            return {error: 'Field map reads a folder on this server. Open a local project, or use the built-in templates.'};
+            return {error: 'Field map reads a folder on this server. Open a customer folder, or use the starter pack.'};
         }
         var roots = typeof getActiveProjectRoots === 'function' ? getActiveProjectRoots() : null;
         var templates = roots && roots.templates ? roots.templates : 'templates/Hl7v2';
@@ -575,16 +576,19 @@ function showCoverageScore() {
 }
 
 function addCoverageControls() {
-    var $button = $('#generate-maps-button');
-    if (!$button.length || $('#ig-guide-file').length) {
+    var $input = $('#ig-guide-file');
+    var $open = $('#ig-guide-open');
+    if (!$input.length || $input.data('bound')) {
         return;
     }
-    var $input = $('<input type="file" id="ig-guide-file" accept="application/json,.json" aria-label="IG ConceptMap JSON file" title="IG ConceptMap or Bundle of ConceptMaps (read in the browser, not uploaded)">');
-    var $score = $('<div id="ig-coverage-score" role="status" style="font-size: 0.8rem; color: var(--text-muted);"></div>');
-    $button.after($input, $score);
+    $input.data('bound', true);
+    $open.on('click', function () {
+        $input.trigger('click');
+    });
     $input.on('change', function () {
         var file = this.files && this.files[0];
         igGuide = null;
+        $('#ig-guide-name').text(file ? file.name : '');
         if (!file) {
             showCoverageScore();
             return;
@@ -595,11 +599,13 @@ function addCoverageControls() {
                 igGuide = JSON.parse(String(reader.result));
             } catch (parseError) {
                 igGuide = null;
+                $('#ig-guide-name').text('That file is not JSON.');
             }
             showCoverageScore();
         };
         reader.onerror = function () {
             igGuide = null;
+            $('#ig-guide-name').text('Could not read that file.');
             showCoverageScore();
         };
         reader.readAsText(file);
@@ -639,7 +645,7 @@ function generateFieldMaps() {
         $('#conversion-status').text('Failed');
         showConversionError(err && err.message ? err.message : 'Could not write the field maps.');
     }).finally(function () {
-        $button.prop('disabled', false).text('Generate maps');
+        $button.prop('disabled', false).text('Build field map');
     });
 }
 
@@ -693,7 +699,7 @@ $(document).ready(function () {
         if (!($('#file-filter').val() || '')) {
             openSections[section] = open;
             try {
-                localStorage.setItem('fhirConverterFileSections', JSON.stringify(openSections));
+                localStorage.setItem('fhirConverterFileSectionsV2', JSON.stringify(openSections));
             } catch (storageError) {
                 // storage unavailable; keep working without persistence
             }
@@ -835,7 +841,12 @@ $(document).ready(function () {
     }
     var storedCollapsed;
     try {
-        storedCollapsed = localStorage.getItem('fhirConverterFileBrowserCollapsed') === 'true';
+        var rawCollapsed = localStorage.getItem('fhirConverterFileBrowserCollapsed');
+        if (rawCollapsed === null) {
+            storedCollapsed = typeof window !== 'undefined' && window.innerWidth <= 960;
+        } else {
+            storedCollapsed = rawCollapsed === 'true';
+        }
     } catch (storageError) {
         storedCollapsed = false;
     }

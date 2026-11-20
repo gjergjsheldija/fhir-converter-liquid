@@ -104,10 +104,14 @@ export function renderMarkdown(markdown, sourceFile) {
     return html;
 }
 
+const THEME_INIT_SCRIPT = "<script>(function(){var c=null,p='paper';try{var r=localStorage.getItem('fhirConverterSettings');var s=r?JSON.parse(r):null;if(s&&typeof s==='object'){if(s.theme==='light'||s.theme==='dark'||s.theme==='system'){c=s.theme;}else if(s.darkMode===true){c='dark';}else{c='light';}if(s.palette==='paper'||s.palette==='slate'||s.palette==='grove'){p=s.palette;}}}catch(e){return;}if(c===null){c='system';}if(c==='system'){c=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=c;document.documentElement.dataset.palette=p;})();</script>";
+
 function pageShell(title, body) {
-    return "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
+    return "<!DOCTYPE html><html lang=\"en\" data-theme=\"light\" data-palette=\"paper\">" +
+        THEME_INIT_SCRIPT +
+        "<head><meta charset=\"utf-8\">" +
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
-        "<title>" + escapeHtml(title) + "</title>" +
+        "<title>" + escapeHtml(title) + " · FHIR Converter</title>" +
         "<link rel=\"stylesheet\" href=\"/css/guide.css\">" +
         "</head><body><header class=\"guide-bar\">" +
         "<a href=\"/\">Editor</a><a href=\"/guide\">User guide</a>" +

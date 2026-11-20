@@ -42,4 +42,23 @@
         <rect x="2" y="5" width="12" height="8" rx="1"/>
         <rect x="2" y="3" width="5" height="3"/>
     </symbol>
+    <symbol id="icon-close" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4.2" y1="4.2" x2="11.8" y2="11.8"/>
+        <line x1="11.8" y1="4.2" x2="4.2" y2="11.8"/>
+    </symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9.8,4 5.8,8 9.8,12"/>
+    </symbol>
+    <symbol id="icon-chevron-down" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4,6.2 8,10.2 12,6.2"/>
+    </symbol>
+    <symbol id="icon-chevron-up" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4,9.8 8,5.8 12,9.8"/>
+    </symbol>
+    <symbol id="icon-play" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="4.5,3.2 12.5,8 4.5,12.8"/>
+    </symbol>
+    <symbol id="icon-sparkle" viewBox="0 0 16 16" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 2.2 9.4 6.6 13.8 8 9.4 9.4 8 13.8 6.6 9.4 2.2 8 6.6 6.6Z"/>
+    </symbol>
 </svg>

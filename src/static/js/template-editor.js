@@ -159,6 +159,43 @@ if (themePreference) {
     });
 }
 
+var guidanceEditor = null;
+
+function ensureGuidanceEditor() {
+    if (guidanceEditor || typeof CodeMirror === 'undefined') {
+        return;
+    }
+    var field = document.getElementById('settings-ai-prompt');
+    if (!field) {
+        return;
+    }
+    guidanceEditor = CodeMirror.fromTextArea(field, {
+        mode: 'markdown',
+        theme: 'fhir',
+        lineWrapping: true,
+        lineNumbers: false
+    });
+    guidanceEditor.setSize(null, 220);
+}
+
+function guidanceText() {
+    if (guidanceEditor) {
+        return guidanceEditor.getValue();
+    }
+    return $('#settings-ai-prompt').val() || '';
+}
+
+function setGuidanceText(text) {
+    var value = text || '';
+    if (guidanceEditor) {
+        if (guidanceEditor.getValue() !== value) {
+            guidanceEditor.setValue(value);
+        }
+        return;
+    }
+    $('#settings-ai-prompt').val(value);
+}
+
 function showSettingsTab(name) {
     $('#settings-modal [role="tab"]').each(function () {
         var on = $(this).attr('data-settings-tab') === name;
@@ -167,6 +204,14 @@ function showSettingsTab(name) {
     $('#settings-modal [role="tabpanel"]').each(function () {
         $(this).prop('hidden', $(this).attr('data-settings-tab') !== name);
     });
+    if (name === 'ai') {
+        ensureGuidanceEditor();
+        if (guidanceEditor) {
+            setTimeout(function () {
+                guidanceEditor.refresh();
+            }, 0);
+        }
+    }
 }
 
 function showFhirAuthFields() {
@@ -252,6 +297,55 @@ function conversionStatusLabel(resource) {
         return 'Converted · ' + resource.resourceType;
     }
     return 'Converted';
+}
+
+function applyConversionStatus(resource, unusedCount) {
+    var label = conversionStatusLabel(resource);
+    var info = window.latestDebugInfo;
+    if (info && typeof info.durationMs === 'number') {
+        label += ' · ' + info.durationMs + ' ms';
+    }
+    if (unusedCount > 0) {
+        label += unusedCount === 1 ? ' · 1 field not read' : ' · ' + unusedCount + ' fields not read';
+    }
+    $('#conversion-status').text(label);
+    syncSessionChrome();
+}
+
+function syncSessionChrome() {
+    var project = typeof getActiveProject === 'function' ? getActiveProject() : null;
+    var converted = $('#conversion-status').text().indexOf('Converted') === 0;
+    $('#session-pitch').prop('hidden', Boolean(project) || !converted);
+    $('#project-readonly').prop('hidden', !(project && project.kind === 'github'));
+    var sampleName = $('#message-name').text() || '';
+    var templateLabel = $('#template-open-name').text() || '';
+    $('#message-name').toggleClass('is-empty', sampleName === 'No sample');
+    $('#template-open-name').toggleClass('is-empty', templateLabel === 'untitled');
+    $('#convert-button').toggleClass('is-manual', currentEditorSettings.convertWhileTyping === false);
+    var pitch = 'This message is now a FHIR bundle.';
+    if (/ADT/i.test(sampleName)) {
+        pitch = 'This ADT message is now a FHIR bundle.';
+    } else if (sampleName === 'No sample') {
+        pitch = 'Pick a sample. The FHIR result updates beside the template.';
+    }
+    $('#session-pitch').text(pitch);
+}
+
+function setMessageStripExpanded(expanded) {
+    if (dataTemplateSplit) {
+        dataTemplateSplit.setSizes(expanded ? [42, 58] : [16, 84]);
+    }
+    $('#message-expand').attr('aria-expanded', expanded ? 'true' : 'false').text(expanded ? 'Show less' : 'Show full message');
+    refreshEditors();
+}
+
+function setCommandPaletteOpen(open) {
+    $('#command-palette').prop('hidden', !open);
+    $('#command-search').attr('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+        $('#command-filter').val('').trigger('input').trigger('focus');
+    }
+    refreshEditors();
 }
 
 function updateUnsavedDot() {
@@ -346,7 +440,7 @@ function convertData(force) {
                     outputCode.setValue(outputLines.join('\n'));
                     $(document).trigger('fhir:debug-updated', [window.latestDebugInfo]);
                     hideResultError();
-                    $('#conversion-status').text(conversionStatusLabel(data.fhirResource));
+                    applyConversionStatus(data.fhirResource);
                     hideConversionError();
                     setUnusedLegend(false);
                     refreshEditors();
@@ -398,7 +492,7 @@ function convertData(force) {
                                                     }, {
                                                         line: line.line,
                                                         ch: endComponentIndex
-                                                    }, {className: 'unused-segment'});
+                                                    }, {className: 'unused-segment', attributes: {title: 'Not read by the template'}});
                                                 });
                                             }
                                         });
@@ -411,6 +505,7 @@ function convertData(force) {
                                 } else {
                                     setUnusedLegend(false);
                                 }
+                                applyConversionStatus(data.fhirResource, unusedMarkCount);
                             }
                         }, 0);
                 }
@@ -818,14 +913,14 @@ function changeDataType(dataType) {
                 // Create splits for editor areas
                 templateOutputSplit = Split(['.template-area', '.output-area'], {
                     gutterSize: 5,
-                    sizes: [50, 50],
+                    sizes: [58, 42],
                     onDrag: refreshEditors,
                     onDragEnd: refreshEditors
                 });
 
                 dataTemplateSplit = Split(['.msg-area', '.editor-area'], {
                     gutterSize: 5,
-                    sizes: [30, 70],
+                    sizes: [16, 84],
                     direction: 'vertical',
                     onDrag: refreshEditors,
                     onDragEnd: refreshEditors
@@ -839,7 +934,7 @@ function changeDataType(dataType) {
                 // Create splits for editor areas
                 templateOutputSplit = Split(['.template-area', '.output-area'], {
                     gutterSize: 5,
-                    sizes: [50, 50],
+                    sizes: [58, 42],
                     onDrag: refreshEditors,
                     onDragEnd: refreshEditors
                 });
@@ -1025,6 +1120,46 @@ $(document).ready(function () {
     //     changeDataType($(this).text());
     // });
 
+    syncSessionChrome();
+    $('#command-search').on('click', function () {
+        setCommandPaletteOpen($('#command-palette').prop('hidden'));
+    });
+    $('#command-filter').on('input', function () {
+        var query = $(this).val().toLowerCase();
+        $('#command-list').children().each(function () {
+            var text = $(this).text().toLowerCase();
+            var match = query.length === 0 || text.indexOf(query) !== -1;
+            $(this).toggleClass('command-filtered', !match);
+        });
+    });
+    $('#command-list').on('click', 'button, a', function () {
+        setCommandPaletteOpen(false);
+    });
+    $(document).on('keydown', function (event) {
+        if ((event.metaKey || event.ctrlKey) && (event.key === 'k' || event.key === 'K')) {
+            event.preventDefault();
+            setCommandPaletteOpen($('#command-palette').prop('hidden'));
+        } else if (event.key === 'Escape' && !$('#command-palette').prop('hidden')) {
+            setCommandPaletteOpen(false);
+        } else if (event.key === 'Escape' && $('#sample-menu').prop('open')) {
+            cancelSaveSampleForm();
+            $('#sample-menu').prop('open', false);
+        }
+    });
+    $(document).on('mousedown', function (event) {
+        var target = event.target;
+        if (!$('#command-palette').prop('hidden') && !$(target).closest('#command-palette, #command-search').length) {
+            setCommandPaletteOpen(false);
+        }
+        if ($('#sample-menu').prop('open') && !$(target).closest('#sample-menu').length) {
+            cancelSaveSampleForm();
+            $('#sample-menu').prop('open', false);
+        }
+    });
+    $('#message-expand').on('click', function () {
+        setMessageStripExpanded($(this).attr('aria-expanded') !== 'true');
+    });
+
     $('#convert-button').on('click', function () {
         convertData(true);
     });
@@ -1058,9 +1193,11 @@ $(document).ready(function () {
 
     $('#new-sample-button').on('click', function () {
         createNewSample();
+        $('#sample-menu').prop('open', false);
     });
 
     $('#import-sample-button').on('click', function () {
+        $('#sample-menu').prop('open', false);
         $('#import-sample-input').trigger('click');
     });
 
@@ -1167,6 +1304,15 @@ $(document).ready(function () {
         populateAiSettingsModal();
     });
 
+    $('#settings-modal').on('shown.bs.modal', function () {
+        if (!$('#settings-panel-ai').prop('hidden')) {
+            ensureGuidanceEditor();
+            if (guidanceEditor) {
+                guidanceEditor.refresh();
+            }
+        }
+    });
+
     $("#settings-modal").on('hidden.bs.modal', function () {
         $('#settings-ai-notice').text('').prop('hidden', true);
     });
@@ -1219,6 +1365,8 @@ $(document).ready(function () {
         settings.fhirProfile = $('#settings-fhir-profile').val().trim();
         saveAiFieldsFromModal(settings);
         setSettings(settings);
+        updateValidateButton();
+        syncSessionChrome();
     });
 
     $('#send-fhir-button').on('click', function () {
@@ -1544,9 +1692,11 @@ function saveCurrentSample() {
             return;
         }
         closeSaveSampleForm();
+        $('#sample-menu').prop('open', false);
         hideConversionError();
         selectedSample = messageName;
         $('#message-name').text(name);
+        syncSessionChrome();
         refreshFileBrowser();
         highlightMatchingTemplate(text);
     });
@@ -1709,7 +1859,7 @@ function populateAiSettingsModal() {
         }
         activeSettingsAiProvider = null;
         select.val(chosen);
-        $('#settings-ai-prompt').val(effectiveAiPrompt(settings.aiPrompt));
+        setGuidanceText(effectiveAiPrompt(settings.aiPrompt));
         syncAiProviderFields(chosen);
     };
 
@@ -1725,7 +1875,7 @@ function saveAiFieldsFromModal(settings) {
     var apiKey = $('#settings-ai-api-key').val() || '';
     var model = ($('#settings-ai-model').val() || '').trim();
     var baseUrl = ($('#settings-ai-base-url').val() || '').trim();
-    var prompt = ($('#settings-ai-prompt').val() || '').trim();
+    var prompt = (guidanceText() || '').trim();
 
     settings.aiProvider = provider;
     settings.aiPrompt = prompt;
@@ -1822,6 +1972,8 @@ function updateValidateButton() {
     var hasUrl = Boolean(settings && settings.fhirBaseUrl);
     var enabled = hasUrl && parseResultResource() !== null;
     button.prop('disabled', !enabled);
+    button.prop('hidden', !hasUrl);
+    $('#send-fhir-button').prop('hidden', !hasUrl);
     button.attr('title', enabled ? 'Validate the result at the FHIR server $validate endpoint' : 'Needs a FHIR result and a FHIR server URL in Settings');
 }
 
@@ -1901,13 +2053,12 @@ function runGenerateTemplate() {
 
         if ((provider === 'custom' && (!customUrl || !apiKey)) || (!keyOptional && !apiKey && !hasServerKey)) {
             var displayLabel = (info && info.label) || provider;
-            $('#settings-ai-notice')
-                .text('Paste your ' + displayLabel + ' API key below and click Save, then click Generate.')
-                .prop('hidden', false);
-            $('#settings-modal').modal('show');
-            setTimeout(function () {
-                $('#settings-ai-api-key').focus();
-            }, 250);
+            var keyMessage = 'Generate needs an API key for ' + displayLabel + '. Add it under Settings, Generate, then try again.';
+            if (provider === 'custom' && !customUrl) {
+                keyMessage = 'Generate needs a base URL and an API key for ' + displayLabel + '. Add them under Settings, Generate, then try again.';
+            }
+            $('#generate-key-message').text(keyMessage);
+            $('#generate-key-modal').modal('show');
             return;
         }
 
@@ -1926,7 +2077,7 @@ function runGenerateTemplate() {
         }
 
         var $btn = $('#generate-template-button');
-        $btn.prop('disabled', true).text('Generating…');
+        $btn.prop('disabled', true).attr('aria-busy', 'true');
         $('#conversion-status').text('Generating template…');
         hideConversionError();
 
@@ -1936,7 +2087,7 @@ function runGenerateTemplate() {
             processData: false,
             contentType: 'application/json',
             success: function (data) {
-                $btn.prop('disabled', false).text('Generate');
+                $btn.prop('disabled', false).attr('aria-busy', 'false');
                 openLocalTemplate(nextGeneratedName(), data.generated || '', true);
                 if (data.fhirResource !== undefined) {
                     outputCode.setValue(JSON.stringify(data.fhirResource, null, 2));
@@ -1950,7 +2101,7 @@ function runGenerateTemplate() {
                 }
             },
             error: function (err) {
-                $btn.prop('disabled', false).text('Generate');
+                $btn.prop('disabled', false).attr('aria-busy', 'false');
                 $('#conversion-status').text('Failed');
                 var message = 'Template generation failed.';
                 if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message) {

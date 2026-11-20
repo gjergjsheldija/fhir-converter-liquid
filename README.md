@@ -34,7 +34,7 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 **Editor**
 
 - Browser workspace for message, Liquid template, and FHIR result, with syntax coloring, folding, and a Liquid formatter
-- Files pane for samples, templates, and partials (Built-in, a local folder, or GitHub), collapsible, with foldable sections
+- Files pane for samples, templates, and partials (starter pack, a local folder, or GitHub). Menu (Cmd-K) holds customer, settings, and docs commands
 - Live conversion, plus a debug drawer: parsed HL7 tree, variable console, unused fields, and hover values on Liquid paths and HL7 fields
 - Includes list grouped by folder; open a partial, or start a new one by name
 - Projects: HL7 v2 or C-CDA, from the Microsoft baseline or an empty example. Open a local folder or a GitHub repo, convert and save against that project
@@ -90,7 +90,7 @@ curl -X POST http://localhost:2019/api/v1/convert/hl7v2/ADT_A01 \
 Open `http://localhost:2019`. The screenshot above is that workspace: files on the left, the HL7 message and Liquid template in the middle, the FHIR bundle on the right, and the debug drawer along the bottom.
 
 1. Pick a sample, paste a message, or use **New sample** / **Import…** / **Save sample**. Samples you add in Built-in mode go to gitignored `src/service-samples/`, not the vendored `src/sample-data/` tree.
-2. Open a template. With **Convert while typing** on, the FHIR bundle updates as you edit either side. **Convert** runs it immediately.
+2. Open a template. With **Update the FHIR result as you type** on, the FHIR bundle updates as you edit either side. **Run** on the FHIR result runs a conversion immediately.
 3. **Format** pretty-prints the Liquid or JSON in the active editor. **Save** writes the template to the built-in runtime tree, or into the open local project.
 4. **Includes** lists the partials for the open template, grouped by folder. Click one to open it. A name that is not on disk yet opens a new tab; nothing is written until you save.
 5. **Debug** opens the bottom drawer: parsed HL7, a variable console, and diagnostics (unused fields and bundle resources). Hover a Liquid path such as `firstSegments.MSH.10`, or a field in the message, to see the value conversion read.

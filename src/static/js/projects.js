@@ -55,7 +55,7 @@
 
     function formatProjectHeaderLabel(proj) {
         if (!proj) {
-            return 'Built-in';
+            return 'Starter pack';
         }
         var m = proj.manifest;
         var name = (m && m.name) || (proj.kind === 'github' ? proj.repo : (proj.path || 'Project').split('/').pop());
@@ -77,9 +77,18 @@
 
     function updateProjectChrome() {
         var hasProj = Boolean(activeProject);
-        $('#project-label').text(formatProjectHeaderLabel(activeProject));
-        $('#project-label').attr('title', formatProjectHeaderLabel(activeProject));
+        var headerLabel = formatProjectHeaderLabel(activeProject);
+        $('#project-label').text(headerLabel);
+        $('#project-label').attr('title', headerLabel);
+        if (typeof document !== 'undefined') {
+            document.title = headerLabel + ' · FHIR Converter';
+        }
         $('#project-use-builtin').prop('hidden', !hasProj);
+        $('#project-readonly').prop('hidden', !(hasProj && activeProject.kind === 'github'));
+        $('#session-pitch').prop('hidden', hasProj);
+        if (typeof syncSessionChrome === 'function') {
+            syncSessionChrome();
+        }
 
         $('#source-switch').prop('hidden', hasProj);
         if (hasProj) {

@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    var STORAGE_OPEN_KEY = 'fhirConverterDebugOpen';
+    var STORAGE_OPEN_KEY = 'fhirConverterDebugOpenV2';
     var STORAGE_HEIGHT_KEY = 'fhirConverterDebugHeight';
     var DEFAULT_HEIGHT = 220;
     var MIN_HEIGHT = 130;
@@ -1083,6 +1083,7 @@
         isOpen = Boolean(nextOpen);
         $('#debug-drawer').prop('hidden', !isOpen);
         $('#debug-drawer-resizer').prop('hidden', !isOpen);
+        $('#problems-rail').prop('hidden', isOpen).attr('aria-expanded', String(isOpen));
         $('#debug-toggle-button')
             .toggleClass('is-active', isOpen)
             .attr('aria-expanded', String(isOpen));
@@ -1114,7 +1115,11 @@
 
         $('#debug-drawer-close').on('click', function () {
             setDebugDrawerOpen(false);
-            $('#debug-toggle-button').focus();
+            $('#problems-rail').focus();
+        });
+
+        $('#problems-rail').on('click', function () {
+            setDebugDrawerOpen(true);
         });
 
         $('.debug-drawer-tabs').on('click', 'button[role="tab"]', function () {

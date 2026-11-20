@@ -13,7 +13,13 @@ var ICON_IDS = {
     'icon-ccda': true,
     'icon-builtin': true,
     'icon-repo': true,
-    'icon-folder': true
+    'icon-folder': true,
+    'icon-close': true,
+    'icon-chevron-left': true,
+    'icon-chevron-down': true,
+    'icon-chevron-up': true,
+    'icon-play': true,
+    'icon-sparkle': true
 };
 
 function icon(id) {
