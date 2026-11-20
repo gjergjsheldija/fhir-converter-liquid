@@ -25,4 +25,4 @@ These specs are the leftovers from the market analysis after the fidelity, edito
 | 07 | Done (2026-11-20) | `07-convert-api-key-and-audit.md` | An optional API key on convert, plus an audit line that records MSH-10 and not the body. |
 | 08 | Done (2026-11-20) | `08-conditional-update.md` | A separate send option updates the resource that already has the identifier. |
 | 09 | Blocked (2026-11-20) | `09-oie-archive-msh10.md` | Archive under MSH-10. Blocked: the channel XML has no MSH-10 expression, only `${message.encodedData}`. |
-| 10 | Not started | `10-ccda-expected-outputs.md` | Sync official C-CDA expected JSON only if the pinned Microsoft tree has it. |
+| 10 | Blocked (2026-11-20) | `10-ccda-expected-outputs.md` | Upstream has 22 C-CDA expected JSON files. Blocked: this engine's output differs from all 22 (content), and a template edit is not allowed. |
