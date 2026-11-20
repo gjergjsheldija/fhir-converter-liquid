@@ -91,7 +91,7 @@ export async function sendResource(baseUrl, resource, auth, options) {
     return {ok: true, status: response.status, location: response.headers.get("location") || "", body};
 }
 
-export function validateTarget(baseUrl) {
+export function validateTarget(baseUrl, profile) {
     let url;
     try {
         url = new URL(baseUrl);
@@ -101,11 +101,15 @@ export function validateTarget(baseUrl) {
     if (url.protocol !== "http:" && url.protocol !== "https:") {
         throw httpError(400, "FHIR server URL must start with http:// or https://.");
     }
-    return url.toString().replace(/\/+$/, "") + "/$validate";
+    const target = url.toString().replace(/\/+$/, "") + "/$validate";
+    if (typeof profile === "string" && profile.trim() !== "") {
+        return target + "?profile=" + encodeURIComponent(profile.trim());
+    }
+    return target;
 }
 
-export async function validateResource(baseUrl, resource, auth) {
-    const target = validateTarget(baseUrl);
+export async function validateResource(baseUrl, resource, auth, options) {
+    const target = validateTarget(baseUrl, options && options.profile);
     if (!resource || typeof resource !== "object" || !resource.resourceType) {
         throw httpError(400, "Result has no resourceType.");
     }

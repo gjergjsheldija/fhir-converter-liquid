@@ -1,6 +1,6 @@
 # Spec 02: Validate against one profile
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, `.agents/skills/codemirror5-vanilla-ui/SKILL.md`, and `AGENTS.md`. Gap spec 01 is independent. Do not start another gap spec in this change.
+**Status:** Done (2026-11-20). Verified by 15 passing sendResource tests, a clean test-summary run (0 unexpected failures), and a browser check that an empty profile adds no `profile` property while a saved profile adds `?profile=` on Validate only. Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, `.agents/skills/codemirror5-vanilla-ui/SKILL.md`, and `AGENTS.md`. Gap spec 01 is independent. Do not start another gap spec in this change.
 
 ## 1. Goal
 

@@ -109,6 +109,34 @@ describe('FHIR $validate', function () {
         assert.strictEqual(validateTarget('http://localhost:8080/fhir'), 'http://localhost:8080/fhir/$validate');
     });
 
+    it('appends an encoded profile query only when profile is non-empty', function () {
+        const profile = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient';
+        const url = validateTarget('https://fhir.example.org/baseR4', profile);
+        assert.strictEqual(url, 'https://fhir.example.org/baseR4/$validate?profile=' + encodeURIComponent(profile));
+        assert.strictEqual(new URL(url).searchParams.get('profile'), profile);
+        for (const blank of [undefined, null, '', '   ', 42]) {
+            assert.strictEqual(validateTarget('https://fhir.example.org/baseR4', blank), 'https://fhir.example.org/baseR4/$validate');
+        }
+    });
+
+    it('posts the resource to a profile URL when options.profile is set', async function () {
+        const profile = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient';
+        mockFetch(200, {resourceType: 'OperationOutcome', issue: []});
+        await validateResource('https://fhir.example.org/baseR4', {resourceType: 'Patient'}, undefined, {profile});
+        assert.strictEqual(calls.length, 1);
+        assert.strictEqual(new URL(calls[0].url).searchParams.get('profile'), profile);
+        assert.strictEqual(calls[0].url.split('?')[0], 'https://fhir.example.org/baseR4/$validate');
+        assert.deepStrictEqual(JSON.parse(calls[0].options.body), {resourceType: 'Patient'});
+    });
+
+    it('posts to the plain $validate URL when no profile is given', async function () {
+        mockFetch(200, {resourceType: 'OperationOutcome', issue: []});
+        await validateResource('https://fhir.example.org/baseR4', {resourceType: 'Patient'}, undefined, {});
+        await validateResource('https://fhir.example.org/baseR4', {resourceType: 'Patient'}, undefined, {profile: ''});
+        assert.strictEqual(calls[0].url, 'https://fhir.example.org/baseR4/$validate');
+        assert.strictEqual(calls[1].url, 'https://fhir.example.org/baseR4/$validate');
+    });
+
     it('rejects a missing or non-http URL', function () {
         assert.throws(() => validateTarget(''), {status: 400});
         assert.throws(() => validateTarget('file:///tmp/fhir'), {status: 400});

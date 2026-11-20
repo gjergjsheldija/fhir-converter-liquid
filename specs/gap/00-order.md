@@ -17,7 +17,7 @@ These specs are the leftovers from the market analysis after the fidelity, edito
 | Spec | Status | File | What it changes |
 | --- | --- | --- | --- |
 | 01 | Done (2026-11-20) | `01-ig-coverage-score.md` | A coverage score between one generated field-map ConceptMap and the HL7 v2-to-FHIR IG. |
-| 02 | Not started | `02-validate-with-profile.md` | Validate can send one profile canonical URL to the existing `{base}/$validate` call. |
+| 02 | Done (2026-11-20) | `02-validate-with-profile.md` | Validate can send one profile canonical URL to the existing `{base}/$validate` call. |
 | 03 | Not started | `03-unmapped-code-queue.md` | After a site pack runs, list Codings that no ConceptMap rewrote. |
 | 04 | Not started | `04-result-lineage.md` | Clicking a FHIR element shows the source field and the include that wrote it. |
 | 05 | Not started | `05-declared-segment-list.md` | A project segment list reports segment ids the message used that are not on the list. |

@@ -63,6 +63,7 @@ var currentEditorSettings = {
     fhirUsername: '',
     fhirPassword: '',
     fhirConditional: false,
+    fhirProfile: '',
     aiProvider: 'openai',
     aiBaseUrl: '',
     aiModel: 'gpt-4.1-mini',
@@ -1154,6 +1155,7 @@ $(document).ready(function () {
         $('#settings-fhir-username').val(settings.fhirUsername || '');
         $('#settings-fhir-password').val(settings.fhirPassword || '');
         $('#settings-fhir-conditional').prop('checked', settings.fhirConditional === true);
+        $('#settings-fhir-profile').val(settings.fhirProfile || '');
         showFhirAuthFields();
         populateAiSettingsModal();
     });
@@ -1195,6 +1197,7 @@ $(document).ready(function () {
         settings.fhirUsername = $('#settings-fhir-username').val();
         settings.fhirPassword = $('#settings-fhir-password').val();
         settings.fhirConditional = $('#settings-fhir-conditional').prop('checked');
+        settings.fhirProfile = $('#settings-fhir-profile').val().trim();
         saveAiFieldsFromModal(settings);
         setSettings(settings);
     });
@@ -1811,15 +1814,19 @@ function validateFhir() {
     }
     $('#validate-fhir-button').prop('disabled', true);
     $('#conversion-status').text('Validating…');
+    var validateBody = {
+        baseUrl: settings.fhirBaseUrl,
+        resource: resource,
+        auth: settings.fhirAuth,
+        token: settings.fhirToken,
+        username: settings.fhirUsername,
+        password: settings.fhirPassword
+    };
+    if (typeof settings.fhirProfile === 'string' && settings.fhirProfile.trim() !== '') {
+        validateBody.profile = settings.fhirProfile.trim();
+    }
     $.ajax('/api/v1/fhir/validate', {
-        data: JSON.stringify({
-            baseUrl: settings.fhirBaseUrl,
-            resource: resource,
-            auth: settings.fhirAuth,
-            token: settings.fhirToken,
-            username: settings.fhirUsername,
-            password: settings.fhirPassword
-        }),
+        data: JSON.stringify(validateBody),
         type: 'POST',
         processData: false,
         contentType: 'application/json',

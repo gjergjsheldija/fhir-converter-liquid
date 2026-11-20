@@ -715,7 +715,7 @@ export default function (app) {
 
     app.post("/api/v1/fhir/validate", function (req, res) {
         const body = req.body || {};
-        validateResource(body.baseUrl, body.resource, body)
+        validateResource(body.baseUrl, body.resource, body, {profile: body.profile})
             .then((result) => {
                 if (result.ok) {
                     res.json(result);

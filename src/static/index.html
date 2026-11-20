@@ -552,6 +552,11 @@
                                     <label for="settings-fhir-password">Password</label>
                                     <input type="password" class="form-control" id="settings-fhir-password" autocomplete="off">
                                 </div>
+                                <div class="form-group">
+                                    <label for="settings-fhir-profile">Profile canonical URL</label>
+                                    <input type="text" class="form-control" id="settings-fhir-profile" placeholder="http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" autocomplete="off">
+                                    <small class="form-text text-muted">Optional. Sent only when you click Validate.</small>
+                                </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="settings-fhir-conditional">
                                     <label class="form-check-label" for="settings-fhir-conditional">Match existing resources by identifier</label>
