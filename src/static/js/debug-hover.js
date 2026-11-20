@@ -906,6 +906,118 @@
         hoverState = {editorKey: 'data', cm: cm, token: coord};
     }
 
+    // --- FHIR result lineage (click) ---------------------------------------------------
+    // lookupResultLineage mirrors lookupLineage in src/lib/liquid-converter/lineage.js (classic
+    // script: no import). `lineage` is debugInfo.lineage: [{outputPath, template, sourcePath}].
+    function lookupResultLineage(lineage, path) {
+        if (!Array.isArray(lineage) || typeof path !== 'string') {
+            return null;
+        }
+        var best = null;
+        lineage.forEach(function (row) {
+            var p = row && row.outputPath;
+            if (typeof p !== 'string' || p.length === 0) {
+                return;
+            }
+            if ((path === p || path.indexOf(p + '.') === 0) && (!best || p.length > best.outputPath.length)) {
+                best = row;
+            }
+        });
+        return best;
+    }
+
+    // Dot-joined JSON path of the string or number value that covers `offset` in `text`
+    // (array indexes are numeric, e.g. "entry.0.resource.id"). Null for keys, punctuation,
+    // booleans and null.
+    function jsonValuePathAt(text, offset) {
+        var stack = []; // {array: bool, key: string|null, index: number}
+        var i = 0;
+        var n = text.length;
+        function pathNow() {
+            return stack.map(function (frame) {
+                return frame.array ? String(frame.index) : frame.key;
+            }).join('.');
+        }
+        while (i < n) {
+            var ch = text.charAt(i);
+            if (ch === '{') {
+                stack.push({array: false, key: null, index: 0});
+                i++;
+            } else if (ch === '[') {
+                stack.push({array: true, key: null, index: 0});
+                i++;
+            } else if (ch === '}' || ch === ']') {
+                stack.pop();
+                i++;
+            } else if (ch === ',') {
+                var top = stack[stack.length - 1];
+                if (top && top.array) {
+                    top.index++;
+                }
+                i++;
+            } else if (ch === '"') {
+                var end = i + 1;
+                while (end < n && text.charAt(end) !== '"') {
+                    end += text.charAt(end) === '\\' ? 2 : 1;
+                }
+                end++; // past the closing quote
+                var after = end;
+                while (after < n && /\s/.test(text.charAt(after))) {
+                    after++;
+                }
+                if (text.charAt(after) === ':') {
+                    var frame = stack[stack.length - 1];
+                    if (frame && !frame.array) {
+                        try {
+                            frame.key = JSON.parse(text.slice(i, end));
+                        } catch (e) {
+                            frame.key = text.slice(i + 1, end - 1);
+                        }
+                    }
+                    if (offset >= i && offset < end) {
+                        return null;
+                    }
+                } else if (offset >= i && offset < end) {
+                    return pathNow();
+                }
+                i = end;
+            } else if (/[-0-9]/.test(ch)) {
+                var numEnd = i + 1;
+                while (numEnd < n && /[0-9.eE+-]/.test(text.charAt(numEnd))) {
+                    numEnd++;
+                }
+                if (offset >= i && offset < numEnd) {
+                    return pathNow();
+                }
+                i = numEnd;
+            } else {
+                i++;
+            }
+        }
+        return null;
+    }
+
+    function handleResultClick(cm, pos, x, y) {
+        var path = jsonValuePathAt(cm.getValue(), cm.indexFromPos(pos));
+        if (path === null || path === '') {
+            hideTooltip(0);
+            return;
+        }
+        var info = debugInfo();
+        var row = lookupResultLineage(info && info.lineage, path);
+        var el = ensureTooltip();
+        var body;
+        if (row && row.template) {
+            body = '<div class="debug-hover-value">Template: ' + escapeHtml(row.template) + '</div>' +
+                (row.sourcePath ? '<div class="debug-hover-value">Source: ' + escapeHtml(row.sourcePath) + '</div>' : '');
+        } else {
+            body = '<div class="debug-hover-value">No source recorded</div>';
+        }
+        el.innerHTML = '<div class="debug-hover-header">' + escapeHtml(path) + '</div>' + body;
+        showTooltip(x, y);
+        hoverState = {editorKey: 'result', cm: cm, token: path};
+    }
+
     // --- wiring ------------------------------------------------------------------------
 
     function editorKeyFor(cm) {
@@ -914,6 +1026,9 @@
         }
         if (typeof templateCodeEditor !== 'undefined' && cm === templateCodeEditor) {
             return 'template';
+        }
+        if (typeof outputCode !== 'undefined' && cm === outputCode) {
+            return 'result';
         }
         return null;
     }
@@ -927,6 +1042,26 @@
             var key = editorKeyFor(cm);
             var lastEvent = null;
             var instance = cm;
+            if (key === 'result') {
+                // The result pane is read-only: a click (not a hover) shows where a value came from.
+                this.addEventListener('click', function (event) {
+                    if (instance.somethingSelected()) {
+                        return;
+                    }
+                    var clicked = instance.coordsChar({left: event.clientX, top: event.clientY}, 'window');
+                    if (!clicked || clicked.outside) {
+                        hideTooltip(0);
+                        return;
+                    }
+                    handleResultClick(instance, clicked, event.clientX, event.clientY);
+                });
+                instance.on('scroll', function () {
+                    if (hoverState && hoverState.editorKey === 'result') {
+                        hideTooltip(0);
+                    }
+                });
+                return;
+            }
             // CodeMirror 5 never signals mousemove or mouseleave on the instance, so listen on the wrapper.
             this.addEventListener('mousemove', function (event) {
                 lastEvent = event;
@@ -964,6 +1099,7 @@
     $(document).ready(function () {
         attachEditor('.template-editor .CodeMirror');
         attachEditor('.msg-area .CodeMirror');
+        attachEditor('.output-area .CodeMirror');
         $(document).on('keydown', function (event) {
             if (event.key === 'Escape') {
                 hideTooltip(0);

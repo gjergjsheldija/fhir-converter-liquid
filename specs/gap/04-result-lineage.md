@@ -1,6 +1,6 @@
 # Spec 04: Lineage from a FHIR element back to the source
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, `.agents/skills/codemirror5-vanilla-ui/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
+**Status:** Done (2026-11-20). Debug convert records the include that wrote each result value and the result pane names it on click; `sourcePath` stays empty because the debug scopes do not say which variable an include read. Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, `.agents/skills/codemirror5-vanilla-ui/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
 
 ## 1. Goal
 
