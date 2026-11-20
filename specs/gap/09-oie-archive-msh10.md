@@ -1,6 +1,6 @@
 # Spec 09: Archive the OIE message under MSH-10
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Integrations spec 01 is Done. Do not start another gap spec in this change.
+**Status:** Blocked (2026-11-20). The channel XML has no MSH-10 expression. The only variable is `${message.encodedData}` on the HTTP Sender. The ACK with MSA-2 is described in the README and is not a channel mapping. Do not invent a File Writer expression. A later spec must add the control-id mapping to the channel before this archive can reuse it.
 
 ## 1. Goal
 
