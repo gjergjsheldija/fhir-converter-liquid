@@ -982,6 +982,7 @@ export default function (app) {
                     templateDirectory: prep.templateDirectory,
                     strictOverridesOnly: prep.strictOverridesOnly,
                     fallbackTemplateDirectory: prep.fallbackTemplateDirectory,
+                    declaredSegments: prep.declaredSegments,
                     timezone: req.headers.timezone,
                     debug: retDebug
                 }).then(async (result) => {

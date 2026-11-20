@@ -23,6 +23,7 @@ import pkg2 from 'cls-hooked';
 import {Context, toPromise} from 'liquidjs';
 import {createDebugCollector, serializeHl7v2Debug, DEBUG_COLLECTOR_KEY} from '../liquid-converter/debugCollector.js';
 import {buildLineage} from '../liquid-converter/lineage.js';
+import {segmentIdsFromMessage, undeclaredSegments} from '../parsers/hl7v2/declaredSegments.js';
 
 const {clear, get, put} = pkg;
 
@@ -154,6 +155,9 @@ export function convertInlineHl7v2(msg) {
                                                 resultMsg.debugInfo.parsedCcda = summarizeCcda(dataContext.msg);
                                             }
                                             resultMsg.debugInfo.lineage = buildLineage(collector.lineageRenders, rendered, result);
+                                            if (!isCcda && Array.isArray(msg.declaredSegments)) {
+                                                resultMsg.debugInfo.undeclaredSegments = undeclaredSegments(segmentIdsFromMessage(s), msg.declaredSegments);
+                                            }
                                         }
                                         fulfill({'status': 200, 'resultMsg': resultMsg});
                                     } catch (err) {

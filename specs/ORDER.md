@@ -101,7 +101,7 @@ Not started. One spec per change. Specs 14 and 22 stay blocked and are not in th
 - `specs/gap/02-validate-with-profile.md` — **Done (2026-11-20)** — Optional profile canonical URL on the existing `{base}/$validate` call. No embedded HL7 validator.
 - `specs/gap/03-unmapped-code-queue.md` — **Done (2026-11-20)** — List Codings the site pack did not rewrite. The list stays outside the FHIR resource.
 - `specs/gap/04-result-lineage.md` — **Done (2026-11-20)** — A click in the FHIR result names the include and source path recorded while debug is on.
-- `specs/gap/05-declared-segment-list.md` — **Not started** — A project `structures/segments.txt` reports segment ids the message used that are not on the list. Conversion still succeeds.
+- `specs/gap/05-declared-segment-list.md` — **Done (2026-11-20)** — A project `structures/segments.txt` reports segment ids the message used that are not on the list. Conversion still succeeds.
 - `specs/gap/06-failure-log.md` — **Not started** — Failed conversions are listed with template name, error, and MSH-10. The raw message is not stored. No replay.
 - `specs/gap/07-convert-api-key-and-audit.md` — **Not started** — `CONVERT_API_KEY`, when set, requires a Bearer token. An audit line records status, template, and MSH-10.
 - `specs/gap/08-conditional-update.md` — **Not started** — A second Settings option sends one transaction of conditional PUTs. It cannot be combined with conditional create. No out-of-order guard.

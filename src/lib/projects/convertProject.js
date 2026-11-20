@@ -7,6 +7,7 @@ import {realpath, stat} from "fs/promises";
 import path from "path";
 import {isValidGitRef, parseGithubRepo, readGithubFile} from "../browse/sources.js";
 import {CCDA_LIQUID_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION} from "../constants/constants.js";
+import {loadDeclaredSegments} from "../parsers/hl7v2/declaredSegments.js";
 import {isSafeRelativePath, readManifest, validateManifest} from "./manifest.js";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -127,7 +128,7 @@ export async function prepareProjectConversion(body = {}) {
         if (tplReal !== rootReal && !tplReal.startsWith(rootReal + path.sep)) {
             throw httpError(400, "Invalid path.");
         }
-        return {
+        const prepared = {
             srcDataType: isCcdaOnly ? "ccda" : "hl7v2",
             templateDirectory: tplReal,
             strictOverridesOnly: false,
@@ -135,6 +136,13 @@ export async function prepareProjectConversion(body = {}) {
             projectRoot: rootReal,
             templatesOverride: userOverrides
         };
+        if (!isCcdaOnly) {
+            const declaredSegments = await loadDeclaredSegments(rootReal);
+            if (declaredSegments) {
+                prepared.declaredSegments = declaredSegments;
+            }
+        }
+        return prepared;
     }
 
     const parsedRepo = parseGithubRepo(project.repo);
