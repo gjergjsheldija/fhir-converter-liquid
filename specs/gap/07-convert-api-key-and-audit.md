@@ -1,6 +1,6 @@
 # Spec 07: Optional API key and an audit line
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
+**Status:** Done (2026-11-20). With CONVERT_API_KEY set, all three convert routes returned 401 for a missing or wrong Bearer token and passed the right one through to conversion, the audit line held only status, template and MSH-10, and with the key unset the page converted with no Authorization header. Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
 
 ## 1. Goal
 
@@ -21,6 +21,7 @@ If those routes already reject a missing key, stop and report the header they re
 - `src/static/js/template-editor.js` to send the key from a Settings field when the user has stored one
 - `src/static/index.html` for that field
 - `.env.example` to document `CONVERT_API_KEY`
+- `.gitignore` for one line, `data/conversion-audit.jsonl`
 - This spec's `**Status:**` line, the row in `specs/gap/00-order.md`, and the bullet in `specs/ORDER.md`
 
 Do not add a dependency. Do not require a key when the environment variable is empty. Do not log the request body. Do not protect Validate, Send, or the static UI.

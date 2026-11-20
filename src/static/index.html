@@ -485,6 +485,11 @@
                                 <input type="text" class="form-control" id="settings-timezone" placeholder="+0000">
                                 <small class="form-text text-muted" id="settings-timezone-help">Offset sent with each conversion. Example: +0200. Leave empty to use the server default.</small>
                             </div>
+                            <div class="form-group mt-3 mb-0">
+                                <label for="settings-convert-api-key">Convert API key</label>
+                                <input type="password" class="form-control" id="settings-convert-api-key" placeholder="Only needed when the server sets CONVERT_API_KEY" autocomplete="off">
+                                <small class="form-text text-muted" id="settings-convert-api-key-help">Sent as a Bearer token on convert requests only. Stored in this browser. Leave empty when the server has no key.</small>
+                            </div>
                         </div>
                         <div class="settings-panel" id="settings-panel-ai" role="tabpanel" data-settings-tab="ai" aria-labelledby="settings-tab-ai" hidden>
                             <fieldset class="settings-group mb-0" id="settings-ai-group">

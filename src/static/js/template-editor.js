@@ -317,6 +317,9 @@ function convertData(force) {
         if (currentEditorSettings.timezone) {
             headers.timezone = currentEditorSettings.timezone;
         }
+        if (currentEditorSettings.convertApiKey) {
+            headers.Authorization = 'Bearer ' + currentEditorSettings.convertApiKey;
+        }
         var convertEndpointUrl = getDataTypeSpecificUrl('convert');
         if (activeProj) {
             convertEndpointUrl = '/api/v1/projects/convert?unusedSegments=true&invalidAccess=true&debug=true';
@@ -1149,6 +1152,7 @@ $(document).ready(function () {
         $('input[name="settings-palette"][value="' + resolveStoredPalette() + '"]').prop('checked', true);
         $('#settings-convert-while-typing').prop('checked', settings.convertWhileTyping !== false);
         $('#settings-timezone').val(settings.timezone || '');
+        $('#settings-convert-api-key').val(settings.convertApiKey || '');
         $('#settings-fhir-url').val(settings.fhirBaseUrl || '');
         $('#settings-fhir-auth').val(settings.fhirAuth || 'none');
         $('#settings-fhir-token').val(settings.fhirToken || '');
@@ -1191,6 +1195,7 @@ $(document).ready(function () {
         settings.palette = $('input[name="settings-palette"]:checked').val() || settings.palette || 'paper';
         settings.convertWhileTyping = $('#settings-convert-while-typing').prop('checked');
         settings.timezone = $('#settings-timezone').val();
+        settings.convertApiKey = $('#settings-convert-api-key').val().trim();
         settings.fhirBaseUrl = $('#settings-fhir-url').val().trim();
         settings.fhirAuth = $('#settings-fhir-auth').val();
         settings.fhirToken = $('#settings-fhir-token').val();
