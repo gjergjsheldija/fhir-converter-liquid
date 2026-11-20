@@ -506,6 +506,106 @@ function downloadBlob(blob, filename) {
     URL.revokeObjectURL(url);
 }
 
+// Browser copy of src/lib/mappings/igCoverage.js (classic scripts cannot import it).
+var igGuide = null;
+var lastFieldMap = null;
+
+function igGroupsOf(resource) {
+    if (!resource || typeof resource !== 'object') {
+        return [];
+    }
+    if (resource.resourceType === 'ConceptMap') {
+        return Array.isArray(resource.group) ? resource.group : [];
+    }
+    if (resource.resourceType === 'Bundle' && Array.isArray(resource.entry)) {
+        return resource.entry.reduce(function (all, entry) {
+            var inner = entry && entry.resource;
+            return inner && inner.resourceType === 'ConceptMap' && Array.isArray(inner.group) ? all.concat(inner.group) : all;
+        }, []);
+    }
+    return [];
+}
+
+function igKeysOf(resource) {
+    var keys = {};
+    var count = 0;
+    igGroupsOf(resource).forEach(function (group) {
+        if (!group || typeof group !== 'object') {
+            return;
+        }
+        (Array.isArray(group.element) ? group.element : []).forEach(function (element) {
+            if (!element || typeof element !== 'object') {
+                return;
+            }
+            var target = Array.isArray(element.target) && element.target[0] ? element.target[0].code : undefined;
+            var key = [group.source, element.code, group.target, target].join('|');
+            if (!Object.prototype.hasOwnProperty.call(keys, key)) {
+                keys[key] = true;
+                count += 1;
+            }
+        });
+    });
+    return {keys: keys, count: count};
+}
+
+function coverageScore(generated, guide) {
+    var generatedKeys = igKeysOf(generated);
+    var guideKeys = igKeysOf(guide);
+    var shared = 0;
+    Object.keys(generatedKeys.keys).forEach(function (key) {
+        if (Object.prototype.hasOwnProperty.call(guideKeys.keys, key)) {
+            shared += 1;
+        }
+    });
+    return {shared: shared, onlyGenerated: generatedKeys.count - shared, onlyGuide: guideKeys.count - shared};
+}
+
+function showCoverageScore() {
+    var $score = $('#ig-coverage-score');
+    if (!lastFieldMap) {
+        $score.text('');
+        return;
+    }
+    if (!igGuide || !igGroupsOf(igGuide).length) {
+        $score.text('No IG ConceptMap loaded');
+        return;
+    }
+    var score = coverageScore(lastFieldMap, igGuide);
+    $score.text('Shared ' + score.shared + ' · Only in template ' + score.onlyGenerated + ' · Only in IG ' + score.onlyGuide);
+}
+
+function addCoverageControls() {
+    var $button = $('#generate-maps-button');
+    if (!$button.length || $('#ig-guide-file').length) {
+        return;
+    }
+    var $input = $('<input type="file" id="ig-guide-file" accept="application/json,.json" aria-label="IG ConceptMap JSON file" title="IG ConceptMap or Bundle of ConceptMaps (read in the browser, not uploaded)">');
+    var $score = $('<div id="ig-coverage-score" role="status" style="font-size: 0.8rem; color: var(--text-muted);"></div>');
+    $button.after($input, $score);
+    $input.on('change', function () {
+        var file = this.files && this.files[0];
+        igGuide = null;
+        if (!file) {
+            showCoverageScore();
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+            try {
+                igGuide = JSON.parse(String(reader.result));
+            } catch (parseError) {
+                igGuide = null;
+            }
+            showCoverageScore();
+        };
+        reader.onerror = function () {
+            igGuide = null;
+            showCoverageScore();
+        };
+        reader.readAsText(file);
+    });
+}
+
 function generateFieldMaps() {
     var target = fieldMapFolder();
     if (target.error) {
@@ -533,6 +633,8 @@ function generateFieldMaps() {
         return response.json();
     }).then(function (result) {
         $('#conversion-status').text('Wrote ' + result.files.length + ' files to ' + result.dir);
+        lastFieldMap = result.conceptMap || null;
+        showCoverageScore();
     }).catch(function (err) {
         $('#conversion-status').text('Failed');
         showConversionError(err && err.message ? err.message : 'Could not write the field maps.');
@@ -601,6 +703,7 @@ $(document).ready(function () {
     $('#source-switch').on('click', 'button', function () {
         setBrowseSource($(this).data('source'));
     });
+    addCoverageControls();
     $('#generate-maps-button').on('click', generateFieldMaps);
     $('#field-map-button').on('click', downloadFieldMap);
     $('#github-list').on('click', function () {
