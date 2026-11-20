@@ -674,7 +674,7 @@ export default function (app) {
                     ];
                     mkdir(outDir, {recursive: true})
                         .then(() => Promise.all(written.map(([name, contents]) => writeFile(join(outDir, name), contents))))
-                        .then(() => res.json({dir: outDir, files: written.map(([name]) => name)}))
+                        .then(() => res.json({dir: outDir, files: written.map(([name]) => name), conceptMap: JSON.parse(files.conceptMap)}))
                         .catch(() => {
                             res.status(400).json(errorMessage(errorCodes.BadRequest, "Could not write the field maps."));
                         });
