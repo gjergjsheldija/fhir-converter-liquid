@@ -90,3 +90,20 @@ Keep compatibility changes strictly separate from Web UI commits (`AGENTS.md`):
 - `specs/liquid-template-compat/27-align-adt-a60-allergy-meta.md` — **Done (2026-11-19)** — Aligned ADT_A60 AllergyIntolerance `meta`: `Resource/_AllergyIntolerance.liquid` line 194 reads `IAM.26.value` but the parsed field exposes `.Value`; DotLiquid resolves member names case-insensitively, case-sensitive LiquidJS rendered an empty `lastUpdated`, so the JSON processor dropped `meta`. `IAM.26` = `202010151600+0215`. Actual `meta.lastUpdated` (ADT-A60-01 AllergyIntolerance `373c1fcc-c86b-470a-6469-b7642c16262d`): absent; expected: `2020-10-15T19:15:00+05:30`. `hl7v2FieldModel.js` now exposes a non-enumerable `value` alias of `Value` on segment/field/repeat/component objects (also used by `Resource/_ClaimResponse.liquid` line 41 `AUT.29.value`). Actual is now `2020-10-15T16:00:00+02:15`, the same instant as expected (13:45:00Z), so `meta` no longer differs. Classification is now 131 pass, 0 count, 1 content (ADT-A60-01/02 pass; only `ORU-R01-01` remains).
 - `specs/liquid-template-compat/28-align-oru-practitioner-role-code.md` — **Done (2026-11-19)** — Aligned ORU_R01 PractitionerRole `code`/`location`/`period`: `ORU_R01.liquid` lines 897/908 (and 8 other templates) include `Resource/PractitionerRole` with `OBR_34: OBR_34` / `OBR_35: OBR_35`, but the loop variables are `obr_34`/`obr_35`; the render saw `OBR_34` = nil, so `_PractitionerRole.liquid` lines 19-45 never emitted the code. DotLiquid lookup is case-insensitive. Actual `code` (ORU-R01-01 PractitionerRole `6f4104a9-6928-bcaf-7719-2fb47f0c2df5`): absent; expected: `TN` / `Technician` / `http://terminology.hl7.org/CodeSystem/v2-0443` (`f035eb01…`: `TR` / `Transcriptionist`). `normalizeVariableNameTypos` rewrites only the argument value (`OBR_34: OBR_34` → `OBR_34: obr_34`). `location` and `period` cleared too. Classification is now 132 pass, 0 count, 0 content (`ORU-R01-01.hl7` passes; none regressed).
 - `specs/liquid-template-compat/HANDOFF.md` — Historical triage notes for the remaining engine/template-drift cases.
+
+---
+
+## Next queue — analysis leftovers (`specs/gap/00-order.md`)
+
+Not started. One spec per change. Specs 14 and 22 stay blocked and are not in this queue. Patient matching, FHIR-to-v2, and a TCP listener in this process are out of scope.
+
+- `specs/gap/01-ig-coverage-score.md` — **Not started** — Score one generated field-map ConceptMap against an IG ConceptMap the user loads. No IG package is vendored.
+- `specs/gap/02-validate-with-profile.md` — **Not started** — Optional profile canonical URL on the existing `{base}/$validate` call. No embedded HL7 validator.
+- `specs/gap/03-unmapped-code-queue.md` — **Not started** — List Codings the site pack did not rewrite. The list stays outside the FHIR resource.
+- `specs/gap/04-result-lineage.md` — **Not started** — A click in the FHIR result names the include and source path recorded while debug is on.
+- `specs/gap/05-declared-segment-list.md` — **Not started** — A project `structures/segments.txt` reports segment ids the message used that are not on the list. Conversion still succeeds.
+- `specs/gap/06-failure-log.md` — **Not started** — Failed conversions are listed with template name, error, and MSH-10. The raw message is not stored. No replay.
+- `specs/gap/07-convert-api-key-and-audit.md` — **Not started** — `CONVERT_API_KEY`, when set, requires a Bearer token. An audit line records status, template, and MSH-10.
+- `specs/gap/08-conditional-update.md` — **Not started** — A second Settings option sends one transaction of conditional PUTs. It cannot be combined with conditional create. No out-of-order guard.
+- `specs/gap/09-oie-archive-msh10.md` — **Not started** — The OIE channel writes `archive/<MSH-10>.hl7`. This server still has no TCP listener.
+- `specs/gap/10-ccda-expected-outputs.md` — **Not started** — Sync official C-CDA expected JSON from the pinned commit. If that commit has none, mark the spec Blocked and do not invent expected JSON.
