@@ -39,7 +39,8 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 - Includes list grouped by folder; open a partial, or start a new one by name
 - Projects: HL7 v2 or C-CDA, from the Microsoft baseline or an empty example. Open a local folder or a GitHub repo, convert and save against that project
 - C-CDA editor: XML coloring, parsed CDA tree, hover paths, and expected-bundle diff
-- Validate the FHIR result against `{base}/$validate`, and optionally send a bundle as conditional creates matched by identifier
+- Validate the FHIR result against `{base}/$validate`, with an optional profile URL. Send can conditionally create or conditionally update, and the two options cannot be combined
+- Generate maps can score the field map against an IG ConceptMap loaded in the browser. A click in the FHIR result names the include that wrote that value
 - AI template generation from Settings. Paste an API key for OpenAI, Anthropic, Google Gemini, xAI (Grok), Mistral, DeepSeek, Groq, OpenRouter, or point at a local OpenAI-compatible server
 - Light, dark, and system themes
 
@@ -48,6 +49,7 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 - REST API with interactive OpenAPI/Swagger docs (`/api-docs`)
 - Project CLI (`npm run convert:project`) for one conversion or a golden-file check
 - An Open Integration Engine channel that posts HL7 v2 at this API
+- Optional `CONVERT_API_KEY` on the convert routes, plus a failure log and an audit line that record MSH-10 and not the message body
 - Async, queue-driven conversion over AMQP (Apache ActiveMQ Artemis via `rhea`) for pipeline integration — optional, off by default
 - Prometheus metrics, structured logging, `/health` and `/version` endpoints
 - Multi-stage Docker build (prod / dev / test) with a docker-compose + Makefile workflow
@@ -171,8 +173,9 @@ All endpoints are versioned under `/api/v1`. Full interactive reference: `GET /a
 | PUT    | `/api/v1/projects/file`                    | Save a file into a local project                                                                                             |
 | POST   | `/api/v1/projects/official-samples`        | Copy the official 139 HL7 v2 samples into a local project                                                                    |
 | POST   | `/api/v1/convert/ccda`                     | Convert a C-CDA document with an inline template                                                                             |
-| POST   | `/api/v1/fhir/validate`                    | POST the FHIR result to `{base}/$validate` and return the OperationOutcome issues                                           |
-| POST   | `/api/v1/fhir/send`                        | POST the FHIR result to the configured server. `conditional: true` sends a batch or collection as identifier-matched creates |
+| POST   | `/api/v1/fhir/validate`                    | POST the FHIR result to `{base}/$validate`. A non-empty `profile` is sent as the `profile` query parameter |
+| POST   | `/api/v1/fhir/send`                        | POST the FHIR result. `conditional: true` sends conditional creates. `update: true` sends conditional updates. Both together is 400 |
+| GET    | `/api/v1/conversions/failures`             | Recent failed conversions, plus success and failure counts since process start |
 | GET    | `/health`                                  | Liveness check                                                                                                               |
 | GET    | `/version`                                 | Build version                                                                                                                |
 
