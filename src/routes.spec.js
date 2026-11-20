@@ -31,6 +31,37 @@ describe("GET /", function () {
     });
 });
 
+describe("GET /guide", function () {
+    it("should list the feature pages", function (done) {
+        supertest(app)
+            .get("/guide")
+            .expect(200)
+            .expect("Content-Type", /html/)
+            .expect(/href="\/guide\/validate"/)
+            .end(function (err) {
+                if (err) done(err);
+                done();
+            });
+    });
+
+    it("should render one feature page and reject an unknown page", function (done) {
+        supertest(app)
+            .get("/guide/validate")
+            .expect(200)
+            .expect(/Profile canonical URL/)
+            .end(function (err) {
+                if (err) return done(err);
+                supertest(app)
+                    .get("/guide/not-a-page")
+                    .expect(404)
+                    .end(function (err2) {
+                        if (err2) done(err2);
+                        done();
+                    });
+            });
+    });
+});
+
 describe("GET /api-docs.json", function () {
     it("should return status code 200", function (done) {
         supertest(app)

@@ -43,6 +43,7 @@ import {applySitePack, collectUnmapped, loadSitePack} from "./lib/projects/siteP
 import {copyOfficialHl7v2Samples} from "./lib/projects/officialSamples.js";
 import {appendFailure, controlIdOf, listFailures} from "./lib/conversions/failureLog.js";
 import {appendAudit, authorizeConvert} from "./lib/conversions/convertAudit.js";
+import {guideImagesRoot, renderGuideHtml} from "./lib/guide/renderGuide.js";
 
 const {json, text} = bodyparser;
 
@@ -101,6 +102,34 @@ export default function (app) {
     app.get("/api-docs.json", (req, res) => {
         res.setHeader("Content-Type", "application/json");
         res.send(swaggerSpec);
+    });
+
+    app.get("/guide", function (req, res) {
+        renderGuideHtml(null)
+            .then((html) => res.type("html").send(html))
+            .catch(() => res.status(404).type("html").send("User guide not found."));
+    });
+
+    app.get("/guide/images/:file", function (req, res) {
+        if (!/^[\w.-]+$/.test(req.params.file)) {
+            res.status(404).end();
+            return;
+        }
+        res.sendFile(join(guideImagesRoot(), req.params.file), (err) => {
+            if (err && !res.headersSent) {
+                res.status(404).end();
+            }
+        });
+    });
+
+    app.get("/guide/:page", function (req, res) {
+        if (!/^[a-z0-9-]+$/.test(req.params.page)) {
+            res.status(404).type("html").send("User guide page not found.");
+            return;
+        }
+        renderGuideHtml(req.params.page)
+            .then((html) => res.type("html").send(html))
+            .catch(() => res.status(404).type("html").send("User guide page not found."));
     });
 
     app.use(cookieParser());

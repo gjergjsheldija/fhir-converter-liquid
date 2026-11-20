@@ -6,8 +6,7 @@ xunit.xml
 src/service-templates/
 .git/
 .idea/
-docs/
+docs/mappings/
 ci/
 Makefile
 README.md
-docs
