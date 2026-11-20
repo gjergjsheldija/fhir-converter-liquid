@@ -1,6 +1,6 @@
 # Spec 06: Failure log
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
+**Status:** Done (2026-11-20). Verified by unit tests and real HTTP: a failed convert added a row with MSH-10 and no body, a 200 convert added none, counts matched. Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
 
 ## 1. Goal
 

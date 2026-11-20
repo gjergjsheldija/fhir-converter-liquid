@@ -41,6 +41,7 @@ import {listProjectFiles, readProjectFile, writeProjectFile} from "./lib/project
 import {prepareProjectConversion} from "./lib/projects/convertProject.js";
 import {applySitePack, collectUnmapped, loadSitePack} from "./lib/projects/sitePack.js";
 import {copyOfficialHl7v2Samples} from "./lib/projects/officialSamples.js";
+import {appendFailure, listFailures} from "./lib/conversions/failureLog.js";
 
 const {json, text} = bodyparser;
 
@@ -739,6 +740,31 @@ export default function (app) {
             });
     });
 
+    // Failure log for POST /api/v1/convert/:srcDataType and POST /api/v1/projects/convert only.
+    const conversionCounts = {failed: 0, succeeded: 0};
+
+    function recordConversion(status, resultMessage, srcData, template) {
+        if (status === 200) {
+            conversionCounts.succeeded++;
+            return;
+        }
+        conversionCounts.failed++;
+        const detail = resultMessage && resultMessage.error && resultMessage.error.message;
+        try {
+            appendFailure({template, message: detail || "Conversion failed.", raw: srcData});
+        } catch (err) {
+            // a log write problem must not change the convert response
+        }
+    }
+
+    app.get("/api/v1/conversions/failures", function (req, res) {
+        res.status(200).json({
+            failures: listFailures(50),
+            failed: conversionCounts.failed,
+            succeeded: conversionCounts.succeeded
+        });
+    });
+
     /**
      * @swagger
      * /api/v1/convert/{srcDataType}:
@@ -827,6 +853,7 @@ export default function (app) {
                 if (!retDebug) {
                     delete resultMessage["debugInfo"];
                 }
+                recordConversion(result.status, resultMessage, req.body.srcData, req.body.template);
                 res.status(result.status);
                 res.json(resultMessage);
             });
@@ -1005,9 +1032,14 @@ export default function (app) {
                 if (!retDebug) {
                     delete resultMessage["debugInfo"];
                 }
+                recordConversion(result.status, resultMessage, body.srcData, body.template);
                 res.status(result.status).json(resultMessage);
             })
-            .catch((err) => sendProjectRouteError(res, err));
+            .catch((err) => {
+                const status = err && Number.isInteger(err.status) ? err.status : 400;
+                recordConversion(status, {error: {message: err && err.message}}, body.srcData, body.template);
+                sendProjectRouteError(res, err);
+            });
     });
 
     app.post("/api/v1/projects/official-samples", function (req, res) {

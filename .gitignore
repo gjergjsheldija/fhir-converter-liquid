@@ -86,3 +86,6 @@ src/service-samples/
 .opencode/
 .vscode/
 AGENTS.md
+
+# conversion failure log (local runtime data)
+data/conversion-failures.jsonl
