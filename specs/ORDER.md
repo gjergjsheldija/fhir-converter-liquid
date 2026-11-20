@@ -104,6 +104,6 @@ Not started. One spec per change. Specs 14 and 22 stay blocked and are not in th
 - `specs/gap/05-declared-segment-list.md` — **Done (2026-11-20)** — A project `structures/segments.txt` reports segment ids the message used that are not on the list. Conversion still succeeds.
 - `specs/gap/06-failure-log.md` — **Done (2026-11-20)** — Failed conversions are listed with template name, error, and MSH-10. The raw message is not stored. No replay.
 - `specs/gap/07-convert-api-key-and-audit.md` — **Done (2026-11-20)** — `CONVERT_API_KEY`, when set, requires a Bearer token. An audit line records status, template, and MSH-10.
-- `specs/gap/08-conditional-update.md` — **Not started** — A second Settings option sends one transaction of conditional PUTs. It cannot be combined with conditional create. No out-of-order guard.
+- `specs/gap/08-conditional-update.md` — **Done (2026-11-20)** — A second Settings option sends one transaction of conditional PUTs. It cannot be combined with conditional create. No out-of-order guard.
 - `specs/gap/09-oie-archive-msh10.md` — **Not started** — The OIE channel writes `archive/<MSH-10>.hl7`. This server still has no TCP listener.
 - `specs/gap/10-ccda-expected-outputs.md` — **Not started** — Sync official C-CDA expected JSON from the pinned commit. If that commit has none, mark the spec Blocked and do not invent expected JSON.
