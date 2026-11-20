@@ -4,7 +4,8 @@
 // -------------------------------------------------------------------------------------------------
 
 import { Process } from '../outputProcessor/jsonProcessor.js';
-import { Process as resourceMergerProcessor }  from '../outputProcessor/resourceMerger.js';
+import { Process as resourceMergerProcessor } from '../outputProcessor/resourceMerger.js';
+import { rewriteProvenanceNarratives } from '../outputProcessor/provenanceNarrative.js';
 import {UnescapeHtml} from "../inputProcessor/specialCharProcessor.js";
 import {applyDotLiquidCompatTransforms} from "../liquid-converter/dotLiquidCompat.js";
 
@@ -28,10 +29,13 @@ export default class dataHandler {
     }
 
     postProcessResult(inResult) {
-        return resourceMergerProcessor(
-            JSON.parse(
-                UnescapeHtml(Process(inResult))
-            ));
+        return rewriteProvenanceNarratives(
+            resourceMergerProcessor(
+                JSON.parse(
+                    UnescapeHtml(Process(inResult))
+                )
+            )
+        );
     }
 
     getConversionResultMetadata() {

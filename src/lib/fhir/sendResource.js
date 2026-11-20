@@ -43,23 +43,85 @@ export function fhirHeaders(auth) {
     return headers;
 }
 
+function firstValidIdentifier(entryResource) {
+    const identifier = entryResource && Array.isArray(entryResource.identifier) ? entryResource.identifier[0] : undefined;
+    if (identifier && typeof identifier === "object" &&
+        typeof identifier.system === "string" && identifier.system !== "" &&
+        typeof identifier.value === "string" && identifier.value !== "") {
+        return identifier;
+    }
+    return undefined;
+}
+
+function rewriteReferences(node, refMap) {
+    if (!node || typeof node !== "object") {
+        return;
+    }
+    if (Array.isArray(node)) {
+        for (const item of node) {
+            rewriteReferences(item, refMap);
+        }
+        return;
+    }
+    if (typeof node.reference === "string" && refMap.has(node.reference)) {
+        node.reference = refMap.get(node.reference);
+    }
+    for (const key of Object.keys(node)) {
+        const value = node[key];
+        if (value && typeof value === "object") {
+            rewriteReferences(value, refMap);
+        }
+    }
+}
+
+function prepareTransactionEntries(copy, isUpdate) {
+    const entries = Array.isArray(copy.entry) ? copy.entry : [];
+    const refMap = new Map();
+    const promotedEntries = new Set();
+
+    for (const entry of entries) {
+        const entryResource = entry && typeof entry === "object" && !Array.isArray(entry) ? entry.resource : undefined;
+        if (entryResource && typeof entryResource === "object" && !Array.isArray(entryResource) &&
+            typeof entryResource.resourceType === "string" && entryResource.resourceType !== "" &&
+            typeof entryResource.id === "string" && entryResource.id !== "") {
+            if (!(typeof entry.fullUrl === "string" && entry.fullUrl.startsWith("urn:uuid:"))) {
+                entry.fullUrl = "urn:uuid:" + entryResource.id;
+            }
+            refMap.set(`${entryResource.resourceType}/${entryResource.id}`, entry.fullUrl);
+            promotedEntries.add(entry);
+        }
+    }
+
+    copy.entry = entries.map((entry) => {
+        const entryResource = entry && entry.resource;
+        if (refMap.size > 0 && entryResource && typeof entryResource === "object") {
+            rewriteReferences(entryResource, refMap);
+        }
+        const request = {method: "POST", url: entryResource && entryResource.resourceType};
+        const identifier = firstValidIdentifier(entryResource);
+        if (identifier) {
+            if (isUpdate) {
+                request.method = "PUT";
+                request.url = entryResource.resourceType + "?identifier=" + encodeURIComponent(identifier.system) + "|" + encodeURIComponent(identifier.value);
+            } else {
+                request.ifNoneExist = "identifier=" + encodeURIComponent(identifier.system) + "|" + encodeURIComponent(identifier.value);
+            }
+        }
+        if (promotedEntries.has(entry) &&
+            (request.method === "POST" || (request.method === "PUT" && typeof request.url === "string" && request.url.includes("?identifier=")))) {
+            delete entryResource.id;
+        }
+        return Object.assign({}, entry, {request});
+    });
+}
+
 export function conditionalTransaction(resource) {
     if (!resource || resource.resourceType !== "Bundle" || (resource.type !== "batch" && resource.type !== "collection")) {
         return resource;
     }
     const copy = JSON.parse(JSON.stringify(resource));
     copy.type = "transaction";
-    copy.entry = (Array.isArray(copy.entry) ? copy.entry : []).map((entry) => {
-        const entryResource = entry && entry.resource;
-        const request = {method: "POST", url: entryResource && entryResource.resourceType};
-        const identifier = entryResource && Array.isArray(entryResource.identifier) ? entryResource.identifier[0] : undefined;
-        if (identifier && typeof identifier === "object" &&
-            typeof identifier.system === "string" && identifier.system !== "" &&
-            typeof identifier.value === "string" && identifier.value !== "") {
-            request.ifNoneExist = "identifier=" + encodeURIComponent(identifier.system) + "|" + encodeURIComponent(identifier.value);
-        }
-        return Object.assign({}, entry, {request});
-    });
+    prepareTransactionEntries(copy, false);
     return copy;
 }
 
@@ -69,18 +131,7 @@ export function conditionalUpdate(resource) {
     }
     const copy = JSON.parse(JSON.stringify(resource));
     copy.type = "transaction";
-    copy.entry = (Array.isArray(copy.entry) ? copy.entry : []).map((entry) => {
-        const entryResource = entry && entry.resource;
-        const request = {method: "POST", url: entryResource && entryResource.resourceType};
-        const identifier = entryResource && Array.isArray(entryResource.identifier) ? entryResource.identifier[0] : undefined;
-        if (identifier && typeof identifier === "object" &&
-            typeof identifier.system === "string" && identifier.system !== "" &&
-            typeof identifier.value === "string" && identifier.value !== "") {
-            request.method = "PUT";
-            request.url = entryResource.resourceType + "?identifier=" + encodeURIComponent(identifier.system) + "|" + encodeURIComponent(identifier.value);
-        }
-        return Object.assign({}, entry, {request});
-    });
+    prepareTransactionEntries(copy, true);
     return copy;
 }
 

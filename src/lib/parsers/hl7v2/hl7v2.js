@@ -6,6 +6,7 @@ import {Escape} from '../../inputProcessor/specialCharProcessor.js';
 import {Unescape} from './hl7EscapeSequence.js';
 import {Process} from '../../inputProcessor/templatePreprocessor.js';
 import {makeCoverageArray, makeUndefinedAccessReporterArray} from './coverage-array.js';
+import {decodeHl7v2Payload} from './charsetDecode.js';
 import dataHandler from '../../dataHandler/dataHandler.js';
 
 export default class hl7v2 extends dataHandler {
@@ -46,10 +47,11 @@ function doesElementExistFactory(type, line) {
 }
 
 export function parseHL7v2(msg) {
+    msg = decodeHl7v2Payload(msg);
     if (msg.charCodeAt(0) === 0xFEFF) {
         msg = msg.slice(1);
     }
-    var segments = msg.split(/\r?\n/);
+    var segments = msg.split(/\r\n|\r|\n/);
     if (segments[0].substring(0, 3) !== "MSH") {
         throw new Error("Invalid HL7 v2 message, first segment id = " + segments[0].substring(0, 3));
     }
@@ -97,7 +99,7 @@ export function parseHL7v2(msg) {
                     {
                         seg.push(null);
                     } else {
-                        var ocomps = makeCoverageArray();
+                        var ocomps = makeCoverageArray(fields[0], f);
 
                         createComponents(ocomps,
                             fields[f],

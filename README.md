@@ -26,30 +26,34 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 
 **Conversion**
 
-- HL7v2 → FHIR R4, with templates for every major trigger-event family: `ADT`, `BAR`, `DFT`, `MDM`, `OMG`, `OML`, `ORM`, `ORU`, `OUL`, `RDE`, `RDS`, `REF`, `SIU`, `VXU`
+- HL7v2 and C-CDA → FHIR R4, with HL7v2 templates for every major trigger-event family (`ADT`, `BAR`, `DFT`, `MDM`, `OMG`, `OML`, `ORM`, `ORU`, `OUL`, `RDE`, `RDS`, `REF`, `SIU`, `VXU`) and C-CDA project packs
+- Bare `\r` MLLP segment terminators and `MSH-18` character set decoding (`8859/1`, `ISO-8859-15`, `WINDOWS-1252`, `UTF-8`)
+- Multi-facility HIE site packs: `conceptmaps/*.json` (with optional `"preserveSource": true` to retain local hospital codes alongside LOINC/SNOMED) and `identifiers.json` Assigning Authority rules (`MR@HOSP_A`, `byAssigner`, `bySystem`, `override`)
+- Clean `FHIR Converter Liquid` Provenance narratives in generated Bundles (no `TEMPLATE_VERSION_PLACEHOLDER` strings or upstream tarball URLs)
 - Per-request template overrides — test a template change against real data without touching what's stored on the server
-- Diagnostics on demand: `unusedSegments` (data the template ignored) and `invalidAccess` (fields the template reached for but weren't there)
+- Diagnostics on demand: `unusedSegments` (data the template ignored), `invalidAccess` (fields the template reached for but weren't there), non-standard unmapped codes, and case-mismatched Liquid variables
 - Timezone-aware date/time conversion via request header
 
 **Editor**
 
 - Browser workspace for message, Liquid template, and FHIR result, with syntax coloring, folding, and a Liquid formatter
 - Files pane for samples, templates, and partials (starter pack, a local folder, or GitHub). Menu (Cmd-K) holds customer, settings, and docs commands
-- Live conversion, plus a debug drawer: parsed HL7 tree, variable console, unused fields, and hover values on Liquid paths and HL7 fields
+- Live conversion, plus a debug drawer: parsed HL7 or CDA tree, variable console, unused fields, case-mismatched variable warnings, and hover values on Liquid paths and HL7 fields
 - Includes list grouped by folder; open a partial, or start a new one by name
 - Projects: HL7 v2 or C-CDA, from the Microsoft baseline or an empty example. Open a local folder or a GitHub repo, convert and save against that project
 - C-CDA editor: XML coloring, parsed CDA tree, hover paths, and expected-bundle diff
-- Validate the FHIR result against `{base}/$validate`, with an optional profile URL. Send can conditionally create or conditionally update, and the two options cannot be combined
-- Generate maps can score the field map against an IG ConceptMap loaded in the browser. A click in the FHIR result names the include that wrote that value
+- Validate the FHIR result against `{base}/$validate`, with an optional profile URL. Send rewrites conditional creates (`If-None-Exist`) and conditional updates (`PUT`) into `urn:uuid:` transactions while stripping client `resource.id` so intra-Bundle references stay intact
+- Generate maps can score the field map against an IG ConceptMap loaded in the browser. Clicking a value in the FHIR result names the Liquid include and direct HL7 source field that wrote it
 - AI template generation from Settings. Paste an API key for OpenAI, Anthropic, Google Gemini, xAI (Grok), Mistral, DeepSeek, Groq, OpenRouter, or point at a local OpenAI-compatible server
 - Light, dark, and system themes
 
 **Serving & tooling**
 
-- REST API with interactive OpenAPI/Swagger docs (`/api-docs`)
-- Project CLI (`npm run convert:project`) for one conversion or a golden-file check
-- An Open Integration Engine channel that posts HL7 v2 at this API
-- Optional `CONVERT_API_KEY` on the convert routes, plus a failure log and an audit line that record MSH-10 and not the message body
+- REST API with interactive OpenAPI/Swagger docs (`/api-docs`), plus headless project conversion at `POST /api/v1/projects/:projectId/convert/:template` (resolved under `PROJECTS_ROOT`, default `./projects`)
+- `HEADLESS_RUNTIME=true` mode for cloud/production deployments (disables browser studio, folder browse, template writes, and outbound FHIR send routes with `403`; keeps `/health`, `/version`, `/metrics`, and authenticated convert routes active)
+- `CONVERT_API_KEY` Bearer protection across convert and sensitive studio/management routes, with non-blocking async `5 MB`-rotated PHI-free `MSH-10` audit and failure logs
+- Project CLI (`bin/convert.mjs` / `npm run convert:project`) for HL7 v2 and C-CDA single conversions or `--check-goldens` checks
+- Open Integration Engine channel (`integrations/oie/hl7v2-to-fhir.xml`) with dynamic `MSH-9` routing, optional `CONVERT_API_KEY` header forwarding, and `MSA|AA` / `MSA|AE` ACK/NACK responses
 - Async, queue-driven conversion over AMQP (Apache ActiveMQ Artemis via `rhea`) for pipeline integration — optional, off by default
 - Prometheus metrics, structured logging, `/health` and `/version` endpoints
 - Multi-stage Docker build (prod / dev / test) with a docker-compose + Makefile workflow
@@ -170,11 +174,12 @@ All endpoints are versioned under `/api/v1`. Full interactive reference: `GET /a
 | POST   | `/api/v1/projects/open`                    | Open a local project folder                                                                                                  |
 | POST   | `/api/v1/projects/open-github`             | Open a GitHub project read-only                                                                                              |
 | POST   | `/api/v1/projects/convert`                 | Convert using the open project's templates                                                                                   |
+| POST   | `/api/v1/projects/{projectId}/convert/{template}` | Headless conversion against `:projectId` under `PROJECTS_ROOT` (applies project templates, `declaredSegments`, and `sitePack`) |
 | PUT    | `/api/v1/projects/file`                    | Save a file into a local project                                                                                             |
 | POST   | `/api/v1/projects/official-samples`        | Copy the official 139 HL7 v2 samples into a local project                                                                    |
 | POST   | `/api/v1/convert/ccda`                     | Convert a C-CDA document with an inline template                                                                             |
 | POST   | `/api/v1/fhir/validate`                    | POST the FHIR result to `{base}/$validate`. A non-empty `profile` is sent as the `profile` query parameter |
-| POST   | `/api/v1/fhir/send`                        | POST the FHIR result. `conditional: true` sends conditional creates. `update: true` sends conditional updates. Both together is 400 |
+| POST   | `/api/v1/fhir/send`                        | POST the FHIR result. `conditional: true` or `update: true` builds a `urn:uuid:` transaction Bundle. Both together is 400 |
 | GET    | `/api/v1/conversions/failures`             | Recent failed conversions, plus success and failure counts since process start |
 | GET    | `/health`                                  | Liveness check                                                                                                               |
 | GET    | `/version`                                 | Build version                                                                                                                |
@@ -236,11 +241,14 @@ The first command replaces both the source template directory and the generated 
 
 `.env` (see `.env.example`):
 
-| Variable                | Default | Purpose                        |
-| ----------------------- | ------- | ------------------------------ |
-| `PORT`                  | `2019`  | HTTP port                      |
-| `CONVERSION_TIMEOUT_MS` | `30000` | Per-message conversion timeout |
-| `LOG_LEVEL`             | `info`  | Winston log level              |
+| Variable                | Default      | Purpose                                                                                                             |
+| ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `PORT`                  | `2019`       | HTTP port                                                                                                           |
+| `CONVERSION_TIMEOUT_MS` | `30000`      | Per-message conversion timeout                                                                                      |
+| `LOG_LEVEL`             | `info`       | Winston log level                                                                                                   |
+| `CONVERT_API_KEY`       | unset        | Require `Authorization: Bearer <key>` on convert and sensitive studio/management routes                             |
+| `HEADLESS_RUNTIME`      | `false`      | Disable browser studio, browse, write, and outbound FHIR routes (`403`); keep health, metrics, and convert active   |
+| `PROJECTS_ROOT`         | `./projects` | Base folder used to resolve `:projectId` on `POST /api/v1/projects/:projectId/convert/:template`                    |
 
 `config/default.json` (loaded via `nconf`, overridable by env vars) controls the optional AMQP integration:
 

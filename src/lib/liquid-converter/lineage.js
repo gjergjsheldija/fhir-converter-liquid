@@ -22,6 +22,8 @@
 export const MAX_LINEAGE_ROWS = 10000;
 const MAX_LINEAGE_RENDERS = 5000;
 const MAX_FALLBACK_SEARCHES = 200;
+const MAX_FIELD_READS = 20000;
+const MAX_DIRECT_SOURCE_PATHS = 3;
 
 // Longest outputPath that equals `path` or is a prefix of it on a path-segment boundary.
 export function lookupLineage(lineage, path) {
@@ -43,23 +45,79 @@ export function lookupLineage(lineage, path) {
     return best;
 }
 
+// Records an HL7 segment/field access on the active debug collector for the current trace frame.
+export function recordFieldRead(collector, path) {
+    if (!collector || typeof path !== 'string' || path.length === 0) {
+        return;
+    }
+    if (!collector.fieldReads) {
+        collector.fieldReads = [];
+    }
+    if (collector.fieldReads.length >= MAX_FIELD_READS) {
+        return;
+    }
+    collector.fieldReads.push({
+        path: path,
+        depth: collector._traceDepth || 0
+    });
+}
+
 // Called by traceRender after an include finished writing to a shared emitter.
-export function recordLineageRender(collector, template, emitter, start, end) {
+export function recordLineageRender(collector, template, emitter, start, end, sourcePath) {
     if (!collector.lineageRenders) {
         collector.lineageRenders = [];
     }
     if (collector.lineageRenders.length >= MAX_LINEAGE_RENDERS || end <= start) {
         return;
     }
-    collector.lineageRenders.push({template: template, emitter: emitter, start: start, end: end});
+    collector.lineageRenders.push({
+        template: template,
+        emitter: emitter,
+        start: start,
+        end: end,
+        sourcePath: typeof sourcePath === 'string' ? sourcePath : ''
+    });
 }
 
 // Wraps the generator returned by renderer.renderTemplates for one include. Output and result are
-// untouched; it only reads the emitter length before and after.
+// untouched; it reads the emitter length and direct HL7 field reads before and after.
 export function* traceRender(collector, template, emitter, inner) {
     const start = emitter.buffer.length;
-    const result = yield* inner;
-    recordLineageRender(collector, template, emitter, start, emitter.buffer.length);
+    const myDepth = ((collector && collector._traceDepth) || 0) + 1;
+    if (collector) {
+        collector._traceDepth = myDepth;
+    }
+    const readStart = collector && Array.isArray(collector.fieldReads) ? collector.fieldReads.length : 0;
+    let result;
+    try {
+        result = yield* inner;
+    } finally {
+        if (collector) {
+            collector._traceDepth = myDepth - 1;
+        }
+    }
+    let sourcePath = '';
+    if (collector && Array.isArray(collector.fieldReads) && collector.fieldReads.length > readStart) {
+        const distinct = [];
+        const seen = new Set();
+        for (let i = readStart; i < collector.fieldReads.length; i++) {
+            const entry = collector.fieldReads[i];
+            let path = null;
+            if (typeof entry === 'string') {
+                path = entry;
+            } else if (entry && entry.depth === myDepth && typeof entry.path === 'string') {
+                path = entry.path;
+            }
+            if (path && !seen.has(path)) {
+                seen.add(path);
+                distinct.push(path);
+            }
+        }
+        if (distinct.length >= 1 && distinct.length <= MAX_DIRECT_SOURCE_PATHS) {
+            sourcePath = distinct.join(', ');
+        }
+    }
+    recordLineageRender(collector, template, emitter, start, emitter.buffer.length, sourcePath);
     return result;
 }
 
@@ -157,7 +215,7 @@ export function buildLineage(renders, rendered, resource) {
         rows.push({
             outputPath: leaf.path,
             template: span.template,
-            sourcePath: ''
+            sourcePath: typeof span.sourcePath === 'string' ? span.sourcePath : ''
         });
     }
     return rows;

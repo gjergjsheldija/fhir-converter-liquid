@@ -1,5 +1,14 @@
 import assert from "assert";
-import {createDebugCollector, serializeHl7v2Debug, DEBUG_COLLECTOR_KEY} from "./debugCollector.js";
+import {createNamespace, getNamespace} from "cls-hooked";
+import {
+    createDebugCollector,
+    serializeHl7v2Debug,
+    scanTemplateCaseMismatches,
+    DEBUG_COLLECTOR_KEY
+} from "./debugCollector.js";
+import {instance as getLiquidEngine} from "./liquid-converter.js";
+import {buildLineage, lookupLineage} from "./lineage.js";
+import {CLS_NAMESPACE} from "../constants/constants.js";
 import {trackAccess, buildUnusedSegmentsReport} from "../parsers/hl7v2/hl7v2AccessTracking.js";
 import {parseHl7v2FieldModel} from "../parsers/hl7v2/hl7v2FieldModel.js";
 
@@ -268,6 +277,103 @@ describe('debugCollector.js', function () {
             assert.strictEqual(scope.PID.__kind, 'hl7Segment');
             assert.strictEqual(scope.PID5.__kind, 'hl7Field');
             assert.strictEqual(scope.PID5.components['1'].value, 'BROS');
+        });
+
+        it('records, normalizes, deduplicates, and caps caseMismatches at 50', function () {
+            const c = createDebugCollector(HL7_MESSAGE);
+            c.recordCaseMismatch({template: 'Resource/_Encounter.liquid', read: 'VisitId', actual: 'visitId'});
+            c.recordCaseMismatch({template: 'Resource/_Encounter', read: 'VisitId', actual: 'visitId'});
+            c.recordCaseMismatch({template: '__root__', read: 'patientId', actual: 'patientId'}); // exact match ignored
+            c.recordCaseMismatch({template: '__root__', read: 'foo', actual: 'bar'}); // non-case mismatch ignored
+
+            assert.deepStrictEqual(c.buildDebugInfo(5, null).caseMismatches, [
+                {template: 'Resource/_Encounter', read: 'VisitId', actual: 'visitId'}
+            ]);
+
+            for (let i = 0; i < 60; i++) {
+                c.recordCaseMismatch({
+                    template: 'Resource/_Encounter',
+                    read: 'Var' + i,
+                    actual: 'var' + i
+                });
+            }
+            assert.strictEqual(c.buildDebugInfo(5, null).caseMismatches.length, 50);
+        });
+
+        it('scans Liquid template expressions for case-mismatched variables without false positives on JSON or strings', function () {
+            const c = createDebugCollector(HL7_MESSAGE);
+            const tpl =
+                '{% assign localStatus = "finished" %}' +
+                '{"id": "{{ VisitId | default: \'visitid\' }}", "status": "{{ localstatus }}"}';
+            scanTemplateCaseMismatches('Resource/_Encounter.liquid', tpl, ['visitId', 'PID'], c);
+            assert.deepStrictEqual(c.buildDebugInfo(1, null).caseMismatches, [
+                {template: 'Resource/_Encounter', read: 'VisitId', actual: 'visitId'},
+                {template: 'Resource/_Encounter', read: 'localstatus', actual: 'localStatus'}
+            ]);
+        });
+
+        it('tracks HL7 field lineage and case-mismatched variables end-to-end during debug Liquid rendering', async function () {
+            const ns = getNamespace(CLS_NAMESPACE) || createNamespace(CLS_NAMESPACE);
+            const collector = createDebugCollector(HL7_MESSAGE);
+            const tracked = trackAccess(parseHl7v2FieldModel(HL7_MESSAGE));
+            const overrides = {
+                'DataType/_HumanName.liquid': '{"family":"{{ XPN.1.Value }}","given":["{{ XPN.2.Value }}"]}',
+                'Resource/_Patient.liquid':
+                    '{"resourceType":"Patient","id":"{{ AttendingDoc }}","birthDate":"{{ PID.7.Value }}","name":[{% include \'DataType/HumanName\' XPN: PID.5 %}]}',
+                'Resource/_Encounter.liquid':
+                    '{"resourceType":"Encounter","id":"{{ VisitId }}"}'
+            };
+            const engine = getLiquidEngine(true, {dataType: 'hl7v2'}, '.', overrides, {strictOverridesOnly: true});
+            const rootTemplate =
+                '{% assign attendingDoc = "doc-9" %}' +
+                '{% assign visitId = "enc-1" %}' +
+                '{"resourceType":"Bundle","entry":[' +
+                '{"resource":{% include \'Resource/Patient\' PID: hl7v2Data.data[1] %}},' +
+                '{"resource":{% include \'Resource/Encounter\' %}}' +
+                ']}';
+
+            const rendered = await ns.runAndReturn(async () => {
+                ns.set(DEBUG_COLLECTOR_KEY, collector);
+                return engine.parseAndRender(rootTemplate, {
+                    hl7v2Data: tracked
+                });
+            });
+
+            const bundle = JSON.parse(rendered);
+            const lineage = buildLineage(collector.lineageRenders, rendered, bundle);
+            const familyRow = lookupLineage(lineage, 'entry.0.resource.name.0.family');
+            assert.deepStrictEqual(familyRow, {
+                outputPath: 'entry.0.resource.name.0.family',
+                template: 'DataType/_HumanName.liquid',
+                sourcePath: 'PID.5'
+            });
+            const dobRow = lookupLineage(lineage, 'entry.0.resource.birthDate');
+            assert.deepStrictEqual(dobRow, {
+                outputPath: 'entry.0.resource.birthDate',
+                template: 'Resource/_Patient.liquid',
+                sourcePath: 'PID.7'
+            });
+
+            const info = collector.buildDebugInfo(10, null);
+            assert.ok(
+                info.caseMismatches.some(
+                    (m) => m.template === 'Resource/_Encounter' && m.read === 'VisitId' && m.actual === 'visitId'
+                ),
+                'expected Encounter VisitId mismatch in ' + JSON.stringify(info.caseMismatches)
+            );
+            assert.ok(
+                info.caseMismatches.some(
+                    (m) => m.template === 'Resource/_Patient' && m.read === 'AttendingDoc' && m.actual === 'attendingDoc'
+                ),
+                'expected Patient AttendingDoc mismatch in ' + JSON.stringify(info.caseMismatches)
+            );
+
+            // Unused fields such as PID.3 and PID.8 must remain unaccessed!
+            const unused = buildUnusedSegmentsReport(tracked);
+            const pidUnused = unused.find((s) => s.type === 'PID');
+            const unusedFieldIndices = pidUnused.field.map((f) => f.index);
+            assert.ok(unusedFieldIndices.includes(3));
+            assert.ok(unusedFieldIndices.includes(8));
         });
     });
 });

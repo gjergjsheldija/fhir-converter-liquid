@@ -86,14 +86,13 @@
                     <path d="M20 7.5c2.6 0 4 1.5 4 3.8v2.4c0 1.1.6 1.7 2.4 2.1-1.8.4-2.4 1-2.4 2.1v2.4c0 2.3-1.4 3.8-4 3.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
                 <span class="brand-text">
-                    <span class="brand-kicker">FHIR Converter</span>
                     <span class="brand-row">
-                        <span class="brand-name" id="project-label">Starter pack</span>
+                        <span class="brand-name">FHIR Converter</span>
+                        <span class="brand-note" id="project-label" hidden></span>
                         <span class="brand-note" id="project-readonly" hidden>Read only</span>
                     </span>
                 </span>
             </span>
-            <p class="session-pitch" id="session-pitch">This message is now a FHIR bundle.</p>
             <div class="nav-cluster nav-cluster-end">
                 <button class="btn btn-outline-dark navbar-btn" id="command-search" type="button" aria-expanded="false" aria-controls="command-palette">Menu <kbd>⌘K</kbd></button>
             </div>
@@ -234,6 +233,9 @@
                                         <path d="M3 3.5h10M3 6.5h6.5M3 9.5h10M3 12.5h6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
                                     </svg>
                                 </button>
+                                <button class="result-icon-btn" id="fold-template-button" type="button" aria-pressed="false" data-folded="false" aria-label="Fold all sections" title="Fold all sections">
+                                    <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-fold-all"></use></svg>
+                                </button>
                                 <button class="result-icon-btn" id="generate-template-button" type="button" aria-label="Generate" title="Generate">
                                     <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-sparkle"></use></svg>
                                 </button>
@@ -283,6 +285,9 @@
                                     </svg>
                                 </button>
                                 <button class="btn btn-sm btn-outline-primary" id="validate-fhir-button" type="button" disabled hidden>Validate</button>
+                                <button class="result-icon-btn" id="fold-result-button" type="button" aria-pressed="false" data-folded="false" aria-label="Fold all sections" title="Fold all sections">
+                                    <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-fold-all"></use></svg>
+                                </button>
                                 <button class="result-icon-btn" id="copy-result-button" type="button" aria-label="Copy" title="Copy">
                                     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                                         <rect x="5.6" y="5.6" width="8" height="8" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
@@ -664,6 +669,7 @@
     <script type="text/javascript" src="/js/template-menu.js"></script>
     <script type="text/javascript" src="/js/liquid-beautifier.js"></script>
     <script type="text/javascript" src="/js/template-editor.js"></script>
+    <script type="text/javascript" src="/js/editor-fold-toggle.js"></script>
     <script type="text/javascript" src="/js/debug-hover.js"></script>
     <script type="text/javascript" src="/js/debug-drawer.js"></script>
     <script type="text/javascript" src="/js/icons.js"></script>

@@ -119,6 +119,134 @@ describe('FHIR conditional send', function () {
         const searchset = {resourceType: 'Bundle', type: 'searchset'};
         assert.strictEqual(conditionalUpdate(searchset), searchset);
     });
+
+    function converterBatchBundle() {
+        return {
+            resourceType: 'Bundle',
+            type: 'batch',
+            entry: [
+                {
+                    resource: {
+                        resourceType: 'Patient',
+                        id: 'pat-uuid',
+                        identifier: [{system: 'http://hospital.example/mrn', value: '12345'}]
+                    }
+                },
+                {
+                    fullUrl: 'Encounter/enc-uuid',
+                    resource: {
+                        resourceType: 'Encounter',
+                        id: 'enc-uuid',
+                        status: 'finished',
+                        subject: {reference: 'Patient/pat-uuid'}
+                    }
+                },
+                {
+                    resource: {
+                        resourceType: 'Observation',
+                        id: 'obs-uuid',
+                        status: 'final',
+                        subject: {reference: 'Patient/pat-uuid'},
+                        encounter: {reference: 'Encounter/enc-uuid'},
+                        performer: [{reference: 'Practitioner/ext-99'}]
+                    }
+                }
+            ]
+        };
+    }
+
+    it('promotes resource.id to urn:uuid fullUrl, rewrites internal references, and strips id in conditionalTransaction', function () {
+        const bundle = converterBatchBundle();
+        const snapshot = JSON.parse(JSON.stringify(bundle));
+        const result = conditionalTransaction(bundle);
+
+        assert.strictEqual(result.type, 'transaction');
+        assert.strictEqual(result.entry[0].fullUrl, 'urn:uuid:pat-uuid');
+        assert.strictEqual(result.entry[0].resource.id, undefined);
+        assert.strictEqual('id' in result.entry[0].resource, false);
+        assert.deepStrictEqual(result.entry[0].request, {
+            method: 'POST',
+            url: 'Patient',
+            ifNoneExist: 'identifier=' + encodeURIComponent('http://hospital.example/mrn') + '|12345'
+        });
+
+        assert.strictEqual(result.entry[1].fullUrl, 'urn:uuid:enc-uuid');
+        assert.strictEqual(result.entry[1].resource.id, undefined);
+        assert.strictEqual(result.entry[1].resource.subject.reference, 'urn:uuid:pat-uuid');
+        assert.deepStrictEqual(result.entry[1].request, {method: 'POST', url: 'Encounter'});
+
+        assert.strictEqual(result.entry[2].fullUrl, 'urn:uuid:obs-uuid');
+        assert.strictEqual(result.entry[2].resource.id, undefined);
+        assert.strictEqual(result.entry[2].resource.encounter.reference, 'urn:uuid:enc-uuid');
+        assert.strictEqual(result.entry[2].resource.subject.reference, 'urn:uuid:pat-uuid');
+        assert.strictEqual(result.entry[2].resource.performer[0].reference, 'Practitioner/ext-99');
+        assert.deepStrictEqual(result.entry[2].request, {method: 'POST', url: 'Observation'});
+
+        assert.deepStrictEqual(bundle, snapshot);
+    });
+
+    it('promotes resource.id to urn:uuid fullUrl, rewrites internal references, and strips id in conditionalUpdate', function () {
+        const bundle = converterBatchBundle();
+        const snapshot = JSON.parse(JSON.stringify(bundle));
+        const result = conditionalUpdate(bundle);
+
+        assert.strictEqual(result.type, 'transaction');
+        assert.strictEqual(result.entry[0].fullUrl, 'urn:uuid:pat-uuid');
+        assert.strictEqual(result.entry[0].resource.id, undefined);
+        assert.strictEqual('id' in result.entry[0].resource, false);
+        assert.deepStrictEqual(result.entry[0].request, {
+            method: 'PUT',
+            url: 'Patient?identifier=' + encodeURIComponent('http://hospital.example/mrn') + '|12345'
+        });
+
+        assert.strictEqual(result.entry[1].fullUrl, 'urn:uuid:enc-uuid');
+        assert.strictEqual(result.entry[1].resource.id, undefined);
+        assert.strictEqual(result.entry[1].resource.subject.reference, 'urn:uuid:pat-uuid');
+        assert.deepStrictEqual(result.entry[1].request, {method: 'POST', url: 'Encounter'});
+
+        assert.strictEqual(result.entry[2].fullUrl, 'urn:uuid:obs-uuid');
+        assert.strictEqual(result.entry[2].resource.id, undefined);
+        assert.strictEqual(result.entry[2].resource.encounter.reference, 'urn:uuid:enc-uuid');
+        assert.strictEqual(result.entry[2].resource.subject.reference, 'urn:uuid:pat-uuid');
+        assert.strictEqual(result.entry[2].resource.performer[0].reference, 'Practitioner/ext-99');
+        assert.deepStrictEqual(result.entry[2].request, {method: 'POST', url: 'Observation'});
+
+        assert.deepStrictEqual(bundle, snapshot);
+    });
+
+    it('preserves an existing urn:uuid: fullUrl on an entry with resource.id and rewrites references to it', function () {
+        const bundle = {
+            resourceType: 'Bundle',
+            type: 'batch',
+            entry: [
+                {
+                    resource: {
+                        resourceType: 'Provenance',
+                        id: 'prov-uuid',
+                        target: [{reference: 'Patient/pat-uuid'}, {reference: 'Organization/ext-org'}]
+                    }
+                },
+                {
+                    fullUrl: 'urn:uuid:existing-pat-urn',
+                    resource: {
+                        resourceType: 'Patient',
+                        id: 'pat-uuid',
+                        identifier: [{system: 'http://hospital.example/mrn', value: '999'}]
+                    }
+                }
+            ]
+        };
+
+        for (const fn of [conditionalTransaction, conditionalUpdate]) {
+            const result = fn(bundle);
+            assert.strictEqual(result.entry[1].fullUrl, 'urn:uuid:existing-pat-urn');
+            assert.strictEqual(result.entry[1].resource.id, undefined);
+            assert.strictEqual(result.entry[0].fullUrl, 'urn:uuid:prov-uuid');
+            assert.strictEqual(result.entry[0].resource.id, undefined);
+            assert.strictEqual(result.entry[0].resource.target[0].reference, 'urn:uuid:existing-pat-urn');
+            assert.strictEqual(result.entry[0].resource.target[1].reference, 'Organization/ext-org');
+        }
+    });
 });
 
 describe('FHIR $validate', function () {

@@ -14,6 +14,7 @@ import {fileURLToPath} from 'url';
 import {tmpdir} from 'os';
 import assert from 'assert';
 import {ExtraDynamicFieldInterceptor} from '../test/e2e-test/util/interceptors.js';
+import {AUDIT_FILE} from './lib/conversions/convertAudit.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -1038,7 +1039,8 @@ describe("GET /metrics", function () {
 });
 
 describe("GET /version", function () {
-    it("should return build version", function (done) {
+    it("should return build version from package.json", function (done) {
+        const expectedVersion = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
         supertest(app)
             .get("/version")
             .expect(200)
@@ -1046,13 +1048,14 @@ describe("GET /version", function () {
                 if (!response.body.version) {
                     throw new Error('Response does not contain version info');
                 }
+                assert.strictEqual(response.body.version, expectedVersion);
+                assert.notStrictEqual(response.body.version, "12");
             })
             .end(function (err) {
                 if (err) {
-                    done(err);
+                    return done(err);
                 }
                 done();
-
             });
     });
 
@@ -1585,5 +1588,233 @@ describe('Project API routes (/api/v1/projects/*)', function () {
             .send({repo: 'acme/rules', ref: 'bad ref', token: ''})
             .expect(400);
         assert.strictEqual(res.body.error.message, 'Invalid ref.');
+    });
+});
+
+describe('HEADLESS_RUNTIME, CONVERT_API_KEY route protection, and deployed project convert route', function () {
+    const validHl7 = 'MSH|^~\\&|AccMgr|1|||20050110045504||ADT^A01|599102|P|2.3|||\rPID|1||10006579^^^1^MR^1||DUCK^DONALD^D||19241010|M';
+    let projectsRoot;
+    let projectSlug;
+
+    before(async function () {
+        projectsRoot = await mkdtemp(join(tmpdir(), 'fhir-deployed-projects-'));
+        const created = await createDeployedTestProject(projectsRoot);
+        projectSlug = created;
+    });
+
+    after(async function () {
+        delete process.env.HEADLESS_RUNTIME;
+        delete process.env.CONVERT_API_KEY;
+        delete process.env.PROJECTS_ROOT;
+        if (projectsRoot) {
+            await rm(projectsRoot, {recursive: true, force: true});
+        }
+    });
+
+    afterEach(function () {
+        delete process.env.HEADLESS_RUNTIME;
+        delete process.env.CONVERT_API_KEY;
+        delete process.env.PROJECTS_ROOT;
+    });
+
+    async function createDeployedTestProject(parentDir) {
+        const createRes = await supertest(app)
+            .post('/api/v1/projects')
+            .send({name: 'Acme Hospital', parentPath: parentDir, family: 'hl7v2', startingPoint: 'empty'})
+            .expect(201);
+        const projPath = createRes.body.path;
+        await supertest(app)
+            .put('/api/v1/projects/file')
+            .set('Content-Type', 'text/plain')
+            .set('X-Project-Path', projPath)
+            .set('X-Project-File', 'templates/Hl7v2/Custom_ADT.liquid')
+            .send('{ "resourceType": "Patient", "id": "acme-pat-1" }')
+            .expect(200);
+        return 'acme-hospital';
+    }
+
+    it('converts via POST /api/v1/projects/:projectId/convert/:template with text/plain, JSON, override and fallback templates', async function () {
+        process.env.PROJECTS_ROOT = projectsRoot;
+
+        const overridePlain = await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/Custom_ADT`)
+            .set('Content-Type', 'text/plain')
+            .send(validHl7)
+            .expect(200);
+        assert.strictEqual(overridePlain.body.fhirResource.id, 'acme-pat-1');
+        assert(Array.isArray(overridePlain.body.unmapped));
+        assert(!('unusedSegments' in overridePlain.body));
+        assert(!('debugInfo' in overridePlain.body));
+
+        const fallbackJson = await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/ADT_A01.liquid?unusedSegments=true&debug=true`)
+            .send({srcData: validHl7})
+            .expect(200);
+        assert.strictEqual(fallbackJson.body.fhirResource.resourceType, 'Bundle');
+        assert(Array.isArray(fallbackJson.body.unusedSegments));
+        assert(fallbackJson.body.debugInfo);
+
+        const ccdaCreate = await supertest(app)
+            .post('/api/v1/projects')
+            .send({name: 'Acme Ccda', parentPath: projectsRoot, family: 'ccda', startingPoint: 'empty'})
+            .expect(201);
+        assert(ccdaCreate.body.path.endsWith('/acme-ccda'));
+        const ccdaXml = '<?xml version="1.0"?><ClinicalDocument xmlns="urn:hl7-org:v3"><id root="2.16.840.1.113883.19.5" extension="ccda-1"/><recordTarget><patientRole><id root="2.16.840.1.113883.19.5" extension="p1"/><patient><name><given>Jane</given><family>Doe</family></name></patient></patientRole></recordTarget></ClinicalDocument>';
+        const ccdaFallback = await supertest(app)
+            .post('/api/v1/projects/acme-ccda/convert/CCD')
+            .set('Content-Type', 'text/plain')
+            .send(ccdaXml)
+            .expect(200);
+        assert.strictEqual(ccdaFallback.body.fhirResource.resourceType, 'Bundle');
+
+        await supertest(app)
+            .post('/api/v1/projects/..%2Fescape/convert/Custom_ADT')
+            .set('Content-Type', 'text/plain')
+            .send(validHl7)
+            .expect(400);
+
+        await supertest(app)
+            .post('/api/v1/projects/missing-project/convert/Custom_ADT')
+            .set('Content-Type', 'text/plain')
+            .send(validHl7)
+            .expect(404);
+
+        await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/Custom_ADT`)
+            .set('Content-Type', 'text/plain')
+            .send('')
+            .expect(400);
+
+        await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/..%2Fsecret`)
+            .set('Content-Type', 'text/plain')
+            .send(validHl7)
+            .expect(400);
+
+        await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/DoesNotExist`)
+            .set('Content-Type', 'text/plain')
+            .send(validHl7)
+            .expect(404, {error: {code: 'NotFound', message: 'Template not found'}});
+    });
+
+    it('blocks Studio and authoring routes with 403 when HEADLESS_RUNTIME is enabled while keeping runtime routes open', async function () {
+        process.env.HEADLESS_RUNTIME = 'true';
+        process.env.PROJECTS_ROOT = projectsRoot;
+
+        const expectedForbidden = {
+            error: {
+                code: 'Forbidden',
+                message: 'Studio routes are disabled when HEADLESS_RUNTIME is enabled.'
+            }
+        };
+
+        await supertest(app).get('/').expect(403, expectedForbidden);
+        await supertest(app).get('/index.html').expect(403, expectedForbidden);
+        await supertest(app).get('/guide').expect(403, expectedForbidden);
+        await supertest(app).get('/guide/validate').expect(403, expectedForbidden);
+        await supertest(app).get('/api-docs').expect(403, expectedForbidden);
+        await supertest(app).get('/api-docs.json').expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/browse/folder').send({path: projectsRoot}).expect(403, expectedForbidden);
+        await supertest(app).get('/api/v1/templates').expect(403, expectedForbidden);
+        await supertest(app).put('/api/v1/templates/Hl7v2/Test.liquid').type('text/plain').send('{}').expect(403, expectedForbidden);
+        await supertest(app).get('/api/v1/sample-data').expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/fhir/send').send({}).expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/templategenerate').send({}).expect(403, expectedForbidden);
+        await supertest(app).get('/api/v1/ai/providers').expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/field-map').send({}).expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/projects').send({}).expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/projects/open').send({}).expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/projects/open-github').send({}).expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/projects/files').send({}).expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/projects/file').send({}).expect(403, expectedForbidden);
+        await supertest(app).put('/api/v1/projects/file').type('text/plain').send('').expect(403, expectedForbidden);
+        await supertest(app).post('/api/v1/projects/official-samples').send({}).expect(403, expectedForbidden);
+
+        process.env.HEADLESS_RUNTIME = '1';
+        await supertest(app).get('/health').expect(200);
+        await supertest(app).get('/version').expect(200);
+        await supertest(app).get('/metrics').expect(200);
+        await supertest(app).get('/api/v1/conversions/failures').expect(200);
+        await supertest(app).post('/api/v1/convert/hl7v2').send({srcData: validHl7, template: '{}'}).expect(200);
+        await supertest(app).post('/api/v1/convert/hl7v2/ADT_A01.liquid').type('text/plain').send(validHl7).expect(200);
+        await supertest(app)
+            .post('/api/v1/projects/convert')
+            .send({project: {kind: 'local', path: join(projectsRoot, projectSlug)}, srcData: validHl7, template: '{}'})
+            .expect(200);
+        await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/Custom_ADT`)
+            .type('text/plain')
+            .send(validHl7)
+            .expect(200);
+    });
+
+    it('requires CONVERT_API_KEY on sensitive non-convert routes without writing audit lines while keeping Studio read routes open', async function () {
+        process.env.CONVERT_API_KEY = 'secret-key-99';
+        process.env.PROJECTS_ROOT = projectsRoot;
+
+        await supertest(app).get('/').expect(200);
+        await supertest(app).get('/health').expect(200);
+        await supertest(app).get('/version').expect(200);
+        await supertest(app).get('/metrics').expect(200);
+        await supertest(app).get('/api/v1/templates').expect(200);
+        await supertest(app).get('/api/v1/templates/Hl7v2/ADT_A01.liquid').expect(200);
+        await supertest(app).get('/api/v1/sample-data').expect(200);
+        await supertest(app).get('/api/v1/helpers').expect(200);
+        await supertest(app).get('/api/v1/parsers').expect(200);
+        await supertest(app).get('/api/v1/ai/providers').expect(200);
+
+        const auditCountBefore = existsSync(AUDIT_FILE)
+            ? readFileSync(AUDIT_FILE, 'utf8').split('\n').filter(Boolean).length
+            : 0;
+
+        const expectedUnauthorized = {
+            error: {
+                code: 'Unauthorized',
+                message: 'Convert API key is required.'
+            }
+        };
+
+        await supertest(app).post('/api/v1/browse/folder').send({path: projectsRoot}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/browse/github').send({repo: 'a/b'}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/browse/choose-folder').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).put('/api/v1/templates/Hl7v2/Test.liquid').type('text/plain').send('{}').expect(401, expectedUnauthorized);
+        await supertest(app).put('/api/v1/sample-data/hl7v2/custom.hl7').type('text/plain').send(validHl7).expect(401, expectedUnauthorized);
+        await supertest(app).delete('/api/v1/sample-data/hl7v2/custom.hl7').expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/fhir/send').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/fhir/validate').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/templategenerate').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/field-map').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/projects').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/projects/open').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).post('/api/v1/projects/files').send({}).expect(401, expectedUnauthorized);
+        await supertest(app).get('/api/v1/conversions/failures').expect(401, expectedUnauthorized);
+
+        await new Promise((r) => setTimeout(r, 25));
+        const auditCountAfterNonConvert = existsSync(AUDIT_FILE)
+            ? readFileSync(AUDIT_FILE, 'utf8').split('\n').filter(Boolean).length
+            : 0;
+        assert.strictEqual(auditCountAfterNonConvert, auditCountBefore, 'non-convert 401s must not write conversion audit lines');
+
+        await supertest(app)
+            .get('/api/v1/conversions/failures')
+            .set('Authorization', 'Bearer secret-key-99')
+            .expect(200);
+        await supertest(app)
+            .post('/api/v1/browse/folder')
+            .set('Authorization', 'Bearer secret-key-99')
+            .send({path: projectsRoot})
+            .expect(200);
+        await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/Custom_ADT`)
+            .type('text/plain')
+            .send(validHl7)
+            .expect(401, expectedUnauthorized);
+        await supertest(app)
+            .post(`/api/v1/projects/${projectSlug}/convert/Custom_ADT`)
+            .set('Authorization', 'Bearer secret-key-99')
+            .type('text/plain')
+            .send(validHl7)
+            .expect(200);
     });
 });

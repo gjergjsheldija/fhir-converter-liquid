@@ -1164,6 +1164,16 @@ body {
     color: var(--text);
 }
 
+.result-icon-btn[aria-pressed="true"] {
+    background: var(--selection);
+    color: var(--accent);
+}
+
+.result-icon-btn[aria-pressed="true"]:hover {
+    background: var(--selection);
+    color: var(--text);
+}
+
 .result-icon-btn:focus {
     outline: 2px solid var(--focus);
     outline-offset: 2px;

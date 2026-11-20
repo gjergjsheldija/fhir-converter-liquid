@@ -88,5 +88,5 @@ src/service-samples/
 AGENTS.md
 
 # conversion failure log (local runtime data)
-data/conversion-failures.jsonl
-data/conversion-audit.jsonl
+data/conversion-failures.jsonl*
+data/conversion-audit.jsonl*

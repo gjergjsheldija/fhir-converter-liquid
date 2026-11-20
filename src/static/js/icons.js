@@ -19,7 +19,9 @@ var ICON_IDS = {
     'icon-chevron-down': true,
     'icon-chevron-up': true,
     'icon-play': true,
-    'icon-sparkle': true
+    'icon-sparkle': true,
+    'icon-fold-all': true,
+    'icon-unfold-all': true
 };
 
 function icon(id) {

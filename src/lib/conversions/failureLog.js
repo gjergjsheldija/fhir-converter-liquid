@@ -1,4 +1,5 @@
-import {appendFileSync, existsSync, mkdirSync, readFileSync} from "fs";
+import {appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync} from "fs";
+import {appendFile, mkdir, rename, stat} from "fs/promises";
 import {dirname, join} from "path";
 import {fileURLToPath} from "url";
 
@@ -7,6 +8,52 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export const FAILURE_LOG_FILE = join(__dirname, "../../../data/conversion-failures.jsonl");
 export const MAX_MESSAGE_LENGTH = 500;
 export const MAX_LIST = 50;
+export const MAX_LOG_BYTES = 5 * 1024 * 1024;
+
+let failureWriteChain = Promise.resolve();
+
+function resolveMaxBytes(options) {
+    if (options && typeof options.maxBytes === "number" && Number.isFinite(options.maxBytes) && options.maxBytes > 0) {
+        return options.maxBytes;
+    }
+    return MAX_LOG_BYTES;
+}
+
+function rotateIfNeededSync(file, maxBytes) {
+    try {
+        const info = statSync(file);
+        if (info.size >= maxBytes) {
+            renameSync(file, file + ".1");
+        }
+    } catch (err) {
+        if (!err || err.code !== "ENOENT") {
+            throw err;
+        }
+    }
+}
+
+async function rotateIfNeededAsync(file, maxBytes) {
+    try {
+        const info = await stat(file);
+        if (info.size >= maxBytes) {
+            await rename(file, file + ".1");
+        }
+    } catch (err) {
+        if (!err || err.code !== "ENOENT") {
+            throw err;
+        }
+    }
+}
+
+function buildFailureRow(entry) {
+    const input = entry || {};
+    return {
+        at: new Date().toISOString(),
+        template: typeof input.template === "string" ? input.template : "",
+        message: String(input.message === undefined || input.message === null ? "" : input.message).slice(0, MAX_MESSAGE_LENGTH),
+        controlId: controlIdOf(input.raw)
+    };
+}
 
 // MSH-10 of an HL7 v2 message, or "" when the first segment is not MSH or field 10 is missing.
 export function controlIdOf(raw) {
@@ -22,17 +69,30 @@ export function controlIdOf(raw) {
 }
 
 // Appends one row. `entry.raw` is only read to find MSH-10; it is never written.
-export function appendFailure(entry, file = FAILURE_LOG_FILE) {
-    const input = entry || {};
-    const row = {
-        at: new Date().toISOString(),
-        template: typeof input.template === "string" ? input.template : "",
-        message: String(input.message === undefined || input.message === null ? "" : input.message).slice(0, MAX_MESSAGE_LENGTH),
-        controlId: controlIdOf(input.raw)
-    };
+export function appendFailure(entry, file = FAILURE_LOG_FILE, options) {
+    const row = buildFailureRow(entry);
+    const maxBytes = resolveMaxBytes(options);
     mkdirSync(dirname(file), {recursive: true});
+    rotateIfNeededSync(file, maxBytes);
     appendFileSync(file, JSON.stringify(row) + "\n");
     return row;
+}
+
+export async function appendFailureAsync(entry, file = FAILURE_LOG_FILE, options) {
+    const row = buildFailureRow(entry);
+    const maxBytes = resolveMaxBytes(options);
+    const task = failureWriteChain.then(async () => {
+        await mkdir(dirname(file), {recursive: true});
+        await rotateIfNeededAsync(file, maxBytes);
+        await appendFile(file, JSON.stringify(row) + "\n");
+        return row;
+    });
+    failureWriteChain = task.catch(() => {});
+    return task;
+}
+
+export function flushFailureWrites() {
+    return failureWriteChain;
 }
 
 // Last `limit` rows (at most 50), newest last. A missing file is an empty list.

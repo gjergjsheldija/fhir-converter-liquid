@@ -1,8 +1,8 @@
 import assert from "assert";
-import {mkdtempSync, readFileSync, rmSync} from "fs";
+import {existsSync, mkdtempSync, readFileSync, rmSync} from "fs";
 import {tmpdir} from "os";
 import {join} from "path";
-import {appendFailure, controlIdOf, listFailures} from "./failureLog.js";
+import {MAX_LOG_BYTES, appendFailure, appendFailureAsync, controlIdOf, listFailures} from "./failureLog.js";
 
 const RAW = "MSH|^~\\&|APP|FAC|APP2|FAC2|20260101||ADT^A01|CTRL-123|P|2.5\rPID|1||SECRET-MRN||DOE^JANE\r";
 
@@ -60,5 +60,40 @@ describe("failure log", function () {
         assert.strictEqual(controlIdOf("MSH|^~\\&|A|B|C|D|E||F"), "");
         assert.strictEqual(controlIdOf("MSH|^~\\&|A|B|C|D|E||F|ID9\n"), "ID9");
         assert.strictEqual(controlIdOf(undefined), "");
+    });
+
+    it("rotates to .1 when file size reaches maxBytes and overwrites previous .1", function () {
+        assert.strictEqual(MAX_LOG_BYTES, 5 * 1024 * 1024);
+        appendFailure({template: "ADT_A01", message: "first failure", raw: RAW}, file, {maxBytes: 150});
+        appendFailure({template: "ADT_A02", message: "second failure", raw: RAW}, file, {maxBytes: 150});
+        assert.strictEqual(existsSync(file + ".1"), false);
+
+        appendFailure({template: "ADT_A03", message: "third failure", raw: RAW}, file, {maxBytes: 150});
+        assert.strictEqual(existsSync(file + ".1"), true);
+        const rotatedFirst = readFileSync(file + ".1", "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).message);
+        const activeFirst = readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).message);
+        assert.deepStrictEqual(rotatedFirst, ["first failure", "second failure"]);
+        assert.deepStrictEqual(activeFirst, ["third failure"]);
+
+        appendFailure({template: "ADT_A04", message: "fourth failure", raw: RAW}, file, {maxBytes: 150});
+        appendFailure({template: "ADT_A05", message: "fifth failure", raw: RAW}, file, {maxBytes: 150});
+        const rotatedSecond = readFileSync(file + ".1", "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).message);
+        const activeSecond = readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).message);
+        assert.deepStrictEqual(rotatedSecond, ["third failure", "fourth failure"]);
+        assert.deepStrictEqual(activeSecond, ["fifth failure"]);
+    });
+
+    it("serializes concurrent appendFailureAsync calls with rotation and strips PHI", async function () {
+        const asyncFile = join(dir, "async", "conversion-failures.jsonl");
+        await Promise.all([
+            appendFailureAsync({template: "ADT_A01", message: "err-1", raw: RAW}, asyncFile, {maxBytes: 150}),
+            appendFailureAsync({template: "ADT_A02", message: "err-2", raw: RAW}, asyncFile, {maxBytes: 150}),
+            appendFailureAsync({template: "ADT_A03", message: "err-3", raw: RAW}, asyncFile, {maxBytes: 150})
+        ]);
+        assert.strictEqual(existsSync(asyncFile + ".1"), true);
+        const combinedText = readFileSync(asyncFile + ".1", "utf8") + readFileSync(asyncFile, "utf8");
+        assert.ok(!combinedText.includes("SECRET-MRN"));
+        const messages = combinedText.split("\n").filter(Boolean).map((l) => JSON.parse(l).message);
+        assert.deepStrictEqual(messages, ["err-1", "err-2", "err-3"]);
     });
 });

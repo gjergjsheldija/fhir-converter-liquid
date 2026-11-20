@@ -4,7 +4,7 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-import {readdir, readFile} from "fs/promises";
+import {access, readdir, readFile} from "fs/promises";
 import path from "path";
 import {convertInlineHl7v2} from "../src/lib/workers/worker.js";
 import {prepareProjectConversion} from "../src/lib/projects/convertProject.js";
@@ -57,19 +57,58 @@ function resolveTemplatePath(templateDirectory, name) {
     return resolved;
 }
 
+async function fileExists(filePath) {
+    try {
+        await access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function resolveProjectTemplatePath(prep, name) {
+    const primary = resolveTemplatePath(prep.templateDirectory, name);
+    if (await fileExists(primary)) {
+        return primary;
+    }
+    if (prep.fallbackTemplateDirectory) {
+        const fallback = resolveTemplatePath(prep.fallbackTemplateDirectory, name);
+        if (await fileExists(fallback)) {
+            return fallback;
+        }
+    }
+    return primary;
+}
+
+async function resolveSamplePath(samplesRoot, basename, srcDataType) {
+    if (srcDataType === "ccda") {
+        const ccdaPath = path.join(samplesRoot, `${basename}.ccda`);
+        if (await fileExists(ccdaPath)) {
+            return ccdaPath;
+        }
+        const xmlPath = path.join(samplesRoot, `${basename}.xml`);
+        if (await fileExists(xmlPath)) {
+            return xmlPath;
+        }
+        return ccdaPath;
+    }
+    return path.join(samplesRoot, `${basename}.hl7`);
+}
+
 async function convert(prep, templatePath, messagePath) {
     const [template, srcData] = await Promise.all([
         readFile(templatePath, "utf8"),
         readFile(messagePath, "utf8")
     ]);
     const result = await convertInlineHl7v2({
-        srcDataType: "hl7v2",
+        srcDataType: prep.srcDataType,
         srcData,
         template,
         templatesOverride: prep.templatesOverride,
         templateDirectory: prep.templateDirectory,
         fallbackTemplateDirectory: prep.fallbackTemplateDirectory,
-        strictOverridesOnly: prep.strictOverridesOnly
+        strictOverridesOnly: prep.strictOverridesOnly,
+        declaredSegments: prep.declaredSegments
     });
     if (result.status !== 200 || !result.resultMsg || !result.resultMsg.fhirResource) {
         throw new Error("Conversion did not produce a FHIR resource.");
@@ -83,10 +122,24 @@ async function checkGoldens(prep, opts) {
         throw new Error(readRes.error);
     }
     const manifest = readRes.manifest;
-    const samplesRoot = path.resolve(prep.projectRoot, manifest.roots.hl7v2.samples);
-    const templatePath = opts.template
-        ? resolveTemplatePath(prep.templateDirectory, opts.template)
-        : path.resolve(prep.projectRoot, manifest.startup.template);
+    const familyRoots = prep.srcDataType === "ccda" ? manifest.roots.ccda : manifest.roots.hl7v2;
+    const samplesRoot = path.resolve(prep.projectRoot, familyRoots.samples);
+    let templatePath;
+    if (opts.template) {
+        templatePath = await resolveProjectTemplatePath(prep, opts.template);
+    } else {
+        const startupPath = path.resolve(prep.projectRoot, manifest.startup.template);
+        if (await fileExists(startupPath)) {
+            templatePath = startupPath;
+        } else {
+            const relToTemplates = path.relative(prep.templateDirectory, startupPath);
+            if (!relToTemplates.startsWith("..") && !path.isAbsolute(relToTemplates)) {
+                templatePath = await resolveProjectTemplatePath(prep, relToTemplates);
+            } else {
+                templatePath = startupPath;
+            }
+        }
+    }
     const expectedDir = path.join(prep.projectRoot, "tests", "expected");
     const entries = await readdir(expectedDir).catch(() => []);
     const names = entries.filter((name) => name.endsWith(".json")).sort();
@@ -94,7 +147,8 @@ async function checkGoldens(prep, opts) {
         const basename = name.slice(0, -".json".length);
         try {
             const expectedText = await readFile(path.join(expectedDir, name), "utf8");
-            const actual = await convert(prep, templatePath, path.join(samplesRoot, `${basename}.hl7`));
+            const samplePath = await resolveSamplePath(samplesRoot, basename, prep.srcDataType);
+            const actual = await convert(prep, templatePath, samplePath);
             compareContent(JSON.stringify(actual), expectedText);
         } catch {
             process.stderr.write(`${basename}\n`);
@@ -115,7 +169,8 @@ async function main() {
         if (opts.checkGoldens) {
             return await checkGoldens(prep, opts);
         }
-        const resource = await convert(prep, resolveTemplatePath(prep.templateDirectory, opts.template), opts.message);
+        const templatePath = await resolveProjectTemplatePath(prep, opts.template);
+        const resource = await convert(prep, templatePath, opts.message);
         process.stdout.write(`${JSON.stringify(resource, null, 2)}\n`);
         return 0;
     } catch (err) {

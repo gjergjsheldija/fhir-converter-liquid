@@ -3,8 +3,14 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
+let activeFieldReadHook = null;
+
+export function setFieldReadHook(hook) {
+    activeFieldReadHook = typeof hook === 'function' ? hook : null;
+}
+
 // This type of array only works properly if items are only added using push and are never deleted, reassigned, or changed using another method.
-export function makeCoverageArray() {
+export function makeCoverageArray(segmentName, fieldIndex) {
     var array = [];
     array.accessed = [];
     array.repeats = [];
@@ -16,6 +22,9 @@ export function makeCoverageArray() {
             Object.defineProperty(array, curIndex, {
                 get: function () {
                     this.accessed[curIndex] = true;
+                    if (activeFieldReadHook !== null && segmentName !== undefined && fieldIndex !== undefined) {
+                        activeFieldReadHook(segmentName + '.' + fieldIndex);
+                    }
                     return item;
                 },
                 set(val) {

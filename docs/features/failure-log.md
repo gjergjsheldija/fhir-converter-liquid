@@ -4,7 +4,9 @@
 
 A failed conversion appends one JSON line to `data/conversion-failures.jsonl`. The directory is created if needed. The file is gitignored.
 
-A row is written only when `POST /api/v1/convert/{srcDataType}` or `POST /api/v1/projects/convert` returns a status other than 200. Validate, Send, and `POST /api/v1/convert/{srcDataType}/{template}` are not counted. A successful conversion increments a counter and writes nothing to this file.
+A row is written when `POST /api/v1/convert/{srcDataType}`, `POST /api/v1/projects/convert`, or `POST /api/v1/projects/:projectId/convert/:template` returns a status other than 200. Validate and Send are not counted. A successful conversion increments a counter and writes nothing to this file.
+
+Writes are non-blocking async appends, and `data/conversion-failures.jsonl` rotates automatically to `data/conversion-failures.jsonl.1` when the file reaches `5 MB`.
 
 ## What a row contains
 
@@ -15,7 +17,7 @@ A row is written only when `POST /api/v1/convert/{srcDataType}` or `POST /api/v1
 | Field | Meaning |
 | --- | --- |
 | `at` | Time the row was written, UTC |
-| `template` | Template name from the request. Empty when the request did not name one |
+| `template` | Template name from the request or URL. Empty when the request did not name one |
 | `message` | Error text, cut at 500 characters |
 | `controlId` | MSH-10 when the first segment is `MSH` and field 10 is present. Otherwise empty |
 
@@ -26,8 +28,11 @@ The process access log is separate. It can still contain the request body. This 
 ## Reading the log
 
 ```bash
-curl http://localhost:2019/api/v1/conversions/failures
+curl http://localhost:2019/api/v1/conversions/failures \
+  -H "Authorization: Bearer $CONVERT_API_KEY"
 ```
+
+When `CONVERT_API_KEY` is set on the server, `GET /api/v1/conversions/failures` requires `Authorization: Bearer <CONVERT_API_KEY>`. When no key is configured, omit the header.
 
 The response is:
 

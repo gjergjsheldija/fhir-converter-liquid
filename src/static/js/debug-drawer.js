@@ -702,6 +702,35 @@
         }
         container.append(bundleSection);
 
+        var caseMismatches = Array.isArray(info.caseMismatches) ? info.caseMismatches : [];
+        if (caseMismatches.length > 0) {
+            var shownMismatches = caseMismatches.filter(function (m) {
+                if (!q) {
+                    return true;
+                }
+                var haystack = (m.read + ' ' + m.actual + ' ' + m.template).toLowerCase();
+                return haystack.indexOf(q) !== -1;
+            });
+            var mismatchSection = $('<div class="debug-diag-section"></div>');
+            mismatchSection.append(
+                $('<div class="debug-diag-heading"></div>').text('Case-mismatched variables (' + caseMismatches.length + ')')
+            );
+            if (shownMismatches.length === 0) {
+                mismatchSection.append($('<div class="debug-empty">No matches.</div>'));
+            } else {
+                shownMismatches.forEach(function (m) {
+                    var mismatchItem = $('<div class="debug-diag-item"></div>');
+                    mismatchItem.append($('<span class="debug-pill is-changed">case</span>'));
+                    mismatchItem.append(
+                        $('<span class="debug-tree-key"></span>').text(m.read + ' (did you mean ' + m.actual + '?)')
+                    );
+                    mismatchItem.append($('<span class="debug-tree-val"></span>').text('in ' + m.template));
+                    mismatchSection.append(mismatchItem);
+                });
+            }
+            container.append(mismatchSection);
+        }
+
         var unused = Array.isArray(info.unusedSegments) ? info.unusedSegments : [];
         var flatUnused = [];
         unused.forEach(function (seg) {
@@ -1028,9 +1057,71 @@
         return typeof getActiveProjectFamily === 'function' && getActiveProjectFamily() === 'ccda';
     }
 
+    function updateProblemsBadge(info) {
+        var mismatchCount = (info && Array.isArray(info.caseMismatches)) ? info.caseMismatches.length : 0;
+        var diagTab = $('.debug-drawer-tabs button[data-debug-tab="diag"]');
+        if (diagTab.length) {
+            var baseLabel = diagTab.attr('data-base-label');
+            if (!baseLabel) {
+                baseLabel = (diagTab.text() || 'Diagnostics').replace(/\s*\(\d+\)\s*$/, '').trim();
+                diagTab.attr('data-base-label', baseLabel);
+            }
+            diagTab.text(mismatchCount > 0 ? (baseLabel + ' (' + mismatchCount + ')') : baseLabel);
+        }
+
+        if (!info || mismatchCount === 0 || info._caseMismatchesCountedInRail) {
+            return;
+        }
+        var rail = $('#problems-rail');
+        if (!rail.length) {
+            return;
+        }
+        info._caseMismatchesCountedInRail = true;
+
+        var badgeEl = rail.find('#problems-count, .problems-count, .badge, .debug-pill').first();
+        if (badgeEl.length && /^\s*\d+\s*$/.test(badgeEl.text())) {
+            var prevCount = parseInt(badgeEl.text(), 10);
+            badgeEl.text(String(prevCount + mismatchCount));
+            return;
+        }
+
+        var updated = false;
+        rail.find('*').addBack().contents().each(function () {
+            if (updated || this.nodeType !== 3) {
+                return;
+            }
+            var txt = this.nodeValue || '';
+            var numMatch = /(\d+)(\s+problem[s]?)/i.exec(txt);
+            if (numMatch) {
+                var total = parseInt(numMatch[1], 10) + mismatchCount;
+                this.nodeValue = txt.replace(
+                    /(\d+)(\s+problem[s]?)/i,
+                    total + ' ' + (total === 1 ? 'Problem' : 'Problems')
+                );
+                updated = true;
+                return;
+            }
+            if (/\bno\s+problems\b/i.test(txt)) {
+                this.nodeValue = txt.replace(
+                    /\bno\s+problems\b/i,
+                    mismatchCount + ' ' + (mismatchCount === 1 ? 'Problem' : 'Problems')
+                );
+                updated = true;
+                return;
+            }
+            var parenMatch = /(problem[s]?\s*\()(\d+)(\))/i.exec(txt);
+            if (parenMatch) {
+                var nextTotal = parseInt(parenMatch[2], 10) + mismatchCount;
+                this.nodeValue = txt.replace(/(problem[s]?\s*\()(\d+)(\))/i, parenMatch[1] + nextTotal + parenMatch[3]);
+                updated = true;
+            }
+        });
+    }
+
     function renderActivePanel() {
         var info = window.latestDebugInfo || null;
         $('.debug-drawer-tabs button[data-debug-tab="hl7"]').text(hasParsedCcda(info) ? 'Parsed CDA' : 'Parsed HL7');
+        updateProblemsBadge(info);
         var timingText = (info && typeof info.durationMs === 'number')
             ? ('Converted in ' + info.durationMs + ' ms')
             : '';

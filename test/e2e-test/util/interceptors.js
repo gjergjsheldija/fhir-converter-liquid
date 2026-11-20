@@ -178,18 +178,31 @@ export class ExtraDynamicFieldInterceptor extends Interceptor {
     }
 
     __normalizeProvenanceTextDiv(resource) {
-        // Normalize dynamic timestamp in Provenance text.div
+        // Normalize dynamic timestamp and converter boilerplate in Provenance text.div
         if (resource['resourceType'] !== 'Provenance') {
             return;
         }
-        if (resource['text'] && resource['text']['div']) {
+        if (resource['text'] && typeof resource['text']['div'] === 'string') {
             // Replace the dynamic timestamp with a placeholder
-            // Pattern: "Resource bundle generated on YYYY-MM-DDTHH:MM:SS[.m{1-3}]Z"
-            // Supports 0-3 millisecond digits to handle variations in expected files
-            resource['text']['div'] = resource['text']['div'].replace(
-                /Resource bundle generated on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z/,
+            // Pattern: "Resource bundle generated on YYYY-MM-DDTHH:MM:SS[.m+]Z"
+            const div = resource['text']['div'].replace(
+                /Resource bundle generated on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z/,
                 'Resource bundle generated on TIMESTAMP_PLACEHOLDER'
             );
+
+            const legacyMatch = div.match(
+                /^<div xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"><p><span>Resource bundle generated on TIMESTAMP_PLACEHOLDER using Microsoft FHIR Converter\.<\/span><span>Template Version: [^<]*<\/span><span>Template URL: [^<]*<\/span><span>Root template: ([^<]+)\.<\/span><\/p><\/div>$/
+            );
+            const currentMatch = div.match(
+                /^<div xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"><p><span>Resource bundle generated on TIMESTAMP_PLACEHOLDER using FHIR Converter Liquid\.<\/span><span>Converter version: [^<]*<\/span><span>Root template: ([^<]+)\.<\/span><\/p><\/div>$/
+            );
+            const rootTemplate = legacyMatch ? legacyMatch[1] : (currentMatch ? currentMatch[1] : null);
+
+            if (rootTemplate !== null) {
+                resource['text']['div'] = `<div xmlns="http://www.w3.org/1999/xhtml"><p><span>Resource bundle generated on TIMESTAMP_PLACEHOLDER.</span><span>Root template: ${rootTemplate}.</span></p></div>`;
+            } else {
+                resource['text']['div'] = div;
+            }
         }
     }
 

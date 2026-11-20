@@ -2,19 +2,26 @@
 
 [Features](../features.md)
 
-`integrations/oie/hl7v2-to-fhir.xml` is a channel you import into Open Integration Engine. This server does not listen on TCP and does not speak MLLP. OIE receives the HL7 v2 message, then posts it to the converter.
+`integrations/oie/hl7v2-to-fhir.xml` is a channel you import into Open Integration Engine. This server does not listen on TCP and does not speak MLLP. OIE receives the HL7 v2 message over MLLP, posts it to the converter over HTTP, and returns an HL7 ACK or NACK to the upstream sender.
 
 ## What the channel does
 
-1. A sender opens TCP port `6661` on OIE and sends an HL7 v2 message. The source is a TCP Listener with `respondAfterProcessing` on, so the sender waits for the channel to finish.
-2. The destination is one HTTP Sender. It POSTs to `127.0.0.1` port `2019`, path `/api/v1/convert/hl7v2`.
-3. The body is `{"srcData":"<the raw message>","template":"ADT_A01"}`. The only message value in that body is the encoded data. The template name is the literal `ADT_A01`.
-4. OIE can return an ACK to the sender. The channel file does not contain that ACK mapping.
+1. A sender opens TCP port `6661` on OIE and transmits an MLLP-framed HL7 v2 message. The source connector is a TCP Listener with `respondAfterProcessing` enabled, so the sender waits for the HTTP destination result.
+2. The channel reads `MSH-9` to derive `templateName` dynamically: `MSH-9.3` (for example `ADT_A01`) when populated, otherwise `MSH-9.1_MSH-9.2` (for example `ORU_R01`), with `ADT_A01` as fallback.
+3. It builds the request payload with `JSON.stringify({ srcData, template: templateName })`, preserving `\r` segment breaks, quotes, and HL7 escape sequences (`\F\`, `\S\`, `\T\`, `\R\`, `\E\`).
+4. When `CONVERT_API_KEY` is defined in OIE's `configurationMap`, the HTTP Sender forwards `Authorization: Bearer <CONVERT_API_KEY>`.
+5. On an HTTP `2xx` response from `http://127.0.0.1:2019/api/v1/convert/hl7v2`, the channel returns an HL7 ACK containing `MSA|AA|<MSH-10>`. On an HTTP error or connection failure, it returns an HL7 NACK containing `MSA|AE|<MSH-10>` so the upstream EHR or interface engine can retry or alert instead of silently dropping the message.
 
-Change `template` in the destination when the message is not an ADT A01. The converter route is the inline HL7 v2 route, so a `CONVERT_API_KEY` on the server applies to this call. The channel as shipped does not send an `Authorization` header.
+## Routing through a customer project pack
 
-## What is documented but not in the channel
+To convert through a customer project under `PROJECTS_ROOT` (default `./projects`) — applying that project's Liquid overrides, `declaredSegments`, and [site pack](site-pack.md) — change the HTTP Sender URL path in OIE from `/api/v1/convert/hl7v2` to:
 
-[integrations/oie/README.md](../../integrations/oie/README.md) shows the ACK that should go back to the sender. MSA-2 is the inbound MSH-10. For an inbound control id `MSG00001`, that field is `MSA|AA|MSG00001`.
+```text
+/api/v1/projects/<projectId>/convert/${templateName}
+```
 
-That control id is not read by an expression in the channel XML. The channel also does not write the raw message to a file. Both need a later change that names MSH-10 inside the channel. This server still does not archive the message itself. A failed call is recorded only as the [failure log](failure-log.md) describes: template, error, and MSH-10, not the body.
+For example, `/api/v1/projects/hosp-a/convert/${templateName}` routes `ADT^A01` to `hosp-a`'s `ADT_A01.liquid` and `ORU^R01` to `hosp-a`'s `ORU_R01.liquid`.
+
+## PHI and logging
+
+This server does not archive inbound HL7 message bodies on disk. Audit and failure entries written during OIE calls record only timestamp, HTTP status, template name, and `MSH-10`, as described in [Convert API key](convert-api-key.md) and [Failure log](failure-log.md).

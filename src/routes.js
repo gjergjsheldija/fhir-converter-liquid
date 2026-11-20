@@ -28,7 +28,7 @@ import os from "os";
 import {fileURLToPath} from "url";
 import {readFileSync} from "fs";
 import {access, mkdir, readFile, readdir, stat, unlink, writeFile} from "fs/promises";
-import {dirname, join, resolve} from "path";
+import {dirname, join, resolve, sep} from "path";
 import {external as libraryFilters} from "./lib/liquid-converter/liquid-helpers.js";
 import {convertInlineHl7v2} from "./lib/workers/worker.js";
 import {chooseLocalFolder, listFolder, listGithub, readFolderFile, readGithubFile} from "./lib/browse/sources.js";
@@ -41,8 +41,8 @@ import {listProjectFiles, readProjectFile, writeProjectFile} from "./lib/project
 import {prepareProjectConversion} from "./lib/projects/convertProject.js";
 import {applySitePack, collectUnmapped, loadSitePack} from "./lib/projects/sitePack.js";
 import {copyOfficialHl7v2Samples} from "./lib/projects/officialSamples.js";
-import {appendFailure, controlIdOf, listFailures} from "./lib/conversions/failureLog.js";
-import {appendAudit, authorizeConvert} from "./lib/conversions/convertAudit.js";
+import {appendFailureAsync, controlIdOf, flushFailureWrites, listFailures} from "./lib/conversions/failureLog.js";
+import {appendAuditAsync, authorizeConvert} from "./lib/conversions/convertAudit.js";
 import {guideImagesRoot, renderGuideHtml} from "./lib/guide/renderGuide.js";
 
 const {json, text} = bodyparser;
@@ -52,6 +52,7 @@ const {serve, setup} = swaggeruiexpress;
 const metricsMiddleware = promMid({includeMethod: true});
 
 const __filename = fileURLToPath(import.meta.url);
+const pkgVersion = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 
 export default function (app) {
     const workerPool = new WorkerPool(
@@ -69,6 +70,56 @@ export default function (app) {
     app.use(customLogging());
     app.use(json({limit: "50mb", extended: true}));
     app.use(text({limit: "50mb", extended: true}));
+
+    function isHeadlessRuntime() {
+        return process.env.HEADLESS_RUNTIME === "true" || process.env.HEADLESS_RUNTIME === "1";
+    }
+
+    function isAllowedHeadlessRequest(req) {
+        const pathname = req.path.length > 1 ? req.path.replace(/\/+$/, "") : req.path;
+        if (req.method === "GET") {
+            return (
+                pathname === "/health" ||
+                pathname === "/version" ||
+                pathname === "/metrics" ||
+                pathname === "/api/v1/conversions/failures"
+            );
+        }
+        if (req.method === "POST") {
+            if (/^\/api\/v1\/convert\/[^/]+(?:\/.+)?$/.test(pathname)) {
+                return true;
+            }
+            if (pathname === "/api/v1/projects/convert") {
+                return true;
+            }
+            if (/^\/api\/v1\/projects\/[^/]+\/convert\/.+$/.test(pathname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function requireApiKey(req, res, next) {
+        if (authorizeConvert(process.env.CONVERT_API_KEY, req.headers.authorization)) {
+            next();
+            return;
+        }
+        res.status(401).json(errorMessage(errorCodes.Unauthorized, "Convert API key is required."));
+    }
+
+    app.use(function (req, res, next) {
+        if (!isHeadlessRuntime() || isAllowedHeadlessRequest(req)) {
+            next();
+            return;
+        }
+        res.status(403).json({
+            error: {
+                code: "Forbidden",
+                message: "Studio routes are disabled when HEADLESS_RUNTIME is enabled."
+            }
+        });
+    });
+
     app.use(express.static(STATIC_LOCATION));
     app.use("/codemirror", express.static(CODE_MIRROR_LOCATION));
 
@@ -274,7 +325,7 @@ export default function (app) {
             });
     });
 
-    app.put("/api/v1/sample-data/hl7v2/:file", function (req, res) {
+    app.put("/api/v1/sample-data/hl7v2/:file", requireApiKey, function (req, res) {
         let fileName = req.params.file;
         if (!fileName || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
             res.status(400);
@@ -322,7 +373,7 @@ export default function (app) {
             });
     });
 
-    app.delete("/api/v1/sample-data/hl7v2/:file", function (req, res) {
+    app.delete("/api/v1/sample-data/hl7v2/:file", requireApiKey, function (req, res) {
         const fileName = req.params.file;
         if (!fileName || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
             res.status(400);
@@ -431,7 +482,7 @@ export default function (app) {
      *     consumes:
      *       - text/plain
      */
-    app.put("/api/v1/templates/:file(*)", function (req, res) {
+    app.put("/api/v1/templates/:file(*)", requireApiKey, function (req, res) {
         const key = req.params.file;
         if (!key || key.includes("..") || !key.endsWith(".liquid")) {
             res.status(400).json(errorMessage(errorCodes.BadRequest, "Invalid template name."));
@@ -503,7 +554,7 @@ export default function (app) {
      *     consumes:
      *       - application/json
      */
-    app.post("/api/v1/templategenerate", function (req, res) {
+    app.post("/api/v1/templategenerate", requireApiKey, function (req, res) {
         const body = req.body || {};
         const ai = readAiConfig();
         const maxIters = Number(body.maxIters) || ai.defaultMaxIters || 4;
@@ -662,6 +713,8 @@ export default function (app) {
         res.status(status).json(payload);
     }
 
+    app.use("/api/v1/browse", requireApiKey);
+
     app.post("/api/v1/browse/github", function (req, res) {
         const body = req.body || {};
         const action = body.file ? readGithubFile(body.repo, body.path, body.token) : listGithub(body.repo, body.path, body.token);
@@ -680,7 +733,7 @@ export default function (app) {
             .catch((err) => browseError(res, err));
     });
 
-    app.post("/api/v1/field-map", function (req, res) {
+    app.post("/api/v1/field-map", requireApiKey, function (req, res) {
         const requested = req.body && typeof req.body.path === "string" ? req.body.path.trim() : "";
         const dir = requested || join(BASE_TEMPLATE_FILES_LOCATION, "Hl7v2");
         stat(dir)
@@ -737,6 +790,8 @@ export default function (app) {
         }).catch((err) => browseError(res, err));
     });
 
+    app.use("/api/v1/fhir", requireApiKey);
+
     app.post("/api/v1/fhir/send", function (req, res) {
         const body = req.body || {};
         if (body.conditional === true && body.update === true) {
@@ -774,23 +829,19 @@ export default function (app) {
             });
     });
 
-    // Failure log for POST /api/v1/convert/:srcDataType and POST /api/v1/projects/convert only.
+    // Failure log for POST /api/v1/convert/:srcDataType, POST /api/v1/projects/convert, and POST /api/v1/projects/:projectId/convert/:template.
     const conversionCounts = {failed: 0, succeeded: 0};
 
     // One audit line per convert attempt: status, template, MSH-10. Never the body or the key.
     function auditConvert(status, template, srcData) {
-        try {
-            appendAudit({
-                status,
-                template: typeof template === "string" ? template : "",
-                controlId: controlIdOf(srcData)
-            });
-        } catch (err) {
-            // an audit write problem must not change the convert response
-        }
+        appendAuditAsync({
+            status,
+            template: typeof template === "string" ? template : "",
+            controlId: controlIdOf(srcData)
+        }).catch(() => {});
     }
 
-    // CONVERT_API_KEY is read on each request. Empty or unset leaves the three convert routes open.
+    // CONVERT_API_KEY is read on each request. Empty or unset leaves convert routes open.
     function requireConvertKey(templateOf) {
         return function (req, res, next) {
             if (authorizeConvert(process.env.CONVERT_API_KEY, req.headers.authorization)) {
@@ -799,11 +850,7 @@ export default function (app) {
             }
             // 401: the request body is not read, so MSH-10 stays empty.
             const template = templateOf ? templateOf(req) : "";
-            try {
-                appendAudit({status: 401, template});
-            } catch (err) {
-                // an audit write problem must not change the response
-            }
+            appendAuditAsync({status: 401, template}).catch(() => {});
             res.status(401).json(errorMessage(errorCodes.Unauthorized, "Convert API key is required."));
         };
     }
@@ -816,18 +863,16 @@ export default function (app) {
         }
         conversionCounts.failed++;
         const detail = resultMessage && resultMessage.error && resultMessage.error.message;
-        try {
-            appendFailure({template, message: detail || "Conversion failed.", raw: srcData});
-        } catch (err) {
-            // a log write problem must not change the convert response
-        }
+        appendFailureAsync({template, message: detail || "Conversion failed.", raw: srcData}).catch(() => {});
     }
 
-    app.get("/api/v1/conversions/failures", function (req, res) {
-        res.status(200).json({
-            failures: listFailures(50),
-            failed: conversionCounts.failed,
-            succeeded: conversionCounts.succeeded
+    app.get("/api/v1/conversions/failures", requireApiKey, function (req, res) {
+        flushFailureWrites().then(() => {
+            res.status(200).json({
+                failures: listFailures(50),
+                failed: conversionCounts.failed,
+                succeeded: conversionCounts.succeeded
+            });
         });
     });
 
@@ -1013,31 +1058,31 @@ export default function (app) {
         res.status(status).json(errorMessage(code, err && err.message ? err.message : "Project request failed."));
     }
 
-    app.post("/api/v1/projects", function (req, res) {
+    app.post("/api/v1/projects", requireApiKey, function (req, res) {
         createProject(req.body || {})
             .then((created) => res.status(201).json(created))
             .catch((err) => sendProjectRouteError(res, err));
     });
 
-    app.post("/api/v1/projects/open", function (req, res) {
+    app.post("/api/v1/projects/open", requireApiKey, function (req, res) {
         openLocalProject(req.body || {})
             .then((result) => res.status(200).json(result))
             .catch((err) => sendProjectRouteError(res, err));
     });
 
-    app.post("/api/v1/projects/open-github", function (req, res) {
+    app.post("/api/v1/projects/open-github", requireApiKey, function (req, res) {
         openGithubProject(req.body || {})
             .then((result) => res.status(200).json(result))
             .catch((err) => sendProjectRouteError(res, err));
     });
 
-    app.post("/api/v1/projects/files", function (req, res) {
+    app.post("/api/v1/projects/files", requireApiKey, function (req, res) {
         listProjectFiles(req.body || {})
             .then((result) => res.status(200).json(result))
             .catch((err) => sendProjectRouteError(res, err));
     });
 
-    app.post("/api/v1/projects/file", function (req, res) {
+    app.post("/api/v1/projects/file", requireApiKey, function (req, res) {
         readProjectFile(req.body || {})
             .then((textContent) => {
                 res.setHeader("Content-Type", "text/plain; charset=utf-8");
@@ -1046,7 +1091,7 @@ export default function (app) {
             .catch((err) => sendProjectRouteError(res, err));
     });
 
-    app.put("/api/v1/projects/file", function (req, res) {
+    app.put("/api/v1/projects/file", requireApiKey, function (req, res) {
         const bodyText = typeof req.body === "string"
             ? req.body
             : (Buffer.isBuffer(req.body) ? req.body.toString("utf8") : "");
@@ -1110,11 +1155,148 @@ export default function (app) {
             });
     });
 
-    app.post("/api/v1/projects/official-samples", function (req, res) {
+    app.post("/api/v1/projects/official-samples", requireApiKey, function (req, res) {
         copyOfficialHl7v2Samples(req.body && req.body.path)
             .then((result) => res.status(200).json(result))
             .catch((err) => sendProjectRouteError(res, err));
     });
+
+    app.post("/api/v1/projects/:projectId/convert/:template(*)", requireConvertKey((req) => req.params.template), async function (req, res) {
+        const retUnusedSegments = req.query.unusedSegments == "true";
+        const retInvalidAccess = req.query.invalidAccess == "true";
+        const retDebug = req.query.debug == "true";
+        const rawTemplate = req.params.template || "";
+        const projectId = req.params.projectId || "";
+
+        let srcData = "";
+        if (typeof req.body === "string") {
+            srcData = req.body;
+        } else if (Buffer.isBuffer(req.body)) {
+            srcData = req.body.toString("utf8");
+        } else if (req.body && typeof req.body === "object" && typeof req.body.srcData === "string") {
+            srcData = req.body.srcData;
+        }
+
+        if (!/^[A-Za-z0-9._-]+$/.test(projectId) || projectId === "." || projectId === ".." || projectId.includes("..")) {
+            const payload = errorMessage(errorCodes.BadRequest, "Invalid project ID.");
+            recordConversion(400, payload, srcData, rawTemplate);
+            res.status(400).json(payload);
+            return;
+        }
+
+        const projectsBase = resolve(process.env.PROJECTS_ROOT || join(dirname(__filename), "../projects"));
+        const projectDir = resolve(projectsBase, projectId);
+        if (!projectDir.startsWith(projectsBase + "/")) {
+            const payload = errorMessage(errorCodes.BadRequest, "Invalid project ID.");
+            recordConversion(400, payload, srcData, rawTemplate);
+            res.status(400).json(payload);
+            return;
+        }
+
+        let projectInfo = null;
+        try {
+            projectInfo = await stat(projectDir);
+        } catch (err) {
+            projectInfo = null;
+        }
+        if (!projectInfo || !projectInfo.isDirectory()) {
+            const payload = errorMessage(errorCodes.NotFound, "Project not found.");
+            recordConversion(404, payload, srcData, rawTemplate);
+            res.status(404).json(payload);
+            return;
+        }
+
+        if (!srcData || !srcData.trim()) {
+            const payload = errorMessage(errorCodes.BadRequest, "No srcData provided.");
+            recordConversion(400, payload, srcData, rawTemplate);
+            res.status(400).json(payload);
+            return;
+        }
+
+        try {
+            const prep = await prepareProjectConversion({
+                project: {kind: "local", path: projectDir},
+                srcData,
+                template: ""
+            });
+
+            const tplFile = rawTemplate.endsWith(".liquid") ? rawTemplate : rawTemplate + ".liquid";
+            const primaryTplPath = resolve(prep.templateDirectory, tplFile);
+            if (!rawTemplate || rawTemplate.includes("..") || !primaryTplPath.startsWith(prep.templateDirectory + sep)) {
+                const payload = errorMessage(errorCodes.BadRequest, "Invalid template name.");
+                recordConversion(400, payload, srcData, rawTemplate);
+                res.status(400).json(payload);
+                return;
+            }
+
+            let templateSource = null;
+            try {
+                templateSource = await readFile(primaryTplPath, "utf8");
+            } catch (primaryErr) {
+                if (!primaryErr || primaryErr.code !== "ENOENT") {
+                    throw primaryErr;
+                }
+                if (prep.fallbackTemplateDirectory) {
+                    const fallbackTplPath = resolve(prep.fallbackTemplateDirectory, tplFile);
+                    if (fallbackTplPath.startsWith(prep.fallbackTemplateDirectory + sep)) {
+                        try {
+                            templateSource = await readFile(fallbackTplPath, "utf8");
+                        } catch (fallbackErr) {
+                            if (fallbackErr && fallbackErr.code !== "ENOENT") {
+                                throw fallbackErr;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (templateSource === null) {
+                const payload = errorMessage(errorCodes.NotFound, "Template not found");
+                recordConversion(404, payload, srcData, rawTemplate);
+                res.status(404).json(payload);
+                return;
+            }
+
+            const result = await workerPool.exec({
+                type: "/api/convert/:srcDataType",
+                srcDataType: prep.srcDataType,
+                srcData,
+                template: templateSource,
+                templatesOverride: {},
+                templateDirectory: prep.templateDirectory,
+                strictOverridesOnly: false,
+                fallbackTemplateDirectory: prep.fallbackTemplateDirectory,
+                declaredSegments: prep.declaredSegments,
+                timezone: req.headers.timezone,
+                debug: retDebug
+            });
+
+            if (prep.projectRoot && result.status === 200 && result.resultMsg && result.resultMsg.fhirResource) {
+                const pack = await loadSitePack(prep.projectRoot);
+                result.resultMsg.unmapped = collectUnmapped(result.resultMsg.fhirResource, pack);
+                result.resultMsg.fhirResource = applySitePack(result.resultMsg.fhirResource, pack);
+            }
+
+            const resultMessage = result.resultMsg;
+            if (!retUnusedSegments) {
+                delete resultMessage["unusedSegments"];
+            }
+            if (!retInvalidAccess) {
+                delete resultMessage["invalidAccess"];
+            }
+            if (!retDebug) {
+                delete resultMessage["debugInfo"];
+            }
+            recordConversion(result.status, resultMessage, srcData, rawTemplate);
+            res.status(result.status).json(resultMessage);
+        } catch (err) {
+            const status = err && Number.isInteger(err.status) ? err.status : 400;
+            recordConversion(status, {error: {message: err && err.message}}, srcData, rawTemplate);
+            sendProjectRouteError(res, err);
+        }
+    });
+
+    app.all("/api/v1/projects*", requireApiKey);
 
     /**
      * @swagger
@@ -1151,9 +1333,7 @@ export default function (app) {
      *         description: Not found
      */
     app.get("/version", function (req, res) {
-        let response = {};
-        response.version = "12";
-        res.status(200).json(response);
+        res.status(200).json({version: pkgVersion});
     });
 
     return app;

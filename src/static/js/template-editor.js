@@ -57,6 +57,7 @@ var currentEditorSettings = {
     darkMode: false,
     convertWhileTyping: true,
     timezone: '',
+    convertApiKey: '',
     fhirBaseUrl: '',
     fhirAuth: 'none',
     fhirToken: '',
@@ -91,6 +92,24 @@ try {
     }
 } catch (ex) {
     // Keep the defaults when stored settings are not JSON.
+}
+if (typeof $ !== 'undefined' && typeof $.ajaxPrefilter === 'function') {
+    $.ajaxPrefilter(function (options) {
+        var url = options && typeof options.url === 'string' ? options.url : '';
+        if (url.indexOf('/api/') !== 0) {
+            return;
+        }
+        if (!currentEditorSettings || !currentEditorSettings.convertApiKey) {
+            return;
+        }
+        var existingHeaders = options.headers || {};
+        if (existingHeaders.Authorization || existingHeaders.authorization) {
+            return;
+        }
+        options.headers = Object.assign({}, existingHeaders, {
+            Authorization: 'Bearer ' + currentEditorSettings.convertApiKey
+        });
+    });
 }
 var hasSuccessfulCallBeenMade = false;
 

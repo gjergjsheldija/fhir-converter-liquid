@@ -34,6 +34,7 @@
 // never change the unusedSegments report of the in-flight conversion.
 
 import {parseHl7v2FieldModel} from '../parsers/hl7v2/hl7v2FieldModel.js';
+import {recordFieldRead} from './lineage.js';
 
 // CLS session key under which the per-request collector is stored. Exported so
 // worker.js (writer) and liquid-converter.js (reader hooks) agree on one name.
@@ -44,6 +45,24 @@ const MAX_ARRAY_ITEMS = 50;
 const MAX_SCOPE_KEYS = 32;
 const MAX_PARTIALS = 100;
 const MAX_INDEXED_KEYS = 64;
+const MAX_CASE_MISMATCHES = 50;
+
+const LIQUID_KEYWORDS = new Set([
+    'if', 'elsif', 'else', 'endif',
+    'unless', 'endunless',
+    'case', 'when', 'endcase',
+    'for', 'in', 'endfor', 'break', 'continue', 'limit', 'offset', 'reversed',
+    'tablerow', 'endtablerow',
+    'assign', 'capture', 'endcapture',
+    'include', 'with', 'render',
+    'evaluate', 'using',
+    'cycle', 'increment', 'decrement',
+    'comment', 'endcomment', 'raw', 'endraw',
+    'liquid', 'echo',
+    'true', 'false', 'nil', 'null', 'empty', 'blank',
+    'and', 'or', 'not', 'contains',
+    'forloop', 'tablerowloop'
+]);
 
 function isObject(v) {
     return v !== null && typeof v === 'object';
@@ -248,6 +267,115 @@ function serializeValue(value, depth, subSep) {
     return out;
 }
 
+// --- case-mismatch template scanner -------------------------------------------------------
+
+function normalizeTemplateLabel(name) {
+    if (!name || name === '__root__') {
+        return 'root';
+    }
+    return String(name).replace(/\.liquid$/i, '');
+}
+
+function stripQuotedLiterals(expr) {
+    return expr.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, ' ');
+}
+
+export function scanTemplateCaseMismatches(templateName, templateSource, scopeKeys, collector) {
+    if (!collector || typeof templateSource !== 'string' || !Array.isArray(scopeKeys) || scopeKeys.length === 0) {
+        return;
+    }
+
+    const stripped = templateSource
+        .replace(/\{%-?\s*comment\s*-?%\}[\s\S]*?\{%-?\s*endcomment\s*-?%\}/g, '')
+        .replace(/\{%-?\s*raw\s*-?%\}[\s\S]*?\{%-?\s*endraw\s*-?%\}/g, '');
+
+    const blocks = [];
+    const blockRegex = /\{\{-?([\s\S]*?)-?\}\}|\{%-?([\s\S]*?)-?%\}/g;
+    let m;
+    while ((m = blockRegex.exec(stripped)) !== null) {
+        if (m[1] !== undefined) {
+            blocks.push({isTag: false, body: stripQuotedLiterals(m[1])});
+        } else if (m[2] !== undefined) {
+            blocks.push({isTag: true, body: stripQuotedLiterals(m[2])});
+        }
+    }
+    if (blocks.length === 0) {
+        return;
+    }
+
+    const localDefs = [];
+    for (const blk of blocks) {
+        if (!blk.isTag) {
+            continue;
+        }
+        const defMatch = /^\s*(?:(assign|capture|evaluate)\s+([A-Za-z_][A-Za-z0-9_]*)|(?:for|tablerow)\s+([A-Za-z_][A-Za-z0-9_]*)\s+in\b)/.exec(blk.body);
+        if (defMatch) {
+            localDefs.push(defMatch[2] || defMatch[3]);
+        }
+    }
+
+    const exactKeys = new Set();
+    const lowerToActual = new Map();
+    for (const key of scopeKeys) {
+        if (typeof key === 'string' && key.length > 0) {
+            exactKeys.add(key);
+            const lower = key.toLowerCase();
+            if (!lowerToActual.has(lower)) {
+                lowerToActual.set(lower, key);
+            }
+        }
+    }
+    for (const key of localDefs) {
+        exactKeys.add(key);
+        const lower = key.toLowerCase();
+        if (!lowerToActual.has(lower)) {
+            lowerToActual.set(lower, key);
+        }
+    }
+
+    const identRegex = /([.|]\s*)?(\b[A-Za-z_][A-Za-z0-9_]*\b)(\s*:)?/g;
+    for (const blk of blocks) {
+        let expr = blk.body;
+        if (blk.isTag) {
+            const tagMatch = /^\s*([A-Za-z_][A-Za-z0-9_]*)\b/.exec(expr);
+            if (!tagMatch) {
+                continue;
+            }
+            const tagName = tagMatch[1];
+            if (tagName.startsWith('end') || tagName === 'else' || tagName === 'break' || tagName === 'continue'
+                || tagName === 'comment' || tagName === 'raw') {
+                continue;
+            }
+            expr = expr.slice(tagMatch[0].length);
+            if (tagName === 'assign' || tagName === 'capture' || tagName === 'evaluate') {
+                expr = expr.replace(/^\s*[A-Za-z_][A-Za-z0-9_]*\b/, ' ');
+            } else if (tagName === 'for' || tagName === 'tablerow') {
+                expr = expr.replace(/^\s*[A-Za-z_][A-Za-z0-9_]*\s+in\b/, ' ');
+            }
+        }
+
+        identRegex.lastIndex = 0;
+        let tok;
+        while ((tok = identRegex.exec(expr)) !== null) {
+            if (tok[1] || tok[3]) {
+                continue;
+            }
+            const ident = tok[2];
+            if (LIQUID_KEYWORDS.has(ident) || exactKeys.has(ident)) {
+                continue;
+            }
+            const actual = lowerToActual.get(ident.toLowerCase());
+            if (actual && actual !== ident) {
+                collector.recordCaseMismatch({
+                    template: templateName,
+                    read: ident,
+                    actual: actual
+                });
+            }
+        }
+    }
+}
+
 // --- per-request collector ------------------------------------------------------------------
 
 export function createDebugCollector(srcData) {
@@ -259,11 +387,146 @@ export function createDebugCollector(srcData) {
         }
     })();
 
+    const hl7RefMap = new WeakMap();
+    const mismatchSeen = new Set();
+    const scannedTemplates = new Set();
+    const templateStack = [];
+
+    function indexFieldRef(field, fieldPath) {
+        if (!isObject(field)) {
+            return;
+        }
+        if (!hl7RefMap.has(field)) {
+            hl7RefMap.set(field, {kind: 'field', path: fieldPath});
+        }
+        const comps = field.Components || [];
+        for (let k = 1; k < comps.length; k++) {
+            const c = comps[k];
+            if (c && isObject(c) && !hl7RefMap.has(c)) {
+                hl7RefMap.set(c, {kind: 'component', path: fieldPath, compPath: fieldPath + '.' + k});
+            }
+        }
+    }
+
+    function indexSegmentRef(seg, segName) {
+        if (!isSegment(seg) || hl7RefMap.has(seg)) {
+            return;
+        }
+        const name = segName || (typeof seg.Value === 'string' ? seg.Value.slice(0, 3) : '');
+        if (!name) {
+            return;
+        }
+        hl7RefMap.set(seg, {kind: 'segment', seg: name});
+        const fields = seg.Fields || [];
+        for (let j = 1; j < fields.length; j++) {
+            if (fields[j]) {
+                indexFieldRef(fields[j], name + '.' + j);
+            }
+        }
+    }
+
     const collector = {
         pendingPartial: null,
         rootScope: null,
         partials: {},
         partialOrder: [],
+        fieldReads: [],
+        caseMismatches: [],
+        _hl7ModelIndexed: null,
+
+        recordFieldRead(path) {
+            recordFieldRead(this, path);
+        },
+
+        pushTemplate(name) {
+            templateStack.push(name || '__root__');
+        },
+
+        popTemplate() {
+            templateStack.pop();
+        },
+
+        currentTemplate() {
+            return templateStack.length > 0 ? templateStack[templateStack.length - 1] : '__root__';
+        },
+
+        indexHl7Model(hl7v2Data) {
+            if (!hl7v2Data || this._hl7ModelIndexed === hl7v2Data) {
+                return;
+            }
+            if (Array.isArray(hl7v2Data.data)) {
+                const meta = Array.isArray(hl7v2Data.meta) ? hl7v2Data.meta : [];
+                for (let i = 0; i < hl7v2Data.data.length; i++) {
+                    indexSegmentRef(hl7v2Data.data[i], meta[i]);
+                }
+                this._hl7ModelIndexed = hl7v2Data;
+            }
+        },
+
+        indexFieldRepeats(fieldPath, repeatsArr) {
+            if (!fieldPath || !Array.isArray(repeatsArr)) {
+                return;
+            }
+            for (let i = 0; i < repeatsArr.length; i++) {
+                indexFieldRef(repeatsArr[i], fieldPath);
+            }
+        },
+
+        lookupHl7Ref(val) {
+            if (!isObject(val)) {
+                return null;
+            }
+            const hit = hl7RefMap.get(val);
+            if (hit) {
+                return hit;
+            }
+            if (isSegment(val)) {
+                indexSegmentRef(val, null);
+                return hl7RefMap.get(val) || null;
+            }
+            return null;
+        },
+
+        isPlainContainer(val) {
+            return isObject(val) && !Array.isArray(val) && !isSegment(val) && !isField(val) && !isComponent(val);
+        },
+
+        recordCaseMismatch(entry) {
+            if (!entry || typeof entry.read !== 'string' || typeof entry.actual !== 'string') {
+                return;
+            }
+            if (entry.read.length === 0 || entry.read === entry.actual
+                || entry.read.toLowerCase() !== entry.actual.toLowerCase()) {
+                return;
+            }
+            if (this.caseMismatches.length >= MAX_CASE_MISMATCHES) {
+                return;
+            }
+            const tpl = normalizeTemplateLabel(entry.template);
+            const dedupKey = tpl + '\0' + entry.read + '\0' + entry.actual;
+            if (mismatchSeen.has(dedupKey)) {
+                return;
+            }
+            mismatchSeen.add(dedupKey);
+            this.caseMismatches.push({
+                template: tpl,
+                read: entry.read,
+                actual: entry.actual
+            });
+        },
+
+        scanTemplateSource(templateName, templateSource, scopeKeys) {
+            if (this.caseMismatches.length >= MAX_CASE_MISMATCHES
+                || typeof templateSource !== 'string' || templateSource.length === 0) {
+                return;
+            }
+            const sig = normalizeTemplateLabel(templateName) + '\0' + scopeKeys.join(',');
+            if (scannedTemplates.has(sig)) {
+                return;
+            }
+            scannedTemplates.add(sig);
+            scanTemplateCaseMismatches(templateName, templateSource, scopeKeys, this);
+        },
 
         // Root scope snapshot, taken by the worker AFTER the root render completes
         // (so every {% assign %} in the root template is visible). `msg` and `hl7v2Data`
@@ -325,7 +588,8 @@ export function createDebugCollector(srcData) {
             return {
                 durationMs: durationMs,
                 parsedHl7v2: parsedHl7v2,
-                scopes: scopes
+                scopes: scopes,
+                caseMismatches: this.caseMismatches.slice()
             };
         }
     };

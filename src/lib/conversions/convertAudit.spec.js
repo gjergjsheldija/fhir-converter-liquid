@@ -1,8 +1,8 @@
 import assert from "assert";
-import {mkdtempSync, readFileSync, rmSync} from "fs";
+import {existsSync, mkdtempSync, readFileSync, rmSync} from "fs";
 import {tmpdir} from "os";
 import {join} from "path";
-import {appendAudit, auditLine, authorizeConvert} from "./convertAudit.js";
+import {MAX_LOG_BYTES, appendAudit, appendAuditAsync, auditLine, authorizeConvert} from "./convertAudit.js";
 import {controlIdOf} from "./failureLog.js";
 
 const RAW = "MSH|^~\\&|APP|FAC|APP2|FAC2|20260101||ADT^A01|CTRL-123|P|2.5\rPID|1||SECRET-MRN||DOE^JANE\r";
@@ -77,6 +77,41 @@ describe("convert API key and audit line", function () {
             assert.strictEqual(lines.length, 2);
             assert.strictEqual(JSON.parse(lines[0]).controlId, "C1");
             assert.strictEqual(JSON.parse(lines[1]).status, 401);
+        });
+
+        it("rotates to .1 when file size reaches maxBytes and overwrites previous .1", function () {
+            assert.strictEqual(MAX_LOG_BYTES, 5 * 1024 * 1024);
+            const file = join(dir, "rotated-audit.jsonl");
+            appendAudit({status: 200, template: "ADT_A01", controlId: "C1"}, file, {maxBytes: 150});
+            appendAudit({status: 200, template: "ADT_A02", controlId: "C2"}, file, {maxBytes: 150});
+            assert.strictEqual(existsSync(file + ".1"), false);
+
+            appendAudit({status: 200, template: "ADT_A03", controlId: "C3"}, file, {maxBytes: 150});
+            assert.strictEqual(existsSync(file + ".1"), true);
+            const rotatedFirst = readFileSync(file + ".1", "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).controlId);
+            const currentFirst = readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).controlId);
+            assert.deepStrictEqual(rotatedFirst, ["C1", "C2"]);
+            assert.deepStrictEqual(currentFirst, ["C3"]);
+
+            appendAudit({status: 200, template: "ADT_A04", controlId: "C4"}, file, {maxBytes: 150});
+            appendAudit({status: 200, template: "ADT_A05", controlId: "C5"}, file, {maxBytes: 150});
+            const rotatedSecond = readFileSync(file + ".1", "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).controlId);
+            const currentSecond = readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).controlId);
+            assert.deepStrictEqual(rotatedSecond, ["C3", "C4"]);
+            assert.deepStrictEqual(currentSecond, ["C5"]);
+        });
+
+        it("serializes concurrent appendAuditAsync calls with rotation without losing entries", async function () {
+            const file = join(dir, "async", "conversion-audit.jsonl");
+            await Promise.all([
+                appendAuditAsync({status: 200, template: "ADT_A01", controlId: "A1"}, file, {maxBytes: 150}),
+                appendAuditAsync({status: 200, template: "ADT_A02", controlId: "A2"}, file, {maxBytes: 150}),
+                appendAuditAsync({status: 200, template: "ADT_A03", controlId: "A3"}, file, {maxBytes: 150})
+            ]);
+            assert.strictEqual(existsSync(file + ".1"), true);
+            const rotated = readFileSync(file + ".1", "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).controlId);
+            const active = readFileSync(file, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l).controlId);
+            assert.deepStrictEqual([...rotated, ...active], ["A1", "A2", "A3"]);
         });
     });
 });

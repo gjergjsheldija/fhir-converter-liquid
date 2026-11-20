@@ -1,6 +1,7 @@
 import assert from "assert";
 import {
     lookupLineage,
+    recordFieldRead,
     recordLineageRender,
     traceRender,
     buildLineage
@@ -91,6 +92,38 @@ describe("result lineage", function () {
             assert.strictEqual(lookupLineage(rows, "code.x").template, "T");
             assert.strictEqual(lookupLineage(rows, "y"), null);
         });
+
+        it("populates sourcePath when recordLineageRender receives a sourcePath while 5-arg calls stay empty", function () {
+            const text = '{"entry":[{"resource":{"id":"abc","name":[{"family":"BROS"}]}}]}';
+            const emitter = {buffer: text};
+            const collector = {};
+            recordLineageRender(
+                collector,
+                "Resource/_Patient",
+                emitter,
+                text.indexOf('"resource"'),
+                text.indexOf('"BROS"}]') + '"BROS"}]'.length
+            );
+            recordLineageRender(
+                collector,
+                "DataType/_HumanName",
+                emitter,
+                text.indexOf('{"family"'),
+                text.indexOf('"BROS"}') + '"BROS"}'.length,
+                "PID.5"
+            );
+            const rows = buildLineage(collector.lineageRenders, text, JSON.parse(text));
+            assert.deepStrictEqual(lookupLineage(rows, "entry.0.resource.name.0.family"), {
+                outputPath: "entry.0.resource.name.0.family",
+                template: "DataType/_HumanName",
+                sourcePath: "PID.5"
+            });
+            assert.deepStrictEqual(lookupLineage(rows, "entry.0.resource.id"), {
+                outputPath: "entry.0.resource.id",
+                template: "Resource/_Patient",
+                sourcePath: ""
+            });
+        });
     });
 
     describe("traceRender", function () {
@@ -109,6 +142,41 @@ describe("result lineage", function () {
             const span = collector.lineageRenders[0];
             assert.strictEqual(span.template, "Resource/_X");
             assert.strictEqual(emitter.buffer.slice(span.start, span.end), "written");
+            assert.strictEqual(span.sourcePath, "");
+        });
+
+        it("captures distinct direct HL7 field reads per partial span without leaking child reads to parent", function () {
+            const emitter = {buffer: ""};
+            const collector = {};
+            function* child() {
+                recordFieldRead(collector, "PID.5");
+                recordFieldRead(collector, "PID.5");
+                emitter.buffer += '{"family":"BROS"}';
+                yield "child";
+            }
+            function* parent() {
+                emitter.buffer += '{"birthDate":"1950-10-02",';
+                recordFieldRead(collector, "PID.7");
+                recordFieldRead(collector, "PID.8");
+                emitter.buffer += '"name":[';
+                yield* traceRender(collector, "DataType/_HumanName", emitter, child());
+                emitter.buffer += ']}';
+            }
+            const it = traceRender(collector, "Resource/_Patient", emitter, parent());
+            while (!it.next().done) {
+                // exhaust generator
+            }
+            const rows = buildLineage(collector.lineageRenders, emitter.buffer, JSON.parse(emitter.buffer));
+            assert.deepStrictEqual(lookupLineage(rows, "name.0.family"), {
+                outputPath: "name.0.family",
+                template: "DataType/_HumanName",
+                sourcePath: "PID.5"
+            });
+            assert.deepStrictEqual(lookupLineage(rows, "birthDate"), {
+                outputPath: "birthDate",
+                template: "Resource/_Patient",
+                sourcePath: "PID.7, PID.8"
+            });
         });
     });
 });
