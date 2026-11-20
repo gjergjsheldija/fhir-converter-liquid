@@ -741,6 +741,28 @@
             });
         }
         container.append(unusedSection);
+
+        if (Array.isArray(info.unmapped)) {
+            var unmappedRows = info.unmapped.filter(function (row) {
+                if (!q) {
+                    return true;
+                }
+                return (row.system + ' | ' + row.code + ' ' + row.path).toLowerCase().indexOf(q) !== -1;
+            });
+            var unmappedSection = $('<div class="debug-diag-section"></div>');
+            unmappedSection.append($('<div class="debug-diag-heading"></div>').text('Unmapped Codes (' + info.unmapped.length + ')'));
+            if (info.unmapped.length === 0) {
+                unmappedSection.append($('<div class="debug-empty">No unmapped codes</div>'));
+            } else {
+                unmappedRows.forEach(function (row) {
+                    var item = $('<div class="debug-diag-item"></div>');
+                    item.append($('<span class="debug-tree-key"></span>').text(row.system + ' | ' + row.code));
+                    item.append($('<span class="debug-tree-val"></span>').text(row.path));
+                    unmappedSection.append(item);
+                });
+            }
+            container.append(unmappedSection);
+        }
     }
 
     // --- Tab 4: Expected diff (editor Spec 06) ----------------------------------------
@@ -1190,6 +1212,18 @@
         $(document).on('fhir:debug-updated', function () {
             renderActivePanel();
             refreshExpectedDiff();
+        });
+
+        // Project convert responses may carry `unmapped`. The editor's success callback has already
+        // set window.latestDebugInfo; attach the list only when it belongs to this response.
+        $(document).ajaxSuccess(function (event, xhr, settings, data) {
+            var info = window.latestDebugInfo;
+            if (!info || !data || !Array.isArray(data.unmapped) || info.fhirResource !== data.fhirResource ||
+                String(settings.url || '').indexOf('/api/v1/projects/convert') !== 0) {
+                return;
+            }
+            info.unmapped = data.unmapped;
+            renderActivePanel();
         });
     });
 })();

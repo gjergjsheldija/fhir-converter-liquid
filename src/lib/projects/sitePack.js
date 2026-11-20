@@ -129,6 +129,35 @@ function walk(node, pack) {
     return copy;
 }
 
+function collectUnmappedInto(node, pack, nodePath, rows) {
+    if (Array.isArray(node)) {
+        node.forEach((item, index) => collectUnmappedInto(item, pack, nodePath ? `${nodePath}.${index}` : String(index), rows));
+        return;
+    }
+    if (!isPlainObject(node)) {
+        return;
+    }
+    if (isCoding(node) && !findMappedTarget(pack, node)) {
+        rows.push({system: node.system, code: node.code, path: nodePath});
+    }
+    for (const [key, value] of Object.entries(node)) {
+        collectUnmappedInto(value, pack, nodePath ? `${nodePath}.${key}` : key, rows);
+    }
+}
+
+/**
+ * Lists Codings in the original resource that no ConceptMap group rewrites, as {system, code, path}.
+ * A missing pack yields an empty array; identifiers are never listed.
+ */
+export function collectUnmapped(resource, pack) {
+    const rows = [];
+    if (!pack) {
+        return rows;
+    }
+    collectUnmappedInto(resource, pack, "", rows);
+    return rows;
+}
+
 /** Returns a deep copy of resource with ConceptMap and identifier-system rules applied. */
 export function applySitePack(resource, pack) {
     return walk(resource, pack || {});

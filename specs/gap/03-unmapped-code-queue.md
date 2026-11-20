@@ -1,6 +1,6 @@
 # Spec 03: Unmapped codes after the site pack
 
-**Status:** Not started (2026-11-20). Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
+**Status:** Done (2026-11-20). Verified with sitePack.spec.js (6 passing), test-summary (728 passing, 0 unexpected failures) and the Diagnostics panel at http://127.0.0.1:2019. Follow `.agents/skills/spec-runner/SKILL.md`, `.agents/skills/test-baseline/SKILL.md`, and `AGENTS.md`. Do not start another gap spec in this change.
 
 ## 1. Goal
 
