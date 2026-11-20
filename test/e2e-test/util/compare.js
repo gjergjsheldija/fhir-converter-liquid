@@ -3,11 +3,30 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-// TODO: consider using `util` nodule inside node env
-import pkg from 'lodash';
-const { isEqual, isPlainObject, isArray, union, xor, isEmpty, cloneDeep } = pkg;
+import { isDeepStrictEqual } from 'node:util';
 import { ExtraDynamicFieldInterceptor } from './interceptors.js';
 export const MAX_COMPARISION_DEPTH = 100;
+
+const isPlainObject = (val) => {
+    if (val === null || typeof val !== 'object') {
+        return false;
+    }
+    const proto = Object.getPrototypeOf(val);
+    return proto === Object.prototype || proto === null;
+};
+
+const union = (a, b) => [...new Set([...a, ...b])];
+
+const xor = (a, b) => {
+    const setA = new Set(a);
+    const setB = new Set(b);
+    return [
+        ...[...setA].filter((x) => !setB.has(x)),
+        ...[...setB].filter((x) => !setA.has(x))
+    ];
+};
+
+const isEmpty = (arr) => arr.length === 0;
 
 /**
  * Recursively sort object keys for stable JSON comparison.
@@ -49,23 +68,23 @@ export const getGroundTruthFileName = testCase => {
 
 const __compareContent = (propPrefix, left, right, depth) => {
     if (depth >= MAX_COMPARISION_DEPTH) {
-        if (!isEqual(left, right)) {
+        if (!isDeepStrictEqual(left, right)) {
             throw new Error(`The conversion result has different property: [${propPrefix}]`);
         }
         return true;
     }
 
     const objectFlag = isPlainObject(left) && isPlainObject(right);
-    const arrayFlag = isArray(left) && isArray(right);
-    
+    const arrayFlag = Array.isArray(left) && Array.isArray(right);
+
     if (objectFlag) {
         const leftPros = Object.keys(left);
         const rightPros = Object.keys(right);
-    
+
         const totalPros = union(leftPros, rightPros);
         const leftDiffs = xor(leftPros, totalPros);
         const rightDiffs = xor(rightPros, totalPros);
-    
+
         if (!isEmpty(leftDiffs)) {
             throw new Error(`The conversion result lacks these properties: [${propPrefix}[${leftDiffs.toString()}]]`);
         }
@@ -79,16 +98,16 @@ const __compareContent = (propPrefix, left, right, depth) => {
     // TODO: The array comparision can be done in a finer granularity
     else if (arrayFlag) {
         // Sort arrays using stable stringify (key-order independent)
-        const sortedLeft = cloneDeep(left).sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
-        const sortedRight = cloneDeep(right).sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
+        const sortedLeft = structuredClone(left).sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
+        const sortedRight = structuredClone(right).sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
         // Use deep equality comparison (ignores property order)
-        if (!isEqual(sortedLeft, sortedRight)) {
+        if (!isDeepStrictEqual(sortedLeft, sortedRight)) {
             throw new Error(`The conversion result has different property: [${propPrefix}Array]`);
         }
         return true;
     }
     else {
-        if (isEqual(left, right)) {
+        if (isDeepStrictEqual(left, right)) {
             return true;
         }
         throw new Error(`The conversion result has different property: [${propPrefix}]`);

@@ -1,8 +1,8 @@
 import {equal, ok} from 'assert';
 import {createServer as _createServer} from 'http';
+import {Writable} from 'node:stream';
 import morgan from "morgan";
 import request from 'supertest';
-import split from 'split';
 
 describe('custom logging', function () {
     describe(':header_uuid', function () {
@@ -221,7 +221,17 @@ function after(count, callback) {
 }
 
 function createLineStream(callback) {
-    return split().on('data', callback);
+    let buffer = '';
+    return new Writable({
+        write(chunk, _encoding, next) {
+            const lines = (buffer + chunk.toString()).split(/\r?\n/);
+            buffer = lines.pop();
+            for (const line of lines) {
+                callback(line);
+            }
+            next();
+        }
+    });
 }
 
 function createRequestListener(format, opts, fn, fn1) {

@@ -3,32 +3,26 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-
-import {join} from 'path';
-import {readFile} from 'fs';
-import Promise from 'promise';
-import pkg from 'memory-cache';
+import { join } from 'path';
+import { readFile } from 'node:fs/promises';
 import {
-    CLS_NAMESPACE,
+    CCDA_LIQUID_TEMPLATE_LOCATION,
+    HL7V2_LIQUID_TEMPLATE_LOCATION,
     TIMEZONE
 } from '../constants/constants.js';
-import {errorCodes, errorMessage} from '../error/error.js';
-import {instance as _liquidInstance} from '../liquid-converter/liquid-converter.js';
-import {CCDA_LIQUID_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION} from '../constants/constants.js';
-import {parentPort} from 'worker_threads';
-import {workerTaskProcessor} from './workerUtils.js';
+import { errorCodes, errorMessage } from '../error/error.js';
+import { instance as _liquidInstance } from '../liquid-converter/liquid-converter.js';
+import { runWithConversionContext } from '../liquid-converter/conversionContext.js';
+import { parentPort } from 'worker_threads';
+import { workerTaskProcessor } from './workerUtils.js';
 import dataHandlerFactory from '../dataHandler/dataHandlerFactory.js';
-import {summarizeCcda} from '../parsers/ccda/ccda.js';
-import pkg2 from 'cls-hooked';
-import {Context, toPromise} from 'liquidjs';
-import {createDebugCollector, serializeHl7v2Debug, DEBUG_COLLECTOR_KEY} from '../liquid-converter/debugCollector.js';
-import {buildLineage} from '../liquid-converter/lineage.js';
-import {segmentIdsFromMessage, undeclaredSegments} from '../parsers/hl7v2/declaredSegments.js';
+import { summarizeCcda } from '../parsers/ccda/ccda.js';
+import { Context, toPromise } from 'liquidjs';
+import { createDebugCollector, serializeHl7v2Debug, DEBUG_COLLECTOR_KEY } from '../liquid-converter/debugCollector.js';
+import { buildLineage } from '../liquid-converter/lineage.js';
+import { segmentIdsFromMessage, undeclaredSegments } from '../parsers/hl7v2/declaredSegments.js';
 
-const {clear, get, put} = pkg;
-
-const {createNamespace} = pkg2;
-var session = createNamespace(CLS_NAMESPACE);
+const compiledTemplateCache = new Map();
 
 var rebuildLiquidCache = true;
 
@@ -42,7 +36,7 @@ function GetLiquidInstance(dataTypeHandler, templatesMap, templateDirectory, str
         dataTypeHandler,
         rootDir,
         templatesMap,
-        {strictOverridesOnly: Boolean(strictOverridesOnly), fallbackTemplateDirectory}
+        { strictOverridesOnly: Boolean(strictOverridesOnly), fallbackTemplateDirectory }
     );
     rebuildLiquidCache = needToUseMap ? true : false;
 
@@ -51,7 +45,7 @@ function GetLiquidInstance(dataTypeHandler, templatesMap, templateDirectory, str
 
 function expireCache() {
     rebuildLiquidCache = true;
-    clear();
+    compiledTemplateCache.clear();
 }
 
 // Exact mirror of liquidjs Liquid#parseAndRender (parse + new Context(scope, options,
@@ -67,7 +61,7 @@ function renderTemplateWithOptionalDebug(liquidInstance, preProcessedTemplate, d
         return liquidInstance.parseAndRender(preProcessedTemplate, dataContext);
     }
     const templates = liquidInstance.parse(preProcessedTemplate);
-    const ctx = new Context(dataContext, liquidInstance.options, {sync: false});
+    const ctx = new Context(dataContext, liquidInstance.options, { sync: false });
     // renderTemplates returns a generator iterator (not a Promise); toPromise consumes it
     // exactly like Liquid#parseAndRender does, resolving with the rendered string.
     return toPromise(liquidInstance.renderer.renderTemplates(templates, ctx)).then((rendered) => {
@@ -78,173 +72,173 @@ function renderTemplateWithOptionalDebug(liquidInstance, preProcessedTemplate, d
 
 export function convertInlineHl7v2(msg) {
     return new Promise((fulfill, reject) => {
-        session.run(() => {
-            try {
-                var s = msg.srcData;
+        try {
+            var s = msg.srcData;
 
-                if (typeof s !== 'string') {
+            if (typeof s !== 'string') {
+                reject({
+                    'status': 400,
+                    'resultMsg': errorMessage(errorCodes.BadRequest, "srcData must be a string.")
+                });
+                return;
+            }
+
+            var templateString = "";
+            if (msg.template) {
+                templateString = msg.template;
+            }
+
+            var templatesMap = undefined;
+            if (msg.templatesOverride) {
+                if (msg.templatesOverride.constructor !== Object) {
                     reject({
                         'status': 400,
-                        'resultMsg': errorMessage(errorCodes.BadRequest, "srcData must be a string.")
+                        'resultMsg': errorMessage(errorCodes.BadRequest, "templatesOverride must be a JSON object.")
                     });
                     return;
                 }
-
-                var templateString = "";
-                if (msg.template) {
-                    templateString = msg.template;
-                }
-
-                var templatesMap = undefined;
-                if (msg.templatesOverride) {
-                    if (msg.templatesOverride.constructor !== Object) {
-                        reject({
-                            'status': 400,
-                            'resultMsg': errorMessage(errorCodes.BadRequest, "templatesOverride must be a JSON object.")
-                        });
-                        return;
-                    }
-                    templatesMap = msg.templatesOverride;
-                }
-
-                var dataTypeHandler = dataHandlerFactory.createDataHandler(msg.srcDataType);
-
-                const isCcda = dataTypeHandler.dataType === 'ccda';
-                if (dataTypeHandler.dataType === 'hl7v2' || isCcda) {
-                    let liquidInstance = GetLiquidInstance(
-                        dataTypeHandler,
-                        templatesMap,
-                        msg.templateDirectory,
-                        msg.strictOverridesOnly,
-                        msg.fallbackTemplateDirectory
-                    );
-                    session.set(TIMEZONE, msg.timezone);
-
-                    // Strictly opt-in debug metadata (Web UI ?debug=true). When active, a per-request
-                    // collector is stored on this request's CLS session so the liquid engine's
-                    // partial-render hooks (debugCollector.js) can attach to it. Non-debug requests
-                    // never create or store a collector and never pay for serialization.
-                    const collector = msg.debug === true ? createDebugCollector(isCcda ? '' : s) : null;
-                    if (collector) {
-                        session.set(DEBUG_COLLECTOR_KEY, collector);
-                    }
-                    const debugStartedAt = collector ? Date.now() : 0;
-
-                    dataTypeHandler.parseSrcData(s)
-                        .then((parsedData) => {
-                            var dataContext = isCcda ? {msg: parsedData} : {msg: parsedData, hl7v2Data: parsedData.v2};
-                            if (templateString == null || templateString.length == 0) {
-                                var result = Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), JSON.parse(JSON.stringify(dataContext.msg)));
-                                fulfill({'status': 200, 'resultMsg': result});
-                                return;
-                            }
-                            renderTemplateWithOptionalDebug(liquidInstance, dataTypeHandler.preProcessTemplate(templateString), dataContext, collector)
-                                .then((rendered) => {
-                                    try {
-                                        var result = dataTypeHandler.postProcessResult(rendered);
-                                        // getConversionResultMetadata (the unusedSegments report) MUST run before
-                                        // debugInfo is built: serializeHl7v2Debug performs marking reads
-                                        // (field.Repeats) that are only safe once this response's report is
-                                        // already built -- the tracked model is per-request, so those reads
-                                        // cannot influence this response's unusedSegments.
-                                        const metadata = dataTypeHandler.getConversionResultMetadata(dataContext.msg);
-                                        const resultMsg = Object.assign(metadata, {'fhirResource': result});
-                                        if (collector) {
-                                            resultMsg.debugInfo = collector.buildDebugInfo(Date.now() - debugStartedAt, isCcda ? null : serializeHl7v2Debug(s, dataContext.msg.v2));
-                                            if (isCcda) {
-                                                resultMsg.debugInfo.parsedCcda = summarizeCcda(dataContext.msg);
-                                            }
-                                            resultMsg.debugInfo.lineage = buildLineage(collector.lineageRenders, rendered, result);
-                                            if (!isCcda && Array.isArray(msg.declaredSegments)) {
-                                                resultMsg.debugInfo.undeclaredSegments = undeclaredSegments(segmentIdsFromMessage(s), msg.declaredSegments);
-                                            }
-                                        }
-                                        fulfill({'status': 200, 'resultMsg': resultMsg});
-                                    } catch (err) {
-                                        reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString())});
-                                    }
-                                })
-                                .catch((err) => {
-                                    reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString())});
-                                });
-                        })
-                        .catch(err => {
-                            reject({
-                                'status': 400,
-                                'resultMsg': errorMessage(errorCodes.BadRequest, `Unable to parse input data. ${err.toString()}`)
-                            });
-                        });
-                } else {
-                    reject({
-                        'status': 400,
-                        'resultMsg': errorMessage(errorCodes.BadRequest, `Data type '${dataTypeHandler.dataType}' is not supported. This converter only supports HL7v2.`)
-                    });
-                }
-            } catch (err) {
-                reject({'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, `${err.toString()}`)});
+                templatesMap = msg.templatesOverride;
             }
-        });
+
+            var dataTypeHandler = dataHandlerFactory.createDataHandler(msg.srcDataType);
+
+            const isCcda = dataTypeHandler.dataType === 'ccda';
+            if (dataTypeHandler.dataType === 'hl7v2' || isCcda) {
+                let liquidInstance = GetLiquidInstance(
+                    dataTypeHandler,
+                    templatesMap,
+                    msg.templateDirectory,
+                    msg.strictOverridesOnly,
+                    msg.fallbackTemplateDirectory
+                );
+
+                // Strictly opt-in debug metadata (Web UI ?debug=true). When active, a per-request
+                // collector is stored on this request's conversion context so the liquid engine's
+                // partial-render hooks (debugTelemetry.js) can attach to it. Non-debug requests
+                // never create or store a collector and never pay for serialization.
+                const collector = msg.debug === true ? createDebugCollector(isCcda ? '' : s) : null;
+                const debugStartedAt = collector ? Date.now() : 0;
+
+                runWithConversionContext(
+                    {
+                        [TIMEZONE]: msg.timezone,
+                        ...(collector ? { [DEBUG_COLLECTOR_KEY]: collector } : {})
+                    },
+                    () => {
+                        dataTypeHandler.parseSrcData(s)
+                            .then((parsedData) => {
+                                var dataContext = isCcda ? { msg: parsedData } : { msg: parsedData, hl7v2Data: parsedData.v2 };
+                                if (templateString == null || templateString.length == 0) {
+                                    var result = Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), JSON.parse(JSON.stringify(dataContext.msg)));
+                                    fulfill({ 'status': 200, 'resultMsg': result });
+                                    return;
+                                }
+                                renderTemplateWithOptionalDebug(liquidInstance, dataTypeHandler.preProcessTemplate(templateString), dataContext, collector)
+                                    .then((rendered) => {
+                                        try {
+                                            var result = dataTypeHandler.postProcessResult(rendered);
+                                            // getConversionResultMetadata (the unusedSegments report) MUST run before
+                                            // debugInfo is built: serializeHl7v2Debug performs marking reads
+                                            // (field.Repeats) that are only safe once this response's report is
+                                            // already built -- the tracked model is per-request, so those reads
+                                            // cannot influence this response's unusedSegments.
+                                            const metadata = dataTypeHandler.getConversionResultMetadata(dataContext.msg);
+                                            const resultMsg = Object.assign(metadata, { 'fhirResource': result });
+                                            if (collector) {
+                                                resultMsg.debugInfo = collector.buildDebugInfo(Date.now() - debugStartedAt, isCcda ? null : serializeHl7v2Debug(s, dataContext.msg.v2));
+                                                if (isCcda) {
+                                                    resultMsg.debugInfo.parsedCcda = summarizeCcda(dataContext.msg);
+                                                }
+                                                resultMsg.debugInfo.lineage = buildLineage(collector.lineageRenders, rendered, result);
+                                                if (!isCcda && Array.isArray(msg.declaredSegments)) {
+                                                    resultMsg.debugInfo.undeclaredSegments = undeclaredSegments(segmentIdsFromMessage(s), msg.declaredSegments);
+                                                }
+                                            }
+                                            fulfill({ 'status': 200, 'resultMsg': resultMsg });
+                                        } catch (err) {
+                                            reject({ 'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString()) });
+                                        }
+                                    })
+                                    .catch((err) => {
+                                        reject({ 'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "Unable to create result: " + err.toString()) });
+                                    });
+                            })
+                            .catch((err) => {
+                                reject({
+                                    'status': 400,
+                                    'resultMsg': errorMessage(errorCodes.BadRequest, `Unable to parse input data. ${err.toString()}`)
+                                });
+                            });
+                    }
+                );
+            } else {
+                reject({
+                    'status': 400,
+                    'resultMsg': errorMessage(errorCodes.BadRequest, `Data type '${dataTypeHandler.dataType}' is not supported. This converter only supports HL7v2.`)
+                });
+            }
+        } catch (err) {
+            reject({ 'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, `${err.toString()}`) });
+        }
     });
 }
 
 if (parentPort) {
     workerTaskProcessor((msg) => {
         return new Promise((fulfill, reject) => {
-            session.run(() => {
-                switch (msg.type) {
-                    case '/api/convert/:srcDataType': {
-                        convertInlineHl7v2(msg).then(fulfill, reject);
+            switch (msg.type) {
+                case '/api/convert/:srcDataType': {
+                    convertInlineHl7v2(msg).then(fulfill, reject);
+                }
+                    break;
+
+                case '/api/convert/:srcDataType/:template': {
+                    let srcData = msg.srcData;
+                    let templateName = msg.templateName;
+                    let srcDataType = msg.srcDataType;
+                    let dataTypeHandler = dataHandlerFactory.createDataHandler(srcDataType);
+
+                    if (!srcData || srcData.length == 0) {
+                        reject({
+                            'status': 400,
+                            'resultMsg': errorMessage(errorCodes.BadRequest, "No srcData provided.")
+                        });
+                        return;
                     }
-                        break;
 
-                    case '/api/convert/:srcDataType/:template': {
-                        let srcData = msg.srcData;
-                        let templateName = msg.templateName;
-                        let srcDataType = msg.srcDataType;
-                        let dataTypeHandler = dataHandlerFactory.createDataHandler(srcDataType);
+                    if (dataTypeHandler.dataType === 'hl7v2') {
+                        let liquidInstance = GetLiquidInstance(dataTypeHandler);
 
-                        if (!srcData || srcData.length == 0) {
-                            reject({
-                                'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "No srcData provided.")
-                            });
-                        }
+                        const getLiquidTemplate = async (name) => {
+                            let template = compiledTemplateCache.get(name);
+                            if (template) {
+                                return template;
+                            }
+                            let templateContent;
+                            try {
+                                templateContent = await readFile(join(HL7V2_LIQUID_TEMPLATE_LOCATION, name));
+                            } catch {
+                                throw {
+                                    'status': 404,
+                                    'resultMsg': errorMessage(errorCodes.NotFound, "Template not found")
+                                };
+                            }
+                            try {
+                                template = dataTypeHandler.preProcessTemplate(templateContent.toString());
+                                compiledTemplateCache.set(name, template);
+                                return template;
+                            } catch (convertErr) {
+                                throw {
+                                    'status': 400,
+                                    'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template compilation. " + convertErr.toString())
+                                };
+                            }
+                        };
 
-                        if (dataTypeHandler.dataType === 'hl7v2') {
-                            let liquidInstance = GetLiquidInstance(dataTypeHandler);
-                            session.set(TIMEZONE, msg.timezone);
-
-                            const getLiquidTemplate = (templateName) => {
-                                return new Promise((fulfill, reject) => {
-                                    var template = get(templateName);
-                                    if (!template) {
-                                        readFile(join(HL7V2_LIQUID_TEMPLATE_LOCATION, templateName), (err, templateContent) => {
-                                            if (err) {
-                                                reject({
-                                                    'status': 404,
-                                                    'resultMsg': errorMessage(errorCodes.NotFound, "Template not found")
-                                                });
-                                            } else {
-                                                try {
-                                                    template = dataTypeHandler.preProcessTemplate(templateContent.toString());
-                                                    put(templateName, template);
-                                                    fulfill(template);
-                                                } catch (convertErr) {
-                                                    reject({
-                                                        'status': 400,
-                                                        'resultMsg': errorMessage(errorCodes.BadRequest, "Error during template compilation. " + convertErr.toString())
-                                                    });
-                                                }
-                                            }
-                                        });
-                                    } else {
-                                        fulfill(template);
-                                    }
-                                });
-                            };
-
+                        runWithConversionContext({ [TIMEZONE]: msg.timezone }, () => {
                             dataTypeHandler.parseSrcData(srcData)
                                 .then((parsedData) => {
-                                    var dataContext = {msg: parsedData, hl7v2Data: parsedData.v2};
+                                    var dataContext = { msg: parsedData, hl7v2Data: parsedData.v2 };
                                     getLiquidTemplate(templateName)
                                         .then((preProcessedTemplate) => {
                                             liquidInstance.parseAndRender(preProcessedTemplate, dataContext)
@@ -253,7 +247,7 @@ if (parentPort) {
                                                         var result = dataTypeHandler.postProcessResult(rendered);
                                                         fulfill({
                                                             'status': 200,
-                                                            'resultMsg': Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), {'fhirResource': result})
+                                                            'resultMsg': Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), { 'fhirResource': result })
                                                         });
                                                     } catch (convertErr) {
                                                         reject({
@@ -272,35 +266,35 @@ if (parentPort) {
                                             reject(err);
                                         });
                                 })
-                                .catch(err => {
+                                .catch((err) => {
                                     reject({
                                         'status': 400,
                                         'resultMsg': errorMessage(errorCodes.BadRequest, `Unable to parse input data. ${err.toString()}`)
                                     });
                                 });
-                        } else {
-                            reject({
-                                'status': 400,
-                                'resultMsg': errorMessage(errorCodes.BadRequest, `Data type '${dataTypeHandler.dataType}' is not supported. This converter only supports HL7v2.`)
-                            });
-                        }
+                        });
+                    } else {
+                        reject({
+                            'status': 400,
+                            'resultMsg': errorMessage(errorCodes.BadRequest, `Data type '${dataTypeHandler.dataType}' is not supported. This converter only supports HL7v2.`)
+                        });
                     }
-                        break;
-
-                    case 'templatesUpdated': {
-                        expireCache();
-                        fulfill();
-                    }
-                        break;
-
-                    case 'constantsUpdated': {
-                        JSON.parse(msg.data);
-                        expireCache();
-                        fulfill();
-                    }
-                        break;
                 }
-            });
+                    break;
+
+                case 'templatesUpdated': {
+                    expireCache();
+                    fulfill();
+                }
+                    break;
+
+                case 'constantsUpdated': {
+                    JSON.parse(msg.data);
+                    expireCache();
+                    fulfill();
+                }
+                    break;
+            }
         });
     });
 }

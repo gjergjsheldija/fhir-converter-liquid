@@ -4,7 +4,6 @@
 // -------------------------------------------------------------------------------------------------
 
 import { workerTaskProcessor } from './workerUtils.js';
-import Promise from 'promise';
 
 workerTaskProcessor((msg) => {
     return new Promise((fulfill, reject) => {

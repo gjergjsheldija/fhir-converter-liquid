@@ -2,8 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
-import { getNamespace } from "cls-hooked";
-import { CLS_NAMESPACE, TIMEZONE } from "../../constants/constants.js";
+import { TIMEZONE } from "../../constants/constants.js";
+import { getConversionValue } from "../conversionContext.js";
+
+const DEFAULT_TIMEZONE = "";
 
 function validDate(year, monthIndex, day) {
     var dateInstance = new Date(year, monthIndex, day);
@@ -67,8 +69,7 @@ function validDatetimeStringSafe(dateTimeString) {
 }
 
 export function formatAsDateTime(dateTimeString) {
-    var session = getNamespace(CLS_NAMESPACE);
-    var timezoneFromParams = (session && session.get(TIMEZONE)) || "";
+    var timezoneFromParams = getConversionValue(TIMEZONE) || DEFAULT_TIMEZONE;
     if (!validDatetimeStringSafe(dateTimeString)) return '';
 
     var ds = dateTimeString.toString();

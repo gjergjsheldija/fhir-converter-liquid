@@ -3,207 +3,131 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-import Promise from 'promise';
-import pkg from 'memory-cache';
-const { Cache: memCache } = pkg;
-import { readFile, mkdir, writeFile, unlink, readdir } from 'fs';
-import { join, dirname } from 'path';
-import { errorCodes } from '../error/error.js';
-import { errorMessage } from '../error/error.js';
+import { readdir, readFile, mkdir, writeFile, unlink } from 'node:fs/promises';
+import { join, dirname, relative, sep } from 'node:path';
+import { errorCodes, errorMessage } from '../error/error.js';
 
-const CACHED = "cached";
-const ACTUAL = "actual";
+async function walk(dir) {
+    const entries = await readdir(dir, { withFileTypes: true });
+    const files = [];
+    for (const entry of entries) {
+        if (entry.name.startsWith('.')) {
+            continue;
+        }
+        const fullPath = join(dir, entry.name);
+        if (entry.isDirectory()) {
+            files.push(...(await walk(fullPath)));
+        } else {
+            files.push(fullPath);
+        }
+    }
+    return files;
+}
 
 export default class fsCache {
     constructor(path) {
-        this._cache = new memCache();
+        this._cache = new Map();
         this._versions = {};
         this._path = path;
         this._empty = true;
+        this._initPromise = null;
     }
 
-    keys() {
-        //console.log(`keys`);
-        let cache = this._cache;
-        return new Promise((fulfill, reject) => {
-            this.init()
-                .then(() => fulfill(cache.keys()))
-                .catch((err) => reject(err));
-        });
+    async keys() {
+        await this.init();
+        return Array.from(this._cache.keys());
     }
 
-    has(key) {
-        //console.log(`has ${key}`);
-        let cache = this._cache;
-        return new Promise((fulfill, reject) => {
-            this.init()
-                .then(() => {
-                    if (cache.keys().includes(key)) {
-                        fulfill(true);
-                    }
-                    else {
-                        fulfill(false);
-                    }
-                })
-                .catch((err) => reject(err));
-        });
+    async has(key) {
+        await this.init();
+        return this._cache.has(key);
     }
 
-    get(key) {
-        //console.log(`get ${key}`);
-        let cache = this._cache;
-        let versions = this._versions;
-
-        return new Promise((fulfill, reject) => {
-            this.init()
-                .then(() => {
-                    if (cache.keys().includes(key)) {
-                        if (versions[key][CACHED] !== versions[key][ACTUAL]) {
-                            //console.log(`get ${key} : cache miss`);
-                            let version = versions[key][ACTUAL];
-                            let filePath = join(this._path, key);
-
-                            readFile(filePath, (err, content) => {
-                                if (err) {
-                                    reject(errorMessage(errorCodes.NotFound, `${key} not found`));
-                                }
-                                else {
-                                    cache.put(key, content);
-                                    versions[key][CACHED] = version;
-                                    fulfill(content);
-                                }
-                            });
-                        }
-                        else {
-                            fulfill(cache.get(key));
-                        }
-                    }
-                    else {
-                        reject(errorMessage(errorCodes.NotFound, `${key} not found`));
-                    }
-                });
-        });
+    async get(key) {
+        await this.init();
+        if (!this._cache.has(key)) {
+            throw errorMessage(errorCodes.NotFound, `${key} not found`);
+        }
+        if (this._versions[key].cached !== this._versions[key].actual) {
+            const version = this._versions[key].actual;
+            try {
+                const content = await readFile(join(this._path, key));
+                this._cache.set(key, content);
+                this._versions[key].cached = version;
+                return content;
+            } catch {
+                throw errorMessage(errorCodes.NotFound, `${key} not found`);
+            }
+        }
+        return this._cache.get(key);
     }
 
-    set(key, value) {
-        //console.log(`set ${key}`);
-        let cache = this._cache;
-        let versions = this._versions;
-
-        return new Promise((fulfill, reject) => {
-            this.init()
-                .then(() => {
-                    let fullFileName = join(this._path, key);
-                    mkdir(dirname(fullFileName), { recursive: true }, (err) => {
-                        // For some versions, mkdir throws EEXIST even if recursive:true is passed, which can be ignored here.
-                        if (err && (err.code !== 'EEXIST')) {
-                            reject(errorMessage(errorCodes.WriteError, err.message));
-                        }
-                        else {
-                            writeFile(fullFileName, value, function (err) {
-                                if (err) {
-                                    reject(errorMessage(errorCodes.WriteError, `Unable to write ${key}`));
-                                }
-                                else {
-                                    if (!cache.keys().includes(key)) {
-                                        versions[key] = { [CACHED]:0, [ACTUAL]:1 };
-                                        cache.put(key, undefined);
-                                    }
-                                    versions[key][ACTUAL]++;
-                                    fulfill();
-                                }
-                            });
-                        }
-                    });
-                });
-        });
+    async set(key, value) {
+        await this.init();
+        const fullFileName = join(this._path, key);
+        try {
+            await mkdir(dirname(fullFileName), { recursive: true });
+        } catch (err) {
+            if (err.code !== 'EEXIST') {
+                throw errorMessage(errorCodes.WriteError, err.message);
+            }
+        }
+        try {
+            await writeFile(fullFileName, value);
+        } catch {
+            throw errorMessage(errorCodes.WriteError, `Unable to write ${key}`);
+        }
+        if (!this._cache.has(key)) {
+            this._versions[key] = { cached: 0, actual: 1 };
+            this._cache.set(key, undefined);
+        }
+        this._versions[key].actual++;
     }
 
-    remove(key) {
-        //console.log(`remove ${key}`);
-        let cache = this._cache;
-        let versions = this._versions;
-
-        return new Promise((fulfill, reject) => {
-            this.init()
-                .then(() => {
-                    unlink(join(this._path, key), function (err) {
-                        if (err) {
-                            reject(errorMessage(errorCodes.NotFound, `Unable to find ${key}`));
-                        }
-                        else {
-                            cache.del(key);
-                            versions[key][ACTUAL]++;
-                            fulfill();
-                        }
-                    });
-                });
-        });
+    async remove(key) {
+        await this.init();
+        try {
+            await unlink(join(this._path, key));
+        } catch {
+            throw errorMessage(errorCodes.NotFound, `Unable to find ${key}`);
+        }
+        this._cache.delete(key);
+        if (this._versions[key]) {
+            this._versions[key].actual++;
+        }
     }
 
     clear() {
-        //console.log(`clear`);
         this._cache.clear();
         this._versions = {};
         this._empty = true;
+        this._initPromise = null;
     }
 
-    init() {
-        var walk = function (dir, done) {
-            var results = [];
-            readdir(dir, { withFileTypes: true }, function (err, list) {
-                if (err) return done(err);
-                var i = 0;
-                (function next() {
-                    var entry = list[i++];
-                    if (!entry) return done(null, results);
-
-                    if (!entry.name.startsWith('.')) { // avoid .git
-                        let file = dir + '/' + entry.name;
-                        if (entry.isDirectory()) {
-                            walk(file, function (err, res) {
-                                results = results.concat(res);
-                                next();
-                            });
-                        } else {
-                            results.push(file);
-                            next();
-                        }
+    async init() {
+        if (!this._empty) {
+            return;
+        }
+        if (!this._initPromise) {
+            this._initPromise = (async () => {
+                let files;
+                try {
+                    files = await walk(this._path);
+                } catch {
+                    this._initPromise = null;
+                    throw errorMessage(errorCodes.NotFound, `Unable to access location ${this._path}`);
+                }
+                for (const file of files) {
+                    const key = relative(this._path, file).split(sep).join('/');
+                    if (key && !this._cache.has(key)) {
+                        this._versions[key] = { cached: 0, actual: 1 };
+                        this._cache.set(key, undefined);
                     }
-                    else {
-                        next();
-                    }
-                })();
-            });
-        };
-
-        let cache = this._cache;
-        let versions = this._versions;
-
-        return new Promise((fulfill, reject) => {
-            if (this._empty) {
-                //console.log(`init`);
-                walk(this._path, (err, files) => {
-                    if (err) {
-                        reject(errorMessage(errorCodes.NotFound, `Unable to access location ${this._path}`));
-                    }
-                    else {
-                        const prefix = this._path + '/';
-                        files
-                            .filter(f => f && f.length > prefix.length) // filter invalid entry caused by another write operations (e.g. UpdateBaseTemplate)
-                            .forEach(f => { 
-                                let key = f.slice(prefix.length);
-                                versions[key] = { [CACHED]:0, [ACTUAL]:1 };
-                                cache.put(key, undefined);
-                            });
-                        this._empty = false;
-                        fulfill();
-                    }
-                });
-            }
-            else {
-                fulfill();
-            }
-        });
+                }
+                this._empty = false;
+                this._initPromise = null;
+            })();
+        }
+        return this._initPromise;
     }
 }

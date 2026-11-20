@@ -5,8 +5,6 @@
 
 import { fail, equal, deepEqual } from 'assert';
 import WorkerPool from './workerPool.js';
-import pkg from 'promise';
-const { all } = pkg;
 
 const testWorkerFileName = './src/lib/workers/testWorker.js';
 
@@ -39,7 +37,7 @@ describe('workerPool', function () {
             execArr.push(pool.exec({TestOnly : 'msg1'}));
             execArr.push(pool.exec({TestOnly : 'msg2'}));
         }
-        const resArr = await all(execArr);
+        const resArr = await Promise.all(execArr);
         deepEqual(resArr, ['b', 'c', 'b', 'c', 'b', 'c']);
         pool.destroy();
     });

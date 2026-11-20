@@ -1,5 +1,4 @@
 import {_evalToken, Context, Hash, Tokenizer} from "liquidjs";
-import {__assign} from "tslib";
 import assert from "assert";
 
 
@@ -37,7 +36,7 @@ export default {
         // include) in addition to the named arguments, and its assign/capture writes land in
         // the outermost scope. The named arguments shadow the inherited variables.
         childCtx.scopes = ctx.scopes.slice();
-        childCtx.push(__assign({}, yield hash.render(ctx)));
+        childCtx.push({ ...(yield hash.render(ctx)) });
 
         // parse sub template, retrieve result and assign to output variable
         const templates = yield liquid._parsePartialFile(filePath, childCtx.sync, this['currentFile']);

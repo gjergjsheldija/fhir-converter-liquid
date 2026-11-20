@@ -54,7 +54,6 @@ A standalone conversion service, API-, and template-editor-compatible with [Micr
 - `CONVERT_API_KEY` Bearer protection across convert and sensitive studio/management routes, with non-blocking async `5 MB`-rotated PHI-free `MSH-10` audit and failure logs
 - Project CLI (`bin/convert.mjs` / `npm run convert:project`) for HL7 v2 and C-CDA single conversions or `--check-goldens` checks
 - Open Integration Engine channel (`integrations/oie/hl7v2-to-fhir.xml`) with dynamic `MSH-9` routing, optional `CONVERT_API_KEY` header forwarding, and `MSA|AA` / `MSA|AE` ACK/NACK responses
-- Async, queue-driven conversion over AMQP (Apache ActiveMQ Artemis via `rhea`) for pipeline integration — optional, off by default
 - Prometheus metrics, structured logging, `/health` and `/version` endpoints
 - Multi-stage Docker build (prod / dev / test) with a docker-compose + Makefile workflow
 
@@ -250,15 +249,6 @@ The first command replaces both the source template directory and the generated 
 | `HEADLESS_RUNTIME`      | `false`      | Disable browser studio, browse, write, and outbound FHIR routes (`403`); keep health, metrics, and convert active   |
 | `PROJECTS_ROOT`         | `./projects` | Base folder used to resolve `:projectId` on `POST /api/v1/projects/:projectId/convert/:template`                    |
 
-`config/default.json` (loaded via `nconf`, overridable by env vars) controls the optional AMQP integration:
-
-| Key                                      | Purpose                                                 |
-| ---------------------------------------- | ------------------------------------------------------- |
-| `enable_message_broker`                  | Turn on queue-driven conversion (off by default)        |
-| `input_queue_name` / `output_queue_name` | Queues consumed/produced when enabled                   |
-| `message_broker.*`                       | Broker host/port/credentials                            |
-| `max_retries`                            | Retry attempts for a failed conversion before giving up |
-
 ## Docker
 
 ```bash
@@ -278,8 +268,7 @@ src/
 │   ├── projects/            # Local and GitHub project open, convert, and save
 │   ├── ai/                  # Template-generation clients (OpenAI-compatible, Anthropic, Gemini)
 │   ├── outputProcessor/     # Post-processing of rendered output into FHIR JSON
-│   ├── workers/             # Worker-pool for CPU-bound conversion
-│   └── message-broker/      # Optional AMQP queue integration
+│   └── workers/             # Worker-pool for CPU-bound conversion
 ├── templates/Hl7v2/         # Base Microsoft Liquid templates
 ├── service-templates/       # Templates served at runtime (regenerated from templates/)
 ├── sample-data/             # Bundled sample HL7v2 messages

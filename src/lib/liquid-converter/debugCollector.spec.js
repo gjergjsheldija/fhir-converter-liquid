@@ -1,5 +1,5 @@
 import assert from "assert";
-import {createNamespace, getNamespace} from "cls-hooked";
+import {runWithConversionContext} from "./conversionContext.js";
 import {
     createDebugCollector,
     serializeHl7v2Debug,
@@ -8,7 +8,6 @@ import {
 } from "./debugCollector.js";
 import {instance as getLiquidEngine} from "./liquid-converter.js";
 import {buildLineage, lookupLineage} from "./lineage.js";
-import {CLS_NAMESPACE} from "../constants/constants.js";
 import {trackAccess, buildUnusedSegmentsReport} from "../parsers/hl7v2/hl7v2AccessTracking.js";
 import {parseHl7v2FieldModel} from "../parsers/hl7v2/hl7v2FieldModel.js";
 
@@ -313,7 +312,6 @@ describe('debugCollector.js', function () {
         });
 
         it('tracks HL7 field lineage and case-mismatched variables end-to-end during debug Liquid rendering', async function () {
-            const ns = getNamespace(CLS_NAMESPACE) || createNamespace(CLS_NAMESPACE);
             const collector = createDebugCollector(HL7_MESSAGE);
             const tracked = trackAccess(parseHl7v2FieldModel(HL7_MESSAGE));
             const overrides = {
@@ -332,12 +330,12 @@ describe('debugCollector.js', function () {
                 '{"resource":{% include \'Resource/Encounter\' %}}' +
                 ']}';
 
-            const rendered = await ns.runAndReturn(async () => {
-                ns.set(DEBUG_COLLECTOR_KEY, collector);
-                return engine.parseAndRender(rootTemplate, {
+            const rendered = await runWithConversionContext(
+                {[DEBUG_COLLECTOR_KEY]: collector},
+                () => engine.parseAndRender(rootTemplate, {
                     hl7v2Data: tracked
-                });
-            });
+                })
+            );
 
             const bundle = JSON.parse(rendered);
             const lineage = buildLineage(collector.lineageRenders, rendered, bundle);

@@ -1,9 +1,10 @@
-import { execFileSync } from 'child_process';
-import { createHash } from 'crypto';
-import fs from 'fs-extra';
-import os from 'os';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import { cp, mkdir, readFile, rm } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -71,7 +72,7 @@ async function syncAssets(assetType) {
         throw new Error(`Unknown asset type "${assetType}". Choose: ${Object.keys(ASSETS).join(', ')}`);
     }
 
-    const provenance = await fs.readFile(PROVENANCE_PATH, 'utf8');
+    const provenance = await readFile(PROVENANCE_PATH, 'utf8');
     const upstreamPin = provenance.match(/at tag `([^`]+)`\s*\(commit `([0-9a-f]{40})`\)/);
     if (!upstreamPin) {
         throw new Error(`Could not read the upstream tag and commit from ${PROVENANCE_PATH}`);
@@ -113,8 +114,9 @@ async function syncAssets(assetType) {
         }
 
         for (const target of asset.destinations) {
-            await fs.emptyDir(target);
-            await fs.copy(upstreamAssets, target, { overwrite: true });
+            await rm(target, { recursive: true, force: true });
+            await mkdir(target, { recursive: true });
+            await cp(upstreamAssets, target, { recursive: true, force: true });
 
             const copiedFiles = listFiles(target, asset.extension);
             if (copiedFiles.length !== upstreamFiles.length ||
@@ -138,7 +140,7 @@ async function syncAssets(assetType) {
             `${tag} (${expectedCommit}).`
         );
     } finally {
-        await fs.remove(temporaryDirectory);
+        await rm(temporaryDirectory, { recursive: true, force: true });
     }
 }
 

@@ -1,11 +1,10 @@
-import assert from "assert";
+import assert from "node:assert/strict";
 import {external as helpers} from "./liquid-helpers.js";
 import {Liquid} from 'liquidjs';
 import evaluate from "./tags/evaluate.js";
 import validate from "./tags/validate.js";
 import {generateIdInput} from "./filters/generateIdInput.js";
 import {generateUuid} from "./filters/generateUuid.js";
-import {expect} from 'chai';
 
 describe('Liquid helpers', function () {
     helpers.forEach((h, idx) => {
@@ -122,16 +121,14 @@ EVN|A01|20050110045502|||||`);
 });
 
 describe('liquid filters/tags', async function () {
-
-    const engine = new Liquid( {
+    const engine = new Liquid({
         root: `${process.cwd()}/src/lib/liquid-converter/demo_templates`,
         extname: '.liquid',
         strictVariables: false,
         lenientIf: true,
     });
 
-    engine.registerFilter('generate_id_input',  generateIdInput);
-
+    engine.registerFilter('generate_id_input', generateIdInput);
     engine.registerFilter('generate_uuid', generateUuid);
 
     engine.registerTag('evaluate', {
@@ -149,31 +146,40 @@ describe('liquid filters/tags', async function () {
         const output = engine.renderSync(template);
         const jsonObject = JSON.parse(output.trim());
         assert.equal(jsonObject["resourceType"], "Bundle");
-        expect(jsonObject).to.have.property('resourceType').to.equal('Bundle');
-        expect(jsonObject).to.have.property('id').to.not.be.null;
+        assert.ok('resourceType' in jsonObject);
+        assert.strictEqual(jsonObject.resourceType, 'Bundle');
+        assert.ok('id' in jsonObject);
+        assert.notStrictEqual(jsonObject.id, null);
     });
 
     it('should work with valid input and multiple variables', function () {
         const template = engine.parseFileSync("ADT_A01_multiple_vars");
         const output = engine.renderSync(template);
         const json = JSON.parse(output);
-        expect(json).to.have.property('resourceType').to.equal('Bundle');
-        expect(json).to.have.property('id').to.not.be.null;
+        assert.ok('resourceType' in json);
+        assert.strictEqual(json.resourceType, 'Bundle');
+        assert.ok('id' in json);
+        assert.notStrictEqual(json.id, null);
     });
 
     it('should validate without errors', function () {
         const template = engine.parseFileSync("validate-templates/valid_matched.liquid");
-        expect(() => engine.renderSync(template)).to.not.throw();
+        assert.doesNotThrow(() => engine.renderSync(template));
     });
 
     it('should validate with errors on type mismatch', function () {
         const template = engine.parseFileSync("validate-templates/valid_unmatched1.liquid");
-        expect( () => engine.renderSync(template)).to.throw(Error, "failed with data/id must be string");
+        assert.throws(
+            () => engine.renderSync(template),
+            (err) => err instanceof Error && err.message.includes("failed with data/id must be string")
+        );
     });
 
     it('should validate with errors on additional entry', function () {
         const template = engine.parseFileSync("validate-templates/valid_unmatched2.liquid");
-        expect(() => engine.renderSync(template)).to.throw(Error, "failed with data must NOT have additional properties");
+        assert.throws(
+            () => engine.renderSync(template),
+            (err) => err instanceof Error && err.message.includes("failed with data must NOT have additional properties")
+        );
     });
 });
-

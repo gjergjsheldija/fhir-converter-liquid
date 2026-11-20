@@ -2,8 +2,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
-import pkg from 'lodash';
-const { isPlainObject, isArray } = pkg;
+
+const isPlainObject = (val) => {
+    if (val === null || typeof val !== 'object') {
+        return false;
+    }
+    const proto = Object.getPrototypeOf(val);
+    return proto === Object.prototype || proto === null;
+};
 
 /**
  * Normalizes ISO8601 datetime strings with timezone offsets to UTC ('Z' suffix).
@@ -14,12 +20,12 @@ const { isPlainObject, isArray } = pkg;
  */
 function normalizeTimestampToUTC(str) {
     if (typeof str !== 'string') return str;
-    
+
     // Match FHIR/ISO8601 datetime with timezone offset: YYYY-MM-DDTHH:MM:SS[.mmm]±HH:MM
     // Supports optional milliseconds (.mmm)
     const isoWithOffsetRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?([+-]\d{2}:\d{2})$/;
     if (!isoWithOffsetRegex.test(str)) return str;
-    
+
     try {
         const date = new Date(str);
         if (isNaN(date.getTime())) return str;
@@ -36,7 +42,7 @@ function normalizeAllTimestamps(obj) {
     if (typeof obj === 'string') {
         return normalizeTimestampToUTC(obj);
     }
-    if (isArray(obj)) {
+    if (Array.isArray(obj)) {
         return obj.map(item => normalizeAllTimestamps(item));
     }
     if (isPlainObject(obj)) {
@@ -55,7 +61,7 @@ function normalizeAllTimestamps(obj) {
  * Also de-duplicates identifiers with identical content.
  */
 function sortIdentifiers(identifiers) {
-    if (!isArray(identifiers)) return identifiers;
+    if (!Array.isArray(identifiers)) return identifiers;
     // De-duplicate by stringify (same content = same entry)
     const seen = new Set();
     const unique = identifiers.filter(id => {
@@ -77,7 +83,7 @@ function sortIdentifiers(identifiers) {
  * Also de-duplicates addresses with identical content.
  */
 function sortAddresses(addresses) {
-    if (!isArray(addresses)) return addresses;
+    if (!Array.isArray(addresses)) return addresses;
     // De-duplicate by stringify
     const seen = new Set();
     const unique = addresses.filter(addr => {
@@ -97,15 +103,15 @@ function sortAddresses(addresses) {
  * Normalizes identifier and address arrays in resources for stable comparison
  */
 function normalizeArrayFields(obj) {
-    if (isArray(obj)) {
+    if (Array.isArray(obj)) {
         return obj.map(item => normalizeArrayFields(item));
     }
     if (isPlainObject(obj)) {
         const result = {};
         for (const key of Object.keys(obj)) {
-            if (key === 'identifier' && isArray(obj[key])) {
+            if (key === 'identifier' && Array.isArray(obj[key])) {
                 result[key] = sortIdentifiers(obj[key]);
-            } else if (key === 'address' && isArray(obj[key])) {
+            } else if (key === 'address' && Array.isArray(obj[key])) {
                 result[key] = sortAddresses(obj[key]);
             } else {
                 result[key] = normalizeArrayFields(obj[key]);
@@ -158,7 +164,7 @@ export class ExtraDynamicFieldInterceptor extends Interceptor {
     }
 
     __handle (data) {
-        if (!('entry' in data) || !isArray(data['entry'])) {
+        if (!('entry' in data) || !Array.isArray(data['entry'])) {
             return data;
         }
         const entries = data['entry'];
@@ -215,7 +221,7 @@ export class ExtraDynamicFieldInterceptor extends Interceptor {
         // The zlib.gzip result will be different on different platforms, see https://stackoverflow.com/questions/26516369/zlib-gzip-produces-different-results-for-same-input-on-different-oses.
         // Hence the hash result will be different too, which will trigger NodeJS CI error and need to be removed.
 
-        if (!('content' in resource) || !isArray(resource['content'])) {
+        if (!('content' in resource) || !Array.isArray(resource['content'])) {
             return;
         }
         for (const ele of resource['content']) {

@@ -4,12 +4,16 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-import {access, readdir, readFile} from "fs/promises";
+import {readdir, readFile} from "fs/promises";
 import path from "path";
+import {
+    applyProjectSitePack,
+    fileExists,
+    resolveProjectTemplatePath
+} from "../src/lib/conversions/runConversion.js";
 import {convertInlineHl7v2} from "../src/lib/workers/worker.js";
 import {prepareProjectConversion} from "../src/lib/projects/convertProject.js";
 import {readManifest} from "../src/lib/projects/manifest.js";
-import {applySitePack, loadSitePack} from "../src/lib/projects/sitePack.js";
 import {compareContent} from "../test/e2e-test/util/compare.js";
 
 const USAGE =
@@ -48,38 +52,6 @@ function errorText(err) {
     return (err && err.message) || String(err);
 }
 
-function resolveTemplatePath(templateDirectory, name) {
-    const file = name.endsWith(".liquid") ? name : `${name}.liquid`;
-    const resolved = path.resolve(templateDirectory, file);
-    if (!resolved.startsWith(templateDirectory + path.sep)) {
-        throw new Error(`Invalid template name '${name}'.`);
-    }
-    return resolved;
-}
-
-async function fileExists(filePath) {
-    try {
-        await access(filePath);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-async function resolveProjectTemplatePath(prep, name) {
-    const primary = resolveTemplatePath(prep.templateDirectory, name);
-    if (await fileExists(primary)) {
-        return primary;
-    }
-    if (prep.fallbackTemplateDirectory) {
-        const fallback = resolveTemplatePath(prep.fallbackTemplateDirectory, name);
-        if (await fileExists(fallback)) {
-            return fallback;
-        }
-    }
-    return primary;
-}
-
 async function resolveSamplePath(samplesRoot, basename, srcDataType) {
     if (srcDataType === "ccda") {
         const ccdaPath = path.join(samplesRoot, `${basename}.ccda`);
@@ -113,7 +85,8 @@ async function convert(prep, templatePath, messagePath) {
     if (result.status !== 200 || !result.resultMsg || !result.resultMsg.fhirResource) {
         throw new Error("Conversion did not produce a FHIR resource.");
     }
-    return applySitePack(result.resultMsg.fhirResource, await loadSitePack(prep.projectRoot));
+    const {fhirResource} = await applyProjectSitePack(prep.projectRoot, result.resultMsg.fhirResource);
+    return fhirResource;
 }
 
 async function checkGoldens(prep, opts) {
@@ -150,7 +123,7 @@ async function checkGoldens(prep, opts) {
             const samplePath = await resolveSamplePath(samplesRoot, basename, prep.srcDataType);
             const actual = await convert(prep, templatePath, samplePath);
             compareContent(JSON.stringify(actual), expectedText);
-        } catch {
+        } catch (err) {
             process.stderr.write(`${basename}\n`);
             return 1;
         }

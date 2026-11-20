@@ -3,94 +3,59 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-import {equal, fail, ok} from "assert";
-import fsCache from "./cache.js";
-import fse from "fs-extra";
-import path, {join} from "path";
-import {fileURLToPath} from "url";
+import { equal, rejects } from 'node:assert';
+import { rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import path, { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import fsCache from './cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe("fsCache", function () {
-    let folderPath = join(__dirname, "test-fsCache");
-    let fileName = "fsCacheTempFile.liquid";
-    let filePath = join(folderPath, fileName);
+describe('fsCache', function () {
+    const folderPath = join(__dirname, 'test-fsCache');
+    const fileName = 'fsCacheTempFile.liquid';
+    const filePath = join(folderPath, fileName);
 
-    before(function () {
-        fse.removeSync(folderPath);
-        fse.ensureDirSync(folderPath);
-        fse.outputFileSync(filePath, "hello");
+    beforeEach(function () {
+        rmSync(folderPath, { recursive: true, force: true });
+        mkdirSync(folderPath, { recursive: true });
+        writeFileSync(filePath, 'hello');
     });
 
-    it("should use Cache for get", function () {
-        let cache = new fsCache(folderPath);
-
-        cache
-            .get(fileName)
-            .then((data1) => {
-                equal(data1, "hello");
-                fse.removeSync(join(folderPath, fileName));
-                cache
-                    .get(fileName)
-                    .then((data2) => {
-                        equal(data2, "hello");
-                    })
-                    .catch(() => fail());
-            })
-            .catch(() => {
-                fail();
-            });
+    after(function () {
+        rmSync(folderPath, { recursive: true, force: true });
     });
 
-    it("Cache should get expired on file update", function () {
-        let cache = new fsCache(folderPath);
+    it('should use Cache for get', async function () {
+        const cache = new fsCache(folderPath);
+        const data1 = await cache.get(fileName);
+        equal(data1, 'hello');
 
-        cache
-            .get(fileName)
-            .then((data1) => {
-                equal(data1, "hello");
-                cache
-                    .set(fileName, "world")
-                    .then(() => {
-                        fse.removeSync(join(folderPath, fileName));
-                        cache
-                            .get(fileName)
-                            .then(() => {
-                                fail();
-                            })
-                            .catch(() => ok());
-                    })
-                    .catch(() => fail());
-            })
-            .catch(() => {
-                fail();
-            });
+        rmSync(filePath, { force: true });
+        const data2 = await cache.get(fileName);
+        equal(data2, 'hello');
     });
 
-    it("Cache has() should return false for non-existent file", function () {
-        let cache = new fsCache(folderPath);
+    it('Cache should get expired on file update', async function () {
+        const cache = new fsCache(folderPath);
+        const data1 = await cache.get(fileName);
+        equal(data1, 'hello');
 
-        cache
-            .has("nonExistentFile")
-            .then((result) => {
-                equal(result, false);
-            })
-            .catch(() => {
-                fail();
-            });
+        await cache.set(fileName, 'world');
+        rmSync(filePath, { force: true });
+        await rejects(() => cache.get(fileName));
     });
 
-    it("Cache has() should return true for existing file", function () {
-        let cache = new fsCache(folderPath);
+    it('Cache has() should return false for non-existent file', async function () {
+        const cache = new fsCache(folderPath);
+        const result = await cache.has('nonExistentFile');
+        equal(result, false);
+    });
 
-        cache
-            .has(fileName)
-            .then((result) => {
-                equal(result, true);
-            })
-            .catch(() => {
-                fail();
-            });
+    it('Cache has() should return true for existing file', async function () {
+        const cache = new fsCache(folderPath);
+        const result = await cache.has(fileName);
+        equal(result, true);
     });
 });

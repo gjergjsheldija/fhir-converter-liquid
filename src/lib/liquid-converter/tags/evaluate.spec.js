@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import assert from 'node:assert/strict';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -26,23 +26,23 @@ describe('evaluate tag scope', function () {
 
     it('lets the partial read variables from the call site', function () {
         const output = engine.parseAndRenderSync("{% assign AIG = 'aig-value' -%}{% evaluate out using 'echo' CWE: 'x' -%}[{{ out }}]");
-        expect(output).to.equal('[aig-value]');
+        assert.strictEqual(output, '[aig-value]');
     });
 
     it('lets named arguments shadow variables from the call site', function () {
         const output = engine.parseAndRenderSync("{% assign AIG = 'outer' -%}{% evaluate out using 'echo' AIG: 'inner' -%}[{{ out }}]");
-        expect(output).to.equal('[inner]');
+        assert.strictEqual(output, '[inner]');
     });
 
     it('keeps a caller variable when an included template re-evaluates it with the same inputs', function () {
         const output = engine.parseAndRenderSync(
             "{% assign AIG = 'aig-value' -%}{% evaluate id using 'only-aig' AIG: AIG -%}{% include 'caller' AIG: AIG -%}[{{ id }}]"
         );
-        expect(output).to.equal('[aig-value][aig-value]');
+        assert.strictEqual(output, '[aig-value][aig-value]');
     });
 
     it('assigns null when nothing renders', function () {
         const output = engine.parseAndRenderSync("{% evaluate out using 'echo' CWE: nothing -%}[{{ out }}]");
-        expect(output).to.equal('[]');
+        assert.strictEqual(output, '[]');
     });
 });
