@@ -113,7 +113,7 @@ The files pane folds Samples, Templates, and Partials, and collapses to a rail.
 
 **Open project** loads a local folder, or a GitHub repository at a ref. Conversion and includes then resolve from that project. A GitHub project is read-only here: Save explains that and does not write. A local HL7 project can later copy in the official 139 HL7 v2 sample messages.
 
-Screenshots of C-CDA, validate, conditional send, the site pack, the project CLI, and the OIE channel are in [docs/features.md](docs/features.md).
+Each feature is described on its own page from [docs/features.md](docs/features.md).
 
 ### Includes
 
