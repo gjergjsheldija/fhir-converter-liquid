@@ -1,10 +1,15 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
-
 import assert from 'assert';
-import {validateTarget, validateResource, sendResource, conditionalTransaction, conditionalUpdate} from './sendResource.js';
+import {createSecretResolver} from '../vault/secretResolver.js';
+import {clearOAuthTokenCache} from '../auth/outboundAuth.js';
+import {
+    fhirTarget,
+    fhirHeaders,
+    validateTarget,
+    validateResource,
+    sendResource,
+    conditionalTransaction,
+    conditionalUpdate
+} from './sendResource.js';
 
 describe('FHIR conditional send', function () {
     let realFetch;
@@ -359,5 +364,104 @@ describe('FHIR $validate', function () {
         mockFetch(200, {});
         await assert.rejects(() => validateResource('https://fhir.example.org', {}), {status: 400});
         assert.strictEqual(calls.length, 0);
+    });
+});
+
+describe('FHIR document Bundles, outboundAuth, and 401 secret refresh', function () {
+    beforeEach(function () {
+        clearOAuthTokenCache();
+    });
+
+    function dischargeDocumentBundle() {
+        return {
+            resourceType: 'Bundle',
+            type: 'document',
+            entry: [
+                {
+                    resource: {
+                        resourceType: 'Composition',
+                        id: 'comp-1',
+                        status: 'final',
+                        subject: {reference: 'Patient/pat-1'},
+                        section: [{entry: [{reference: 'Observation/obs-1'}]}]
+                    }
+                },
+                {
+                    resource: {
+                        resourceType: 'Patient',
+                        id: 'pat-1',
+                        identifier: [{system: 'http://hospital.example/mrn', value: 'M-100'}]
+                    }
+                },
+                {
+                    resource: {
+                        resourceType: 'Observation',
+                        id: 'obs-1',
+                        status: 'final',
+                        subject: {reference: 'Patient/pat-1'}
+                    }
+                }
+            ]
+        };
+    }
+
+    it('targets /Bundle for unmodified document Bundles and base URL when promoted to transaction', function () {
+        const doc = dischargeDocumentBundle();
+        assert.strictEqual(fhirTarget('https://fhir.example.org/r4/', doc), 'https://fhir.example.org/r4/Bundle');
+        assert.strictEqual(fhirHeaders({auth: 'bearer', token: 't1'}).Authorization, 'Bearer t1');
+
+        const txCreate = conditionalTransaction(doc);
+        assert.strictEqual(txCreate.type, 'transaction');
+        assert.strictEqual(fhirTarget('https://fhir.example.org/r4/', txCreate), 'https://fhir.example.org/r4');
+        assert.strictEqual(txCreate.entry[0].fullUrl, 'urn:uuid:comp-1');
+        assert.strictEqual(txCreate.entry[0].resource.subject.reference, 'urn:uuid:pat-1');
+        assert.strictEqual(txCreate.entry[0].resource.section[0].entry[0].reference, 'urn:uuid:obs-1');
+        assert.strictEqual(txCreate.entry[1].request.method, 'POST');
+        assert.ok(txCreate.entry[1].request.ifNoneExist.includes('M-100'));
+
+        const txUpdate = conditionalUpdate(doc);
+        assert.strictEqual(txUpdate.type, 'transaction');
+        assert.strictEqual(txUpdate.entry[1].request.method, 'PUT');
+        assert.ok(txUpdate.entry[1].request.url.includes('M-100'));
+    });
+
+    it('refreshes secretRef credentials and retries once on HTTP 401, attaching AbortSignal timeout', async function () {
+        const env = {FHIR_TOKEN: 'stale-token'};
+        const secretResolver = createSecretResolver({env, ttlMs: 60000});
+        await secretResolver.resolve('env://FHIR_TOKEN');
+        env.FHIR_TOKEN = 'rotated-token';
+
+        const calls = [];
+        const fetchImpl = async (url, init) => {
+            calls.push({url, init});
+            if (calls.length === 1) {
+                return {
+                    ok: false,
+                    status: 401,
+                    text: async () => JSON.stringify({resourceType: 'OperationOutcome'}),
+                    headers: {get: () => ''}
+                };
+            }
+            return {
+                ok: true,
+                status: 201,
+                text: async () => JSON.stringify({resourceType: 'Bundle', type: 'transaction-response'}),
+                headers: {get: (k) => (k === 'location' ? 'https://fhir.example.org/r4/Bundle/1' : '')}
+            };
+        };
+
+        const res = await sendResource(
+            'https://fhir.example.org/r4',
+            dischargeDocumentBundle(),
+            {type: 'bearer', secretRef: 'env://FHIR_TOKEN'},
+            {update: true, timeoutMs: 5000, secretResolver, fetchImpl}
+        );
+
+        assert.strictEqual(res.ok, true);
+        assert.strictEqual(res.status, 201);
+        assert.strictEqual(calls.length, 2);
+        assert.strictEqual(calls[0].init.headers.Authorization, 'Bearer stale-token');
+        assert.strictEqual(calls[1].init.headers.Authorization, 'Bearer rotated-token');
+        assert.ok(calls[0].init.signal);
     });
 });

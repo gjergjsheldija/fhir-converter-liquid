@@ -1,8 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
-
 // Result lineage for the opt-in debug convert (?debug=true): which include wrote a value in the
 // FHIR result. Each row is {outputPath, template, sourcePath}.
 //

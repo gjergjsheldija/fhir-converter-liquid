@@ -1,13 +1,14 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
-
 import assert from 'assert';
+import express from 'express';
 import { readdirSync, readFileSync } from 'fs';
+import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
 import path from 'path';
+import supertest from 'supertest';
 import { fileURLToPath } from 'url';
 import vm from 'vm';
+import fileSystemCache from '../src/lib/fsCache/cache.js';
+import registerStudioRoutes from '../src/routes/studio.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -363,6 +364,369 @@ describe('Web UI classic script modules decomposition', function () {
             assert.strictEqual(ctx.getUrl('templates', 'ADT_A04.liquid'), '/api/v1/templates/ADT_A04.liquid');
             assert.strictEqual(ctx.indexOfX('PID|1||10001|', '|', 2), 6);
             assert.strictEqual(ctx.unchangedFromReference('untitled', ''), true);
+        });
+    });
+
+    describe('Bidirectional FHIR -> HL7v2 Studio support', function () {
+        it('exposes HL7v2 gateway defaults in DEFAULT_EDITOR_SETTINGS', function () {
+            const ctx = loadClassicScripts(['settings-modal.js'], {
+                localStorage: createStorageMock()
+            });
+            assert.strictEqual(ctx.DEFAULT_EDITOR_SETTINGS.hl7GwUrl, '');
+            assert.strictEqual(ctx.DEFAULT_EDITOR_SETTINGS.hl7GwFormat, 'json_envelope');
+            assert.strictEqual(ctx.DEFAULT_EDITOR_SETTINGS.hl7GwAuth, 'none');
+            assert.strictEqual(ctx.DEFAULT_EDITOR_SETTINGS.hl7GwToken, '');
+            assert.strictEqual(ctx.DEFAULT_EDITOR_SETTINGS.hl7GwUsername, '');
+            assert.strictEqual(ctx.DEFAULT_EDITOR_SETTINGS.hl7GwPassword, '');
+        });
+
+        it('formats conversionStatusLabel on HL7v2 conversion metadata', function () {
+            const ctx = loadClassicScripts(['template-editor.js']);
+            assert.strictEqual(
+                ctx.conversionStatusLabel({
+                    hl7v2Message: 'MSH|^~\\&|A|B\rPID|1||10001',
+                    messageType: 'MDM^T02',
+                    segmentCount: 16
+                }),
+                'Converted · MDM^T02 · 16 segments'
+            );
+            assert.strictEqual(
+                ctx.conversionStatusLabel({
+                    messageType: 'ADT^A03',
+                    segmentCount: 1
+                }),
+                'Converted · ADT^A03 · 1 segment'
+            );
+            assert.strictEqual(
+                ctx.conversionStatusLabel({
+                    hl7v2Message: 'MSH|^~\\&|A|B\rPID|1||10001\rPV1|1|I'
+                }),
+                'Converted · HL7v2 · 3 segments'
+            );
+        });
+
+        it('selects FHIR_TO_HL7V2_AI_PROMPT in effectiveAiPrompt when currentDataType is fhir', function () {
+            const ctx = loadClassicScripts(['ai-panel.js'], {
+                currentDataType: 'fhir',
+                getActiveProjectFamily() {
+                    return 'hl7v2';
+                }
+            });
+
+            assert.ok(ctx.FHIR_TO_HL7V2_AI_PROMPT.includes('MSH|^~\\&|'));
+            assert.strictEqual(ctx.effectiveAiPrompt(''), ctx.FHIR_TO_HL7V2_AI_PROMPT);
+            assert.strictEqual(ctx.effectiveAiPrompt(ctx.DEFAULT_AI_PROMPT), ctx.FHIR_TO_HL7V2_AI_PROMPT);
+            assert.strictEqual(ctx.effectiveAiPrompt('My custom reverse prompt'), 'My custom reverse prompt');
+
+            ctx.currentDataType = 'hl7v2';
+            assert.strictEqual(ctx.effectiveAiPrompt(ctx.FHIR_TO_HL7V2_AI_PROMPT), ctx.DEFAULT_AI_PROMPT);
+        });
+
+        it('supports .json FHIR Bundle samples in sample-manager.js when currentDataType is fhir', function () {
+            let putRequest = null;
+            const ctx = loadClassicScripts(['sample-manager.js', 'template-editor.js'], {
+                $: {
+                    ajax(opts) {
+                        putRequest = opts;
+                        return {
+                            done(cb) {
+                                cb({ ok: true, messageName: 'fhir/Discharge_Bundle.json' });
+                                return this;
+                            },
+                            fail() {
+                                return this;
+                            }
+                        };
+                    }
+                }
+            });
+
+            ctx.currentDataType = 'fhir';
+            assert.strictEqual(ctx.isSupportedSampleFile('Discharge_Composition_Bundle.json'), true);
+            assert.strictEqual(ctx.isSupportedSampleFile('ADT01.hl7'), false);
+            assert.strictEqual(ctx.sanitizeSampleFileName('Discharge Bundle'), 'Discharge_Bundle.json');
+            assert.strictEqual(ctx.validateFhirBundleSampleText('{"resourceType":"Patient"}').ok, false);
+            assert.strictEqual(ctx.validateFhirBundleSampleText('{"resourceType":"Bundle","id":"b1"}').ok, true);
+            assert.strictEqual(ctx.defaultSampleFileName('{"resourceType":"Bundle","id":"disch-1"}'), 'disch-1.json');
+
+            let savedName = null;
+            ctx.putSampleFile('Discharge_Bundle.json', '{"resourceType":"Bundle","type":"document"}', (err, name) => {
+                assert.strictEqual(err, null);
+                savedName = name;
+            });
+            assert.strictEqual(putRequest.url, '/api/v1/sample-data/fhir/Discharge_Bundle.json');
+            assert.strictEqual(savedName, 'fhir/Discharge_Bundle.json');
+        });
+
+        it('constructs sendToHl7Gateway payload, toggles gateway/FHIR action buttons, and switches Studio modes cleanly', function () {
+            let resultText = 'MSH|^~\\&|HIS|HOSP|EHR|DEST|20260101120000||MDM^T02|MSG1|P|2.5.1\nPID|1||10001';
+            const ajaxCalls = [];
+            const elements = {};
+            function getEl(sel) {
+                if (!elements[sel]) {
+                    elements[sel] = {
+                        length: 1,
+                        props: {},
+                        attrs: {},
+                        classes: new Set(),
+                        textVal: '',
+                        prop(k, v) {
+                            if (v === undefined) {
+                                return this.props[k];
+                            }
+                            this.props[k] = v;
+                            return this;
+                        },
+                        attr(k, v) {
+                            if (v === undefined) {
+                                return this.attrs[k];
+                            }
+                            this.attrs[k] = v;
+                            return this;
+                        },
+                        removeAttr(k) {
+                            delete this.attrs[k];
+                            return this;
+                        },
+                        toggleClass(cls, force) {
+                            if (force) {
+                                this.classes.add(cls);
+                            } else {
+                                this.classes.delete(cls);
+                            }
+                            return this;
+                        },
+                        text(v) {
+                            if (v === undefined) {
+                                return this.textVal;
+                            }
+                            this.textVal = String(v);
+                            return this;
+                        },
+                        on() {
+                            return this;
+                        }
+                    };
+                }
+                return elements[sel];
+            }
+            const $mock = function (sel) {
+                return getEl(sel);
+            };
+            $mock.ajaxPrefilter = function () {};
+            $mock.ajax = function (urlOrOpts, maybeOpts) {
+                const url = typeof urlOrOpts === 'string' ? urlOrOpts : urlOrOpts.url;
+                const opts = typeof urlOrOpts === 'string' ? (maybeOpts || {}) : urlOrOpts;
+                ajaxCalls.push({ url, opts });
+                if (url === '/api/v1/hl7v2/send' && typeof opts.success === 'function') {
+                    opts.success({ ok: true, ackCode: 'AA' });
+                } else if (url === '/api/v1/sample-data?dataType=fhir' && typeof opts.success === 'function') {
+                    opts.success({
+                        messages: [{ messageName: 'fhir/Discharge_Composition_Bundle.json', source: 'builtin' }]
+                    });
+                } else if (url === '/api/v1/templates?dataType=fhir' && typeof opts.success === 'function') {
+                    opts.success({
+                        templates: [
+                            { templateName: 'FhirToHl7v2/MDM_T02.liquid' },
+                            { templateName: 'FhirToHl7v2/Segment/_MSH.liquid' }
+                        ]
+                    });
+                }
+            };
+
+            const ctx = loadClassicScripts(
+                [
+                    'settings-modal.js',
+                    'includes-panel.js',
+                    'sample-manager.js',
+                    'ai-panel.js',
+                    'fhir-actions.js',
+                    'template-editor.js'
+                ],
+                {
+                    localStorage: createStorageMock(),
+                    $: $mock
+                }
+            );
+
+            const dataOpts = {};
+            const outputOpts = {};
+            ctx.dataEditor = {
+                setValue() {},
+                setOption(k, v) { dataOpts[k] = v; },
+                refresh() {}
+            };
+            ctx.outputCode = {
+                getValue() { return resultText; },
+                setValue(v) { resultText = v; },
+                setOption(k, v) { outputOpts[k] = v; },
+                refresh() {}
+            };
+
+            ctx.setSettings(Object.assign({}, ctx.getSettings(), {
+                fhirBaseUrl: 'https://hapi.fhir.org/baseR4',
+                hl7GwUrl: 'https://gw.example.org/hl7',
+                hl7GwFormat: 'raw_er7',
+                hl7GwAuth: 'bearer',
+                hl7GwToken: 'gw-secret-token',
+                hl7GwUsername: 'u',
+                hl7GwPassword: 'p'
+            }));
+
+            ctx.switchStudioDataType('fhir');
+            assert.strictEqual(ctx.currentDataType, 'fhir');
+            assert.strictEqual(ctx.templateKeyPrefix, 'FhirToHl7v2/');
+            assert.deepStrictEqual(Array.from(ctx.templateNames), ['MDM_T02.liquid', 'Segment/_MSH.liquid']);
+            assert.strictEqual(ctx.resolveIncludeName('Segment/MSH'), 'Segment/_MSH.liquid');
+            assert.strictEqual(getEl('#input-pane-label').textVal, 'FHIR Bundle (JSON)');
+            assert.strictEqual(getEl('#output-pane-label').textVal, 'HL7v2 Result');
+            assert.deepStrictEqual(JSON.parse(JSON.stringify(dataOpts.mode)), { name: 'javascript', json: true });
+            assert.strictEqual(dataOpts.foldGutter, true);
+            assert.strictEqual(outputOpts.mode, 'hl7v2');
+            assert.strictEqual(getEl('#validate-fhir-button').props.hidden, true);
+            assert.strictEqual(getEl('#send-fhir-button').props.hidden, true);
+            assert.strictEqual(getEl('#send-hl7v2-button').props.hidden, false);
+
+            resultText = 'MSH|^~\\&|HIS|HOSP|EHR|DEST|20260101120000||MDM^T02|MSG1|P|2.5.1\nPID|1||10001';
+            ctx.sendToHl7Gateway();
+            const sendCall = ajaxCalls.find((c) => c.url === '/api/v1/hl7v2/send');
+            assert.ok(sendCall, 'expected POST to /api/v1/hl7v2/send');
+            const parsedPayload = JSON.parse(sendCall.opts.data);
+            assert.deepStrictEqual(parsedPayload, {
+                gatewayUrl: 'https://gw.example.org/hl7',
+                hl7v2Message: 'MSH|^~\\&|HIS|HOSP|EHR|DEST|20260101120000||MDM^T02|MSG1|P|2.5.1\rPID|1||10001',
+                format: 'raw_er7',
+                auth: 'bearer',
+                token: 'gw-secret-token',
+                username: 'u',
+                password: 'p'
+            });
+            assert.strictEqual(getEl('#conversion-status').textVal, 'Sent · ACK AA');
+        });
+    });
+
+    describe('studio.routes.js reverse FHIR sample & template endpoints', function () {
+        let tmpRoot;
+        let testApp;
+
+        beforeEach(async function () {
+            tmpRoot = await mkdtemp(path.join(tmpdir(), 'fhir-studio-reverse-'));
+            const hl7Samples = path.join(tmpRoot, 'sample-data');
+            const userHl7Samples = path.join(tmpRoot, 'user-samples');
+            const revSamples = path.join(tmpRoot, 'reverse-samples');
+            const userRevSamples = path.join(tmpRoot, 'user-reverse-samples');
+            const hl7Templates = path.join(tmpRoot, 'service-templates');
+            const revTemplates = path.join(tmpRoot, 'service-reverse-templates');
+            const revBaseTemplates = path.join(tmpRoot, 'reverse-templates');
+
+            await mkdir(path.join(hl7Samples, 'hl7v2'), { recursive: true });
+            await mkdir(path.join(revSamples, 'fhir'), { recursive: true });
+            await mkdir(path.join(hl7Templates, 'Hl7v2'), { recursive: true });
+            await mkdir(path.join(revTemplates, 'FhirToHl7v2', 'Segment'), { recursive: true });
+            await mkdir(revBaseTemplates, { recursive: true });
+
+            await writeFile(path.join(hl7Samples, 'hl7v2', 'ADT01.hl7'), 'MSH|^~\\&|A|B\n');
+            await writeFile(
+                path.join(revSamples, 'fhir', 'Discharge_Composition_Bundle.json'),
+                JSON.stringify({ resourceType: 'Bundle', type: 'document', entry: [] }, null, 2)
+            );
+            await writeFile(path.join(hl7Templates, 'Hl7v2', 'ADT_A01.liquid'), '{}');
+            await writeFile(path.join(revTemplates, 'FhirToHl7v2', 'MDM_T02.liquid'), 'MSH|^~\\&|');
+            await writeFile(path.join(revTemplates, 'FhirToHl7v2', 'Segment', '_MSH.liquid'), 'MSH|');
+
+            const studioState = {
+                templateCache: new fileSystemCache(hl7Templates),
+                sampleDataLocation: hl7Samples,
+                userSampleDataLocation: userHl7Samples,
+                messageCache: new fileSystemCache(hl7Samples),
+                reverseTemplateCache: new fileSystemCache(revTemplates),
+                reverseTemplateFilesLocation: revTemplates,
+                reverseBaseTemplateFilesLocation: revBaseTemplates,
+                reverseSampleDataLocation: revSamples,
+                userReverseSampleDataLocation: userRevSamples,
+                reverseMessageCache: new fileSystemCache(revSamples)
+            };
+
+            testApp = express();
+            testApp.use(express.json({ limit: '5mb' }));
+            testApp.use(express.text({ limit: '5mb' }));
+            registerStudioRoutes(testApp, {
+                studioState,
+                requireApiKey: (req, res, next) => next()
+            });
+        });
+
+        afterEach(async function () {
+            if (tmpRoot) {
+                await rm(tmpRoot, { recursive: true, force: true });
+            }
+        });
+
+        it('keeps default hl7v2 responses unchanged and serves reverse fhir samples and templates', async function () {
+            const defaultSamples = await supertest(testApp).get('/api/v1/sample-data').expect(200);
+            assert.deepStrictEqual(defaultSamples.body.messages, [
+                { messageName: 'hl7v2/ADT01.hl7', source: 'builtin' }
+            ]);
+
+            const fhirSamples = await supertest(testApp).get('/api/v1/sample-data?dataType=fhir').expect(200);
+            assert.deepStrictEqual(fhirSamples.body.messages, [
+                { messageName: 'fhir/Discharge_Composition_Bundle.json', source: 'builtin' }
+            ]);
+
+            const sampleBody = await supertest(testApp)
+                .get('/api/v1/sample-data/fhir/Discharge_Composition_Bundle.json')
+                .expect(200);
+            assert.strictEqual(JSON.parse(sampleBody.text).resourceType, 'Bundle');
+
+            await supertest(testApp)
+                .put('/api/v1/sample-data/fhir/Discharge_Composition_Bundle.json')
+                .set('Content-Type', 'text/plain')
+                .send(JSON.stringify({ resourceType: 'Bundle', type: 'collection' }))
+                .expect(409);
+
+            await supertest(testApp)
+                .delete('/api/v1/sample-data/fhir/Discharge_Composition_Bundle.json')
+                .expect(403);
+
+            await supertest(testApp)
+                .put('/api/v1/sample-data/fhir/NotABundle.json')
+                .set('Content-Type', 'text/plain')
+                .send(JSON.stringify({ resourceType: 'Patient' }))
+                .expect(400);
+
+            const putUser = await supertest(testApp)
+                .put('/api/v1/sample-data/fhir/Custom_Discharge')
+                .set('Content-Type', 'text/plain')
+                .send(JSON.stringify({ resourceType: 'Bundle', type: 'document' }))
+                .expect(200);
+            assert.strictEqual(putUser.body.messageName, 'fhir/Custom_Discharge.json');
+
+            const fhirSamplesAfter = await supertest(testApp).get('/api/v1/sample-data?type=fhir').expect(200);
+            assert.strictEqual(fhirSamplesAfter.body.messages.length, 2);
+            assert.ok(fhirSamplesAfter.body.messages.some((m) => m.messageName === 'fhir/Custom_Discharge.json' && m.source === 'user'));
+
+            await supertest(testApp)
+                .delete('/api/v1/sample-data/fhir/Custom_Discharge.json')
+                .expect(200);
+
+            const defaultTemplates = await supertest(testApp).get('/api/v1/templates').expect(200);
+            assert.deepStrictEqual(defaultTemplates.body.templates, [{ templateName: 'Hl7v2/ADT_A01.liquid' }]);
+
+            const reverseTemplates = await supertest(testApp).get('/api/v1/templates?dataType=fhir').expect(200);
+            assert.strictEqual(reverseTemplates.body.templates.length, 2);
+            assert.ok(reverseTemplates.body.templates.some((t) => t.templateName === 'FhirToHl7v2/MDM_T02.liquid'));
+
+            const getRevTpl = await supertest(testApp).get('/api/v1/templates/FhirToHl7v2/MDM_T02.liquid').expect(200);
+            assert.strictEqual(getRevTpl.text, 'MSH|^~\\&|');
+
+            await supertest(testApp)
+                .put('/api/v1/templates/FhirToHl7v2/ADT_A03.liquid')
+                .set('Content-Type', 'text/plain')
+                .send('MSH|^~\\&|UPDATED|')
+                .expect(200);
+
+            const getUpdatedTpl = await supertest(testApp).get('/api/v1/templates/FhirToHl7v2/ADT_A03.liquid').expect(200);
+            assert.strictEqual(getUpdatedTpl.text, 'MSH|^~\\&|UPDATED|');
         });
     });
 });

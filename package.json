@@ -23,6 +23,7 @@
     "posttest": "eslint {src,test}/**/*.js",
     "prestart": "node src/init-service.js",
     "start": "node src/index.js",
+    "start:runtime": "node src/runtime.js",
     "convert:project": "node bin/convert.mjs",
     "eslint": "eslint {src,test}/**/*.js",
     "test:generate": "env NODE_ENV=testing AI_OPENAI_API_KEY=test-mock-key NODE_OPTIONS=\"--import ./test/mocks/register-templategenerate-loader.mjs\" node node_modules/.bin/nyc --exit --timeout 10000 node node_modules/mocha/bin/mocha.js src/routes.spec.js"
@@ -100,14 +101,18 @@
     "supertest": "^6.2.4"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.1178.0",
     "ajv": "^8.11.0",
     "codemirror": "^5.59.2",
     "deepmerge": "^4.2.2",
     "express": "^4.18.1",
     "express-prom-bundle": "^6.5.0",
     "he": "^1.2.0",
+    "js-yaml": "^4.1.0",
     "liquidjs": "^9.42.0",
+    "lru-cache": "^11.5.3",
     "morgan": "^1.10.0",
+    "piscina": "^5.3.2",
     "prom-client": "^14.0.1",
     "swagger-jsdoc": "^6.2.1",
     "swagger-ui-express": "^4.5.0",

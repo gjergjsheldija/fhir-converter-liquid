@@ -1,0 +1,22 @@
+{% include 'Segment/MSH' msgType: 'ORU^R01^ORU_R01' %}
+{% if patient %}
+{% include 'Segment/PID' pat: patient %}
+{% endif %}
+{% if encounter %}
+{% include 'Segment/PV1' enc: encounter %}
+{% endif %}
+{% assign orcCompId = composition.identifier | identifier_by_system: '' -%}
+{% assign orcFiller = orcCompId.value | default: composition.id | default: questionnaireResponse.id | default: bundle.id | default: 'ORD-1' | hl7_escape -%}
+{% assign orcTimeRaw = composition.date | default: questionnaireResponse.authored | default: encounter.period.end | default: bundle.timestamp -%}
+{% assign orcTime = orcTimeRaw | hl7_datetime -%}
+{% assign orcPrac = '' -%}
+{% if practitioner -%}
+{% assign orcPracIdObj = practitioner.identifier | identifier_by_system: '' -%}
+{% assign orcPracId = orcPracIdObj.value | default: practitioner.id | default: '' | hl7_escape -%}
+{% assign orcPracFam = practitioner.name[0].family | default: '' | hl7_escape -%}
+{% assign orcPracGiv = practitioner.name[0].given[0] | default: '' | hl7_escape -%}
+{% assign orcPrac = orcPracId | append: '^' | append: orcPracFam | append: '^' | append: orcPracGiv -%}
+{% endif -%}
+ORC|RE||{{ orcFiller }}||||||{{ orcTime }}|||{{ orcPrac }}
+{% include 'Segment/OBR' fillerOrderId: orcFiller, universalServiceId: '18842-5^Hospital Discharge Form^LN' %}
+{% include 'Segment/OBX_Discharge' includeAttachments: 'false' %}

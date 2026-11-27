@@ -1,7 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
 /* eslint-disable no-undef, no-unused-vars */
 // Liquid block fold range finder for the template editor (CodeMirror 5):
 // folds multi-line Liquid blocks ({% comment %}, {% raw %}, {% if %}, {% unless %},

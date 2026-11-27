@@ -986,6 +986,60 @@ body {
     margin-left: auto;
 }
 
+.direction-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+}
+
+#direction-toggle[hidden],
+#ig-coverage-slot[hidden] {
+    display: none;
+}
+
+.direction-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 var(--space-3);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.direction-toggle-btn:hover {
+    color: var(--text);
+    background: var(--hover);
+}
+
+.direction-toggle-btn.is-active {
+    background: var(--accent);
+    color: var(--accent-text);
+    box-shadow: var(--shadow-sm);
+}
+
+.direction-toggle-btn.is-active:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+}
+
+.direction-toggle-btn:focus {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
+
 .session-pitch {
     flex: 1 1 auto;
     min-width: 0;
@@ -2663,6 +2717,11 @@ li.CodeMirror-hint-active {
 @media (max-width: 720px) {
     .session-pitch {
         display: none;
+    }
+
+    .direction-toggle-btn {
+        padding: 0 var(--space-2);
+        font-size: var(--font-xs);
     }
 
     #includes-popover {

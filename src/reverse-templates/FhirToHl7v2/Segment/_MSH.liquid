@@ -1,0 +1,21 @@
+{%- assign msh3 = customer.sendingApplication | default: 'FHIR_CONVERTER' | hl7_escape -%}
+{%- assign msh4 = customer.sendingFacility | default: organization.name | default: 'HOSPITAL_ORG' | hl7_escape -%}
+{%- assign msh5 = customer.receivingApplication | default: 'HIS' | hl7_escape -%}
+{%- assign msh6 = customer.receivingFacility | default: 'HOSPITAL' | hl7_escape -%}
+{%- assign rawMsgTime = bundle.timestamp | default: composition.date | default: questionnaireResponse.authored | default: encounter.period.end | default: encounter.period.start -%}
+{%- if rawMsgTime -%}
+{%- assign msh7 = rawMsgTime | hl7_datetime -%}
+{%- else -%}
+{%- assign msh7 = '' | now | hl7_datetime -%}
+{%- endif -%}
+{%- assign msh9 = msgType | default: 'MDM^T02^MDM_T02' -%}
+{%- if customer.messageControlId -%}
+{%- assign msh10 = customer.messageControlId | hl7_escape -%}
+{%- else -%}
+{%- assign ctrlSeed = bundle.id | default: composition.id | default: questionnaireResponse.id -%}
+{%- assign msh10 = ctrlSeed | hl7_control_id -%}
+{%- endif -%}
+{%- assign msh11 = customer.processingId | default: 'P' | hl7_escape -%}
+{%- assign msh12 = customer.hl7Version | default: '2.5.1' | hl7_escape -%}
+{%- assign msh18 = customer.charset | default: 'UNICODE UTF-8' | hl7_escape -%}
+MSH|^~\&|{{ msh3 }}|{{ msh4 }}|{{ msh5 }}|{{ msh6 }}|{{ msh7 }}||{{ msh9 }}|{{ msh10 }}|{{ msh11 }}|{{ msh12 }}||||||{{ msh18 }}

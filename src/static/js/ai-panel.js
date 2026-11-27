@@ -27,13 +27,32 @@ var CCDA_AI_PROMPT = [
     'Trim tags with {%- and -%}. Leave out a JSON property when its value is empty.'
 ].join('\n');
 
+var FHIR_TO_HL7V2_AI_PROMPT = [
+    'Return the Liquid template only. No markdown fence and no explanation.',
+    'Write one HL7 v2.5.1 ER7 pipe-delimited message starting with MSH|^~\\&|.',
+    'The input FHIR R4 Bundle is msg (also exposed as fhirData / bundle).',
+    'Entries live in msg.entry (each item has resource.resourceType, resource.id, and FHIR fields).',
+    'Format FHIR ISO timestamps as HL7 TS (YYYYMMDDHHMMSS) and escape |, ^, ~, \\, & in free-text fields.',
+    "Reuse segment partials when available: {% include 'Segment/PID' patient: patient -%}",
+    'Emit one ER7 segment per line with no blank lines and trim Liquid control tags with {%- and -%}.'
+].join('\n');
+
 var defaultAiPrompt = DEFAULT_AI_PROMPT;
 var ccdaAiPrompt = CCDA_AI_PROMPT;
+var fhirToHl7v2AiPrompt = FHIR_TO_HL7V2_AI_PROMPT;
 
-// A saved prompt that differs from the HL7 default is the user's own and is used as is.
+// A saved prompt that differs from the built-in defaults is the user's own and is used as is.
 function effectiveAiPrompt(savedPrompt) {
-    if (savedPrompt && savedPrompt !== DEFAULT_AI_PROMPT && savedPrompt !== CCDA_AI_PROMPT) {
+    if (
+        savedPrompt &&
+        savedPrompt !== DEFAULT_AI_PROMPT &&
+        savedPrompt !== CCDA_AI_PROMPT &&
+        savedPrompt !== FHIR_TO_HL7V2_AI_PROMPT
+    ) {
         return savedPrompt;
+    }
+    if (typeof currentDataType !== 'undefined' && String(currentDataType).toLowerCase() === 'fhir') {
+        return FHIR_TO_HL7V2_AI_PROMPT;
     }
     return (typeof getActiveProjectFamily === 'function' && getActiveProjectFamily() === 'ccda')
         ? CCDA_AI_PROMPT
@@ -214,8 +233,11 @@ function saveAiFieldsFromModal(settings) {
 
 function runGenerateTemplate() {
     var srcMessage = (typeof dataEditor !== 'undefined' && dataEditor) ? dataEditor.getValue() : '';
+    var isReverse = typeof currentDataType !== 'undefined' && String(currentDataType).toLowerCase() === 'fhir';
     if (!srcMessage || !srcMessage.trim()) {
-        showConversionError('Load or paste an HL7 v2 message before generating a template.');
+        showConversionError(isReverse
+            ? 'Load or paste a FHIR Bundle JSON before generating a template.'
+            : 'Load or paste an HL7 v2 message before generating a template.');
         return;
     }
 
@@ -245,6 +267,7 @@ function runGenerateTemplate() {
 
         var payload = {
             sampleDataInline: srcMessage,
+            dataType: isReverse ? 'fhir' : 'hl7v2',
             provider: provider,
             model: model,
             prompt: effectiveAiPrompt(settings.aiPrompt),
@@ -270,7 +293,10 @@ function runGenerateTemplate() {
             success: function (data) {
                 $btn.prop('disabled', false).attr('aria-busy', 'false');
                 openLocalTemplate(nextGeneratedName(), data.generated || '', true);
-                if (data.fhirResource !== undefined) {
+                if (typeof data.hl7v2Message === 'string') {
+                    outputCode.setValue(data.hl7v2Message.replace(/\r\n|\r/g, '\n'));
+                    $('#conversion-status').text(conversionStatusLabel(data));
+                } else if (data.fhirResource !== undefined) {
                     outputCode.setValue(JSON.stringify(data.fhirResource, null, 2));
                     $('#conversion-status').text(conversionStatusLabel(data.fhirResource));
                 } else {
@@ -303,8 +329,10 @@ function runGenerateTemplate() {
 var _aiGlobal = typeof globalThis !== 'undefined' ? globalThis : window;
 _aiGlobal.DEFAULT_AI_PROMPT = DEFAULT_AI_PROMPT;
 _aiGlobal.CCDA_AI_PROMPT = CCDA_AI_PROMPT;
+_aiGlobal.FHIR_TO_HL7V2_AI_PROMPT = FHIR_TO_HL7V2_AI_PROMPT;
 _aiGlobal.defaultAiPrompt = defaultAiPrompt;
 _aiGlobal.ccdaAiPrompt = ccdaAiPrompt;
+_aiGlobal.fhirToHl7v2AiPrompt = fhirToHl7v2AiPrompt;
 _aiGlobal.effectiveAiPrompt = effectiveAiPrompt;
 _aiGlobal.nextGeneratedName = nextGeneratedName;
 _aiGlobal.AI_PROVIDER_LABELS = AI_PROVIDER_LABELS;

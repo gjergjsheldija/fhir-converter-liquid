@@ -1,8 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
-
 // Opt-in debug metadata for the Web UI hover inspector (?debug=true on
 // POST /api/v1/convert/hl7v2). Two concerns live here:
 //

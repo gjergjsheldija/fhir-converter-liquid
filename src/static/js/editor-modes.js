@@ -1,7 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
 /* eslint-disable no-undef, no-unused-vars */
 // CodeMirror 5 modes for the three editor panes (used with the "fhir" theme):
 //   - "hl7v2": HL7v2 segment IDs, field/component delimiters, escape sequences,

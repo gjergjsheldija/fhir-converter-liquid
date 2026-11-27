@@ -1,12 +1,31 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
+import {buildOutboundHeaders, invalidateAuthSecrets, isRefreshableAuth} from "../auth/outboundAuth.js";
+
+const DEFAULT_FHIR_TIMEOUT_MS = 15000;
+const FHIR_BASE_HEADERS = {
+    Accept: "application/fhir+json",
+    "Content-Type": "application/fhir+json"
+};
 
 function httpError(status, message) {
     const error = new Error(message);
     error.status = status;
     return error;
+}
+
+function buildTimeoutSignal(options) {
+    const timeoutMs = options && options.timeoutMs !== undefined ? Number(options.timeoutMs) : DEFAULT_FHIR_TIMEOUT_MS;
+    if (Number.isFinite(timeoutMs) && timeoutMs > 0 && global.AbortSignal && typeof global.AbortSignal.timeout === "function") {
+        return global.AbortSignal.timeout(timeoutMs);
+    }
+    return undefined;
+}
+
+function isTransformableBundle(resource) {
+    return Boolean(
+        resource &&
+        resource.resourceType === "Bundle" &&
+        (resource.type === "batch" || resource.type === "collection" || resource.type === "document")
+    );
 }
 
 export function fhirTarget(baseUrl, resource) {
@@ -116,7 +135,7 @@ function prepareTransactionEntries(copy, isUpdate) {
 }
 
 export function conditionalTransaction(resource) {
-    if (!resource || resource.resourceType !== "Bundle" || (resource.type !== "batch" && resource.type !== "collection")) {
+    if (!isTransformableBundle(resource)) {
         return resource;
     }
     const copy = JSON.parse(JSON.stringify(resource));
@@ -126,13 +145,73 @@ export function conditionalTransaction(resource) {
 }
 
 export function conditionalUpdate(resource) {
-    if (!resource || resource.resourceType !== "Bundle" || (resource.type !== "batch" && resource.type !== "collection")) {
+    if (!isTransformableBundle(resource)) {
         return resource;
     }
     const copy = JSON.parse(JSON.stringify(resource));
     copy.type = "transaction";
     prepareTransactionEntries(copy, true);
     return copy;
+}
+
+function buildFhirBaseHeaders(options) {
+    const baseHeaders = {
+        ...FHIR_BASE_HEADERS
+    };
+    if (options && typeof options.requestId === "string" && options.requestId.trim()) {
+        baseHeaders["X-Request-Id"] = options.requestId.trim();
+    }
+    if (options && typeof options.traceparent === "string" && options.traceparent.trim()) {
+        baseHeaders.traceparent = options.traceparent.trim();
+    }
+    return baseHeaders;
+}
+
+async function executeFhirPost(target, serializedBody, auth, options) {
+    const doFetch = (options && options.fetchImpl) || global.fetch;
+    const secretResolver = options && options.secretResolver;
+    const baseHeaders = buildFhirBaseHeaders(options);
+    let headers = await buildOutboundHeaders(auth, {
+        secretResolver,
+        fetchImpl: doFetch,
+        baseHeaders
+    });
+
+    const performFetch = async (reqHeaders) => {
+        const signal = buildTimeoutSignal(options);
+        const init = {
+            method: "POST",
+            headers: reqHeaders,
+            body: serializedBody
+        };
+        if (signal) {
+            init.signal = signal;
+        }
+        return doFetch(target, init);
+    };
+
+    let response;
+    try {
+        response = await performFetch(headers);
+    } catch (err) {
+        throw httpError(400, `FHIR server request failed: ${err.message}`);
+    }
+
+    if (response && response.status === 401 && isRefreshableAuth(auth)) {
+        invalidateAuthSecrets(auth, secretResolver);
+        headers = await buildOutboundHeaders(auth, {
+            secretResolver,
+            fetchImpl: doFetch,
+            baseHeaders
+        });
+        try {
+            response = await performFetch(headers);
+        } catch (err) {
+            throw httpError(400, `FHIR server request failed: ${err.message}`);
+        }
+    }
+
+    return response;
 }
 
 export async function sendResource(baseUrl, resource, auth, options) {
@@ -143,16 +222,7 @@ export async function sendResource(baseUrl, resource, auth, options) {
         payload = conditionalTransaction(resource);
     }
     const target = fhirTarget(baseUrl, payload);
-    let response;
-    try {
-        response = await fetch(target, {
-            method: "POST",
-            headers: fhirHeaders(auth),
-            body: JSON.stringify(payload)
-        });
-    } catch (err) {
-        throw httpError(400, `FHIR server request failed: ${err.message}`);
-    }
+    const response = await executeFhirPost(target, JSON.stringify(payload), auth, options);
     const text = await response.text();
     let body = text.slice(0, 500);
     try {
@@ -165,7 +235,12 @@ export async function sendResource(baseUrl, resource, auth, options) {
         error.detail = body;
         throw error;
     }
-    return {ok: true, status: response.status, location: response.headers.get("location") || "", body};
+    return {
+        ok: true,
+        status: response.status,
+        location: (response.headers && typeof response.headers.get === "function" && response.headers.get("location")) || "",
+        body
+    };
 }
 
 export function validateTarget(baseUrl, profile) {
@@ -190,16 +265,7 @@ export async function validateResource(baseUrl, resource, auth, options) {
     if (!resource || typeof resource !== "object" || !resource.resourceType) {
         throw httpError(400, "Result has no resourceType.");
     }
-    let response;
-    try {
-        response = await fetch(target, {
-            method: "POST",
-            headers: fhirHeaders(auth),
-            body: JSON.stringify(resource)
-        });
-    } catch (err) {
-        throw httpError(400, `FHIR server request failed: ${err.message}`);
-    }
+    const response = await executeFhirPost(target, JSON.stringify(resource), auth, options);
     const text = await response.text();
     let body;
     try {

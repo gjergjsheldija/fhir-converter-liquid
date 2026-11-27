@@ -1,0 +1,20 @@
+{% include 'Segment/MSH' msgType: 'ADT^A03^ADT_A03' %}
+{% include 'Segment/EVN' eventCode: 'A03' %}
+{% if patient %}
+{% include 'Segment/PID' pat: patient %}
+{% endif %}
+{% for relItem in byType.RelatedPerson %}
+{% include 'Segment/NK1' rel: relItem, setId: forloop.index %}
+{% endfor %}
+{% if encounter %}
+{% include 'Segment/PV1' enc: encounter %}
+{% endif %}
+{% for condItem in byType.Condition %}
+{% include 'Segment/DG1' cond: condItem, setId: forloop.index %}
+{% endfor %}
+{% for procItem in byType.Procedure %}
+{% include 'Segment/PR1' proc: procItem, setId: forloop.index %}
+{% endfor %}
+{% for allergyItem in byType.AllergyIntolerance %}
+{% include 'Segment/AL1' allergy: allergyItem, setId: forloop.index %}
+{% endfor %}

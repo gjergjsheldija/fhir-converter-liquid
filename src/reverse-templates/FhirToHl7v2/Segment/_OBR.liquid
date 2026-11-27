@@ -1,0 +1,26 @@
+{%- assign obrCompIdObj = composition.identifier | identifier_by_system: '' -%}
+{%- assign obrFillerRaw = fillerOrderId | default: obrCompIdObj.value | default: composition.id | default: questionnaireResponse.id | default: bundle.id | default: 'ORD-1' -%}
+{%- assign obr3 = obrFillerRaw | hl7_escape -%}
+{%- assign obr4 = universalServiceId | default: '18842-5^Hospital Discharge Form^LN' -%}
+{%- assign obr7Raw = composition.date | default: questionnaireResponse.authored | default: encounter.period.end | default: bundle.timestamp -%}
+{%- assign obr7 = obr7Raw | hl7_datetime -%}
+{%- assign obrPrac = practitioner -%}
+{%- assign obr16 = '' -%}
+{%- if obrPrac -%}
+{%- assign obrPracIdObj = obrPrac.identifier | identifier_by_system: '' -%}
+{%- assign obrPracId = obrPracIdObj.value | default: obrPrac.id | default: '' | hl7_escape -%}
+{%- assign obrPracFam = obrPrac.name[0].family | default: '' | hl7_escape -%}
+{%- assign obrPracGiv = obrPrac.name[0].given[0] | default: '' | hl7_escape -%}
+{%- assign obr16 = obrPracId | append: '^' | append: obrPracFam | append: '^' | append: obrPracGiv -%}
+{%- endif -%}
+{%- assign obr22Raw = composition.date | default: questionnaireResponse.authored | default: bundle.timestamp -%}
+{%- assign obr22 = obr22Raw | hl7_datetime -%}
+{%- assign rawStatus = composition.status | default: questionnaireResponse.status | default: 'final' -%}
+{%- if rawStatus == 'preliminary' or rawStatus == 'in-progress' -%}
+{%- assign obr25 = 'P' -%}
+{%- elsif rawStatus == 'amended' or rawStatus == 'corrected' -%}
+{%- assign obr25 = 'C' -%}
+{%- else -%}
+{%- assign obr25 = 'F' -%}
+{%- endif -%}
+OBR|1||{{ obr3 }}|{{ obr4 }}|||{{ obr7 }}|||||||||{{ obr16 }}||||||{{ obr22 }}|||{{ obr25 }}

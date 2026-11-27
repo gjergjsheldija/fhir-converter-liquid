@@ -1,0 +1,63 @@
+{%- assign targetPat = pat | default: patient -%}
+{%- assign assigningAuth = customer.assigningAuthority | default: 'HOSPITAL' | hl7_escape -%}
+{%- if customer.patientMrnSystem -%}
+{%- assign mrnObj = targetPat.identifier | identifier_by_system: customer.patientMrnSystem, false -%}
+{%- endif -%}
+{%- unless mrnObj -%}
+{%- assign mrnObj = targetPat.identifier | identifier_by_type: 'MR' -%}
+{%- endunless -%}
+{%- unless mrnObj -%}
+{%- for candidateId in targetPat.identifier -%}
+{%- if candidateId.value and candidateId.type.coding[0].code != 'GKV' -%}
+{%- assign mrnObj = candidateId -%}
+{%- break -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endunless -%}
+{%- assign gkvObj = targetPat.identifier | identifier_by_type: 'GKV' -%}
+{%- assign pid3 = '' -%}
+{%- if mrnObj and mrnObj.value -%}
+{%- assign mrnVal = mrnObj.value | hl7_escape -%}
+{%- assign pid3 = mrnVal | append: '^^^' | append: assigningAuth | append: '^MR' -%}
+{%- if gkvObj and gkvObj.value -%}
+{%- assign gkvVal = gkvObj.value | hl7_escape -%}
+{%- assign pid3 = pid3 | append: '~' | append: gkvVal | append: '^^^GKV^GKV' -%}
+{%- endif -%}
+{%- endif -%}
+{%- assign patName = targetPat.name[0] -%}
+{%- for nm in targetPat.name -%}
+{%- if nm.use == 'official' -%}
+{%- assign patName = nm -%}
+{%- break -%}
+{%- endif -%}
+{%- endfor -%}
+{%- assign pid5 = '' -%}
+{%- if patName -%}
+{%- assign patFamily = patName.family | default: '' | hl7_escape -%}
+{%- assign patGiven1 = patName.given[0] | default: '' | hl7_escape -%}
+{%- assign patGiven2 = patName.given[1] | default: '' | hl7_escape -%}
+{%- assign patPrefix = patName.prefix[0] | default: '' | hl7_escape -%}
+{%- if patFamily != '' or patGiven1 != '' -%}
+{%- assign pid5 = patFamily | append: '^' | append: patGiven1 | append: '^' | append: patGiven2 | append: '^^' | append: patPrefix | append: '^^L' -%}
+{%- endif -%}
+{%- endif -%}
+{%- assign pid7 = targetPat.birthDate | hl7_datetime: 'date' -%}
+{%- assign pid8 = targetPat.gender | map_gender -%}
+{%- assign patAddr = targetPat.address[0] -%}
+{%- assign pid11 = '' -%}
+{%- if patAddr -%}
+{%- assign addrLine = patAddr.line[0] | default: '' | hl7_escape -%}
+{%- assign addrCity = patAddr.city | default: '' | hl7_escape -%}
+{%- assign addrState = patAddr.state | default: '' | hl7_escape -%}
+{%- assign addrZip = patAddr.postalCode | default: '' | hl7_escape -%}
+{%- assign addrCountry = patAddr.country | default: '' | hl7_escape -%}
+{%- assign pid11 = addrLine | append: '^^' | append: addrCity | append: '^' | append: addrState | append: '^' | append: addrZip | append: '^' | append: addrCountry | append: '^H' -%}
+{%- endif -%}
+{%- assign pid13 = '' -%}
+{%- for tel in targetPat.telecom -%}
+{%- if tel.system == 'phone' and tel.value -%}
+{%- assign pid13 = tel.value | hl7_escape -%}
+{%- break -%}
+{%- endif -%}
+{%- endfor -%}
+PID|1||{{ pid3 }}||{{ pid5 }}||{{ pid7 }}|{{ pid8 }}|||{{ pid11 }}||{{ pid13 }}

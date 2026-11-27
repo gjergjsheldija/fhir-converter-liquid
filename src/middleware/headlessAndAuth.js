@@ -17,7 +17,9 @@ export function isHeadlessAllowedRoute(req) {
             pathname === "/health" ||
             pathname === "/version" ||
             pathname === "/metrics" ||
-            pathname === "/api/v1/conversions/failures"
+            pathname === "/api/v1/conversions/failures" ||
+            pathname === "/api/v1/customers" ||
+            /^\/api\/v1\/customers\/[^/]+$/.test(pathname)
         );
     }
     if (req.method === "POST") {
@@ -28,6 +30,9 @@ export function isHeadlessAllowedRoute(req) {
             return true;
         }
         if (/^\/api\/v1\/projects\/[^/]+\/convert\/.+$/.test(pathname)) {
+            return true;
+        }
+        if (/^\/api\/v1\/customers\/[^/]+\/(?:inbound|outbound)\/.+$/.test(pathname)) {
             return true;
         }
     }

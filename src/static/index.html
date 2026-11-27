@@ -93,6 +93,10 @@
                     </span>
                 </span>
             </span>
+            <div class="direction-toggle" id="direction-toggle" role="group" aria-label="Conversion direction">
+                <button type="button" class="direction-toggle-btn is-active" id="mode-hl7-to-fhir" data-direction="hl7v2" aria-pressed="true">HL7v2 → FHIR</button>
+                <button type="button" class="direction-toggle-btn" id="mode-fhir-to-hl7" data-direction="fhir" aria-pressed="false">FHIR → HL7v2</button>
+            </div>
             <div class="nav-cluster nav-cluster-end">
                 <button class="btn btn-outline-dark navbar-btn" id="command-search" type="button" aria-expanded="false" aria-controls="command-palette">Menu <kbd>⌘K</kbd></button>
             </div>
@@ -194,9 +198,12 @@
                 <div id="editor-panes" class="vertical-content">
                 <div class="content split msg-area">
                     <div class="pane-header">
-                        <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-message"></use></svg>Message</span>
+                        <span class="pane-title" id="input-pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use id="input-pane-icon" href="/icons.svg#icon-message"></use></svg><span id="input-pane-label">Sample Data (HL7v2)</span></span>
                         <span id="message-name">No sample</span>
                         <span class="pane-actions">
+                            <button class="result-icon-btn" id="fold-input-button" type="button" hidden aria-pressed="false" data-folded="false" aria-label="Fold all sections" title="Fold all sections">
+                                <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-fold-all"></use></svg>
+                            </button>
                             <button class="btn btn-sm btn-outline-dark" id="message-expand" type="button" aria-expanded="false">Show full message</button>
                             <details class="pane-menu" id="sample-menu">
                                 <summary>Sample <span aria-hidden="true">▾</span></summary>
@@ -273,13 +280,18 @@
                     </div>
                     <div class="split output-area">
                         <div class="pane-header">
-                            <span class="pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-json"></use></svg>FHIR result</span>
+                            <span class="pane-title" id="output-pane-title"><svg width="16" height="16" aria-hidden="true" focusable="false"><use id="output-pane-icon" href="/icons.svg#icon-json"></use></svg><span id="output-pane-label">FHIR Result</span></span>
                             <span class="pane-actions">
                                 <button id="convert-button" type="button" aria-label="Convert now" title="Convert now">
                                     <svg width="14" height="14" aria-hidden="true" focusable="false"><use href="/icons.svg#icon-play"></use></svg>
                                     <span class="convert-button-label">Run</span>
                                 </button>
                                 <button class="result-icon-btn" id="send-fhir-button" type="button" hidden aria-label="Send" title="Send">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M8 2.4v7.2M5.2 5.1 8 2.4l2.8 2.7M3.4 9.2v2.3c0 .7.6 1.3 1.3 1.3h6.6c.7 0 1.3-.6 1.3-1.3V9.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
+                                <button class="result-icon-btn" id="send-hl7v2-button" type="button" hidden aria-label="Send to HL7v2 gateway" title="Send to HL7v2 gateway">
                                     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                                         <path d="M8 2.4v7.2M5.2 5.1 8 2.4l2.8 2.7M3.4 9.2v2.3c0 .7.6 1.3 1.3 1.3h6.6c.7 0 1.3-.6 1.3-1.3V9.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                                     </svg>
@@ -503,6 +515,7 @@
                             <button type="button" class="is-active" role="tab" id="settings-tab-editor" data-settings-tab="editor" aria-controls="settings-panel-editor" aria-selected="true">Editor</button>
                             <button type="button" role="tab" id="settings-tab-ai" data-settings-tab="ai" aria-controls="settings-panel-ai" aria-selected="false">Generate</button>
                             <button type="button" role="tab" id="settings-tab-fhir" data-settings-tab="fhir" aria-controls="settings-panel-fhir" aria-selected="false">FHIR server</button>
+                            <button type="button" role="tab" id="settings-tab-hl7gw" data-settings-tab="hl7gw" aria-controls="settings-panel-hl7gw" aria-selected="false">HL7v2 gateway</button>
                         </div>
                         <div class="settings-panel" id="settings-panel-editor" role="tabpanel" data-settings-tab="editor" aria-labelledby="settings-tab-editor">
                             <fieldset class="settings-group">
@@ -633,6 +646,42 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="settings-fhir-update">
                                     <label class="form-check-label" for="settings-fhir-update">Update the resource that already has this identifier</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="settings-panel" id="settings-panel-hl7gw" role="tabpanel" data-settings-tab="hl7gw" aria-labelledby="settings-tab-hl7gw" hidden>
+                            <fieldset class="settings-group mb-0">
+                                <small class="form-text text-muted" id="settings-hl7gw-help">Used when you click Send in FHIR → HL7v2 mode. Stored in this browser.</small>
+                                <div class="form-group">
+                                    <label for="settings-hl7gw-url">Gateway URL</label>
+                                    <input type="text" class="form-control" id="settings-hl7gw-url" placeholder="https://gateway.example.org/hl7v2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="settings-hl7gw-format">Payload format</label>
+                                    <select class="form-control" id="settings-hl7gw-format">
+                                        <option value="json_envelope">JSON envelope</option>
+                                        <option value="raw_er7">Raw ER7 (x-application/hl7-v2+er7)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="settings-hl7gw-auth">Authentication</label>
+                                    <select class="form-control" id="settings-hl7gw-auth">
+                                        <option value="none">None</option>
+                                        <option value="bearer">Bearer token</option>
+                                        <option value="basic">Basic</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="settings-hl7gw-token-row">
+                                    <label for="settings-hl7gw-token">Token</label>
+                                    <input type="password" class="form-control" id="settings-hl7gw-token" autocomplete="off">
+                                </div>
+                                <div class="form-group" id="settings-hl7gw-user-row">
+                                    <label for="settings-hl7gw-username">Username</label>
+                                    <input type="text" class="form-control" id="settings-hl7gw-username" autocomplete="off">
+                                </div>
+                                <div class="form-group mb-0" id="settings-hl7gw-password-row">
+                                    <label for="settings-hl7gw-password">Password</label>
+                                    <input type="password" class="form-control" id="settings-hl7gw-password" autocomplete="off">
                                 </div>
                             </fieldset>
                         </div>

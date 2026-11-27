@@ -1,0 +1,55 @@
+{%- assign targetEnc = enc | default: encounter -%}
+{%- assign encClassCode = targetEnc.class.code | default: 'IMP' -%}
+{%- if encClassCode == 'IMP' or encClassCode == 'ACUTE' or encClassCode == 'NONAC' -%}
+{%- assign pv1Class = 'I' -%}
+{%- elsif encClassCode == 'AMB' -%}
+{%- assign pv1Class = 'O' -%}
+{%- elsif encClassCode == 'EMER' -%}
+{%- assign pv1Class = 'E' -%}
+{%- else -%}
+{%- assign pv1Class = 'I' -%}
+{%- endif -%}
+{%- assign pv1Loc = '' -%}
+{%- if targetEnc.location[0].location.display -%}
+{%- assign locParts = targetEnc.location[0].location.display | split: ' / ' -%}
+{%- assign locPoc = locParts[0] | default: '' | hl7_escape -%}
+{%- assign locRoom = locParts[1] | default: '' | hl7_escape -%}
+{%- assign locBed = locParts[2] | default: '' | hl7_escape -%}
+{%- assign pv1Loc = locPoc | append: '^' | append: locRoom | append: '^' | append: locBed -%}
+{%- endif -%}
+{%- assign attPrac = practitioner -%}
+{%- if targetEnc.participant[0].individual -%}
+{%- assign resolvedPart = targetEnc.participant[0].individual | resolve_ref: byRef -%}
+{%- if resolvedPart -%}
+{%- assign attPrac = resolvedPart -%}
+{%- endif -%}
+{%- endif -%}
+{%- assign pv1Attending = '' -%}
+{%- if attPrac -%}
+{%- assign attIdObj = attPrac.identifier | identifier_by_system: '' -%}
+{%- assign attId = attIdObj.value | default: attPrac.id | default: '' | hl7_escape -%}
+{%- assign attFam = attPrac.name[0].family | default: '' | hl7_escape -%}
+{%- assign attGiv = attPrac.name[0].given[0] | default: '' | hl7_escape -%}
+{%- assign attPref = attPrac.name[0].prefix[0] | default: '' | hl7_escape -%}
+{%- assign pv1Attending = attId | append: '^' | append: attFam | append: '^' | append: attGiv | append: '^^^' | append: attPref -%}
+{%- endif -%}
+{%- assign assigningAuth = customer.assigningAuthority | default: 'HOSPITAL' | hl7_escape -%}
+{%- if customer.visitNumberSystem -%}
+{%- assign vnObj = targetEnc.identifier | identifier_by_system: customer.visitNumberSystem, false -%}
+{%- endif -%}
+{%- unless vnObj -%}
+{%- assign vnObj = targetEnc.identifier | identifier_by_type: 'VN' -%}
+{%- endunless -%}
+{%- unless vnObj -%}
+{%- assign vnObj = targetEnc.identifier | identifier_by_system: '', true -%}
+{%- endunless -%}
+{%- assign pv1Visit = '' -%}
+{%- if vnObj and vnObj.value -%}
+{%- assign vnVal = vnObj.value | hl7_escape -%}
+{%- assign pv1Visit = vnVal | append: '^^^' | append: assigningAuth | append: '^VN' -%}
+{%- endif -%}
+{%- assign dispoCoding = targetEnc.hospitalization.dischargeDisposition | coding_by_system: '' -%}
+{%- assign pv1Dispo = dispoCoding.code | default: targetEnc.hospitalization.dischargeDisposition.text | default: '' | hl7_escape -%}
+{%- assign pv1Admit = targetEnc.period.start | hl7_datetime -%}
+{%- assign pv1Discharge = targetEnc.period.end | hl7_datetime -%}
+PV1|1|{{ pv1Class }}|{{ pv1Loc }}||||{{ pv1Attending }}||||||||||||{{ pv1Visit }}|||||||||||||||||{{ pv1Dispo }}||||||||{{ pv1Admit }}|{{ pv1Discharge }}

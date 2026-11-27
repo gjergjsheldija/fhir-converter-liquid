@@ -1,0 +1,24 @@
+{%- assign nk1SetId = setId | default: 1 -%}
+{%- assign nkNameObj = rel.name[0] -%}
+{%- assign nk1Name = '' -%}
+{%- if nkNameObj -%}
+{%- assign nkFamily = nkNameObj.family | default: '' | hl7_escape -%}
+{%- assign nkGiven = nkNameObj.given[0] | default: '' | hl7_escape -%}
+{%- assign nk1Name = nkFamily | append: '^' | append: nkGiven -%}
+{%- endif -%}
+{%- assign relCoding = rel.relationship[0] | coding_by_system: '' -%}
+{%- assign relCode = relCoding.code | default: 'C' | hl7_escape -%}
+{%- assign relDisp = relCoding.display | default: rel.relationship[0].text | default: 'Emergency Contact' | hl7_escape -%}
+{%- assign nk1Rel = relCode | append: '^' | append: relDisp | append: '^HL70063' -%}
+{%- assign nkAddr = rel.address[0] -%}
+{%- assign nk1Addr = '' -%}
+{%- if nkAddr -%}
+{%- assign nkLine = nkAddr.line[0] | default: '' | hl7_escape -%}
+{%- assign nkCity = nkAddr.city | default: '' | hl7_escape -%}
+{%- assign nkState = nkAddr.state | default: '' | hl7_escape -%}
+{%- assign nkZip = nkAddr.postalCode | default: '' | hl7_escape -%}
+{%- assign nkCountry = nkAddr.country | default: '' | hl7_escape -%}
+{%- assign nk1Addr = nkLine | append: '^^' | append: nkCity | append: '^' | append: nkState | append: '^' | append: nkZip | append: '^' | append: nkCountry | append: '^H' -%}
+{%- endif -%}
+{%- assign nk1Phone = rel.telecom[0].value | default: '' | hl7_escape -%}
+NK1|{{ nk1SetId }}|{{ nk1Name }}|{{ nk1Rel }}|{{ nk1Addr }}|{{ nk1Phone }}

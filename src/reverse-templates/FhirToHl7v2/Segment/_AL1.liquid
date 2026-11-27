@@ -1,0 +1,36 @@
+{%- assign alSetId = setId | default: 1 -%}
+{%- assign alCat = allergy.category[0] | default: '' -%}
+{%- if alCat == 'medication' -%}
+{%- assign al2 = 'DA' -%}
+{%- elsif alCat == 'food' -%}
+{%- assign al2 = 'FA' -%}
+{%- elsif alCat == 'environment' -%}
+{%- assign al2 = 'EA' -%}
+{%- else -%}
+{%- assign al2 = 'MA' -%}
+{%- endif -%}
+{%- assign alCoding = allergy.code | coding_by_system: '' -%}
+{%- if alCoding.system contains 'snomed' -%}
+{%- assign alSys = 'SCT' -%}
+{%- elsif alCoding.system contains 'atc' -%}
+{%- assign alSys = 'ATC' -%}
+{%- else -%}
+{%- assign alSys = 'L' -%}
+{%- endif -%}
+{%- assign alCode = alCoding.code | default: '' | hl7_escape -%}
+{%- assign alDisp = alCoding.display | default: allergy.code.text | default: '' | hl7_escape -%}
+{%- assign al3 = alCode | append: '^' | append: alDisp | append: '^' | append: alSys -%}
+{%- assign alSevRaw = allergy.reaction[0].severity | default: allergy.criticality | default: '' -%}
+{%- if alSevRaw == 'severe' or alSevRaw == 'high' -%}
+{%- assign al4 = 'SV' -%}
+{%- elsif alSevRaw == 'moderate' -%}
+{%- assign al4 = 'MO' -%}
+{%- elsif alSevRaw == 'mild' or alSevRaw == 'low' -%}
+{%- assign al4 = 'MI' -%}
+{%- else -%}
+{%- assign al4 = 'U' -%}
+{%- endif -%}
+{%- assign al5 = allergy.reaction[0].manifestation[0].coding[0].display | default: allergy.reaction[0].manifestation[0].text | default: '' | hl7_escape -%}
+{%- assign al6Raw = allergy.recordedDate | default: allergy.onsetDateTime -%}
+{%- assign al6 = al6Raw | hl7_datetime: 'date' -%}
+AL1|{{ alSetId }}|{{ al2 }}|{{ al3 }}|{{ al4 }}|{{ al5 }}|{{ al6 }}

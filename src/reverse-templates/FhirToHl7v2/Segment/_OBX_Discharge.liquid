@@ -1,0 +1,116 @@
+{%- assign obxSeq = 0 -%}
+{%- assign obsTimeRaw = composition.date | default: questionnaireResponse.authored | default: encounter.period.end | default: bundle.timestamp -%}
+{%- assign obsTime = obsTimeRaw | hl7_datetime -%}
+{%- assign docRawStatus = composition.status | default: questionnaireResponse.status | default: 'final' -%}
+{%- if docRawStatus == 'preliminary' or docRawStatus == 'in-progress' -%}
+{%- assign obxStatus = 'P' -%}
+{%- elsif docRawStatus == 'amended' or docRawStatus == 'corrected' -%}
+{%- assign obxStatus = 'C' -%}
+{%- else -%}
+{%- assign obxStatus = 'F' -%}
+{%- endif -%}
+{% for sec in composition.section -%}
+{%- assign secPlain = sec.text.div | strip_xhtml -%}
+{%- if secPlain != '' -%}
+{%- assign obxSeq = obxSeq | plus: 1 -%}
+{%- assign secCoding = sec.code | coding_by_system: 'http://loinc.org', true -%}
+{%- if secCoding.system contains 'loinc' -%}
+{%- assign secSys = 'LN' -%}
+{%- else -%}
+{%- assign secSys = 'L' -%}
+{%- endif -%}
+{%- assign secCode = secCoding.code | default: 'SECTION' | hl7_escape -%}
+{%- assign secTitle = sec.title | default: secCoding.display | default: 'Clinical Section' | hl7_escape -%}
+{%- assign secVal = secPlain | hl7_escape -%}
+OBX|{{ obxSeq }}|FT|{{ secCode }}^{{ secTitle }}^{{ secSys }}|{{ forloop.index }}|{{ secVal }}||||||{{ obxStatus }}|||{{ obsTime }}
+{% endif -%}
+{% endfor -%}
+{% for medReq in byType.MedicationRequest -%}
+{%- assign medName = medReq.medicationCodeableConcept.text | default: medReq.medicationCodeableConcept.coding[0].display | default: '' -%}
+{%- if medName == '' and medReq.medicationReference -%}
+{%- assign resolvedMed = medReq.medicationReference | resolve_ref: byRef -%}
+{%- assign medName = resolvedMed.code.text | default: resolvedMed.code.coding[0].display | default: '' -%}
+{%- endif -%}
+{%- assign medDose = medReq.dosageInstruction[0].text | default: '' -%}
+{%- if medName != '' -%}
+{%- assign obxSeq = obxSeq | plus: 1 -%}
+{%- if medDose != '' -%}
+{%- assign medLine = medName | append: ' - ' | append: medDose | hl7_escape -%}
+{%- else -%}
+{%- assign medLine = medName | hl7_escape -%}
+{%- endif -%}
+OBX|{{ obxSeq }}|ST|10183-2^Discharge Medication^LN|{{ forloop.index }}|{{ medLine }}||||||{{ obxStatus }}|||{{ obsTime }}
+{% endif -%}
+{% endfor -%}
+{% for medStmt in byType.MedicationStatement -%}
+{%- assign stmtName = medStmt.medicationCodeableConcept.text | default: medStmt.medicationCodeableConcept.coding[0].display | default: '' -%}
+{%- assign stmtDose = medStmt.dosage[0].text | default: '' -%}
+{%- if stmtName != '' -%}
+{%- assign obxSeq = obxSeq | plus: 1 -%}
+{%- if stmtDose != '' -%}
+{%- assign stmtLine = stmtName | append: ' - ' | append: stmtDose | hl7_escape -%}
+{%- else -%}
+{%- assign stmtLine = stmtName | hl7_escape -%}
+{%- endif -%}
+OBX|{{ obxSeq }}|ST|10183-2^Discharge Medication^LN|{{ forloop.index }}|{{ stmtLine }}||||||{{ obxStatus }}|||{{ obsTime }}
+{% endif -%}
+{% endfor -%}
+{% if questionnaireResponse -%}
+{%- assign flatItems = questionnaireResponse.item | flatten_qr_items -%}
+{% for qrItem in flatItems -%}
+{%- assign obxSeq = obxSeq | plus: 1 -%}
+{%- if qrItem.system contains 'loinc' -%}
+{%- assign qrIdSys = 'LN' -%}
+{%- elsif qrItem.system contains 'snomed' -%}
+{%- assign qrIdSys = 'SCT' -%}
+{%- else -%}
+{%- assign qrIdSys = 'L' -%}
+{%- endif -%}
+{%- assign qrCode = qrItem.code | default: qrItem.linkId | hl7_escape -%}
+{%- assign qrDisp = qrItem.display | default: qrItem.text | hl7_escape -%}
+{%- if qrItem.hl7DataType == 'CE' or qrItem.hl7DataType == 'CWE' -%}
+{%- if qrItem.value.system contains 'v2-0136' -%}
+{%- assign valSys = 'HL70136' -%}
+{%- elsif qrItem.value.system contains 'snomed' -%}
+{%- assign valSys = 'SCT' -%}
+{%- elsif qrItem.value.system contains 'loinc' -%}
+{%- assign valSys = 'LN' -%}
+{%- else -%}
+{%- assign valSys = 'L' -%}
+{%- endif -%}
+{%- assign vCode = qrItem.value.code | default: '' | hl7_escape -%}
+{%- assign vDisp = qrItem.value.display | default: '' | hl7_escape -%}
+{%- assign qrObxVal = vCode | append: '^' | append: vDisp | append: '^' | append: valSys -%}
+{%- elsif qrItem.hl7DataType == 'DT' -%}
+{%- assign qrObxVal = qrItem.value | hl7_datetime: 'date' -%}
+{%- elsif qrItem.hl7DataType == 'DTM' -%}
+{%- assign qrObxVal = qrItem.value | hl7_datetime -%}
+{%- else -%}
+{%- assign qrObxVal = qrItem.value | hl7_escape -%}
+{%- endif -%}
+{%- assign qrObxUnit = '' -%}
+{%- if qrItem.unit and qrItem.unit != '' -%}
+{%- assign unitEsc = qrItem.unit | hl7_escape -%}
+{%- assign qrObxUnit = unitEsc | append: '^' | append: unitEsc | append: '^UCUM' -%}
+{%- endif -%}
+OBX|{{ obxSeq }}|{{ qrItem.hl7DataType }}|{{ qrCode }}^{{ qrDisp }}^{{ qrIdSys }}|{{ forloop.index }}|{{ qrObxVal }}|{{ qrObxUnit }}|||||{{ obxStatus }}|||{{ obsTime }}
+{% endfor -%}
+{% endif -%}
+{% if includeAttachments != 'false' -%}
+{% for doc in byType.DocumentReference -%}
+{% for contentEntry in doc.content -%}
+{%- assign att = contentEntry.attachment -%}
+{%- if att.data and att.data != '' -%}
+{%- assign obxSeq = obxSeq | plus: 1 -%}
+{%- assign mimeParts = att.contentType | default: 'application/pdf' | split: '/' -%}
+{%- assign edMainType = mimeParts[0] | default: 'application' | hl7_escape -%}
+{%- assign edSubType = mimeParts[1] | default: 'pdf' | hl7_escape -%}
+{%- assign docCoding = doc.type | coding_by_system: 'http://loinc.org', true -%}
+{%- assign edCode = docCoding.code | default: '18842-5' | hl7_escape -%}
+{%- assign edTitle = att.title | default: doc.description | default: docCoding.display | default: 'Discharge Summary PDF' | hl7_escape -%}
+{%- assign cleanB64 = att.data | hl7_escape: 'space' | strip -%}
+OBX|{{ obxSeq }}|ED|{{ edCode }}^{{ edTitle }}^LN|{{ forloop.index }}|^{{ edMainType }}^{{ edSubType }}^Base64^{{ cleanB64 }}||||||{{ obxStatus }}|||{{ obsTime }}
+{% endif -%}
+{% endfor -%}
+{% endfor -%}
+{% endif -%}

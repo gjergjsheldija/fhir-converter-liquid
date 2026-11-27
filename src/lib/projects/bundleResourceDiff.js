@@ -1,8 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
-
 // Browser twin: the same function lives between the BEGIN/END markers in
 // src/static/js/debug-drawer.js (classic scripts cannot import this module).
 // bundleResourceDiff.spec.js runs both copies against the same cases.

@@ -1,0 +1,592 @@
+{
+  "resourceType": "Bundle",
+  "id": "discharge-doc-bundle-001",
+  "type": "document",
+  "timestamp": "2026-11-26T15:00:00+01:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555501",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "comp-discharge-001",
+        "identifier": {
+          "system": "https://hospital.example/fhir/sid/doc-id",
+          "value": "DOC-2026-88412"
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "18842-5",
+              "display": "Discharge summary"
+            }
+          ],
+          "text": "Discharge summary"
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502",
+          "display": "Anna Müller"
+        },
+        "encounter": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555503"
+        },
+        "date": "2026-11-26T14:45:00+01:00",
+        "author": [
+          {
+            "reference": "urn:uuid:11111111-2222-4333-8444-555555555504",
+            "display": "Dr. med. Markus Weber"
+          }
+        ],
+        "title": "Ärztlicher Entlassungsbrief / Hospital Discharge Summary",
+        "confidentiality": "N",
+        "custodian": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555505",
+          "display": "Universitätsklinikum Beispiel"
+        },
+        "section": [
+          {
+            "title": "Anamnese / Reason for Admission",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "46241-6",
+                  "display": "Hospital admission diagnosis Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Die 72-j&auml;hrige Patientin Anna M&uuml;ller stellte sich mit zunehmender Belastungsdyspnoe (NYHA III) &amp; Unterschenkel&ouml;demen beidseits vor.</p></div>"
+            }
+          },
+          {
+            "title": "Epikrise / Hospital Course",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8648-8",
+                  "display": "Hospital course Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Nach intraven&ouml;ser Rekompensation erfolgte am 20.11.2026 die komplikationslose Schrittmacher-Implantation.<br/>Entlassung in kardiopulmonal kompensiertem Allgemeinzustand mit reizlosen Wundverh&auml;ltnissen.</p></div>"
+            }
+          },
+          {
+            "title": "Entlassungsdiagnosen",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11535-2",
+                  "display": "Hospital discharge dx Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>I50.13 Globale Herzinsuffizienz (NYHA III)</li><li>I10.00 Essentielle Hypertonie</li></ul></div>"
+            }
+          },
+          {
+            "title": "Entlassungsmedikation",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "10183-2",
+                  "display": "Hospital discharge medications Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Ramipril 5 mg 1-0-0-0</li><li>Torasemid 10 mg 1-0-0-0</li></ul></div>"
+            }
+          },
+          {
+            "title": "Weiterbehandlung / Post-Acute Care Plan",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "18776-5",
+                  "display": "Plan of care note"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>T&auml;gliche Gewichtskontrolle &amp; Trinkmengenbeschr&auml;nkung (max. 1,5 Liter/Tag). Haus&auml;rztliche Laborkontrolle (Kreatinin, Kalium) in 5 Tagen sowie Schrittmacher-Kontrolle in 6 Wochen.</p></div>"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555502",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-mueller-001",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "https://hospital.example/fhir/sid/mrn",
+            "value": "PAT-100492"
+          },
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://fhir.de/CodeSystem/identifier-type-de-basis",
+                  "code": "GKV",
+                  "display": "Gesetzliche Krankenversicherung"
+                }
+              ]
+            },
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "value": "A123456789"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Müller",
+            "given": [
+              "Anna"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "+49-89-5550192",
+            "use": "home"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1954-08-19",
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "Hauptstraße 42"
+            ],
+            "city": "München",
+            "postalCode": "80331",
+            "country": "DE"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555503",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-discharge-001",
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "VN",
+                  "display": "Visit number"
+                }
+              ]
+            },
+            "system": "https://hospital.example/fhir/sid/visit-nr",
+            "value": "FALL-2026-55901"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "urn:uuid:11111111-2222-4333-8444-555555555504",
+              "display": "Dr. med. Markus Weber"
+            }
+          }
+        ],
+        "period": {
+          "start": "2026-11-18T09:15:00+01:00",
+          "end": "2026-11-26T14:30:00+01:00"
+        },
+        "hospitalization": {
+          "dischargeDisposition": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                "code": "01",
+                "display": "Discharged to home"
+              }
+            ],
+            "text": "home"
+          }
+        },
+        "location": [
+          {
+            "location": {
+              "display": "Station 4B / Zimmer 412 / Bett 1"
+            },
+            "status": "completed"
+          }
+        ],
+        "serviceProvider": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555505"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555504",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "prac-weber-001",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "LANR"
+                }
+              ]
+            },
+            "system": "https://fhir.kbv.de/NamingSystem/KBV_NS_Base_ANR",
+            "value": "123456789"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Weber",
+            "given": [
+              "Markus"
+            ],
+            "prefix": [
+              "Dr. med."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555505",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "org-ukb-001",
+        "identifier": [
+          {
+            "system": "http://fhir.de/sid/arge-ik/iknr",
+            "value": "260914050"
+          }
+        ],
+        "name": "Universitätsklinikum Beispiel"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555506",
+      "resource": {
+        "resourceType": "RelatedPerson",
+        "id": "rel-mueller-001",
+        "patient": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "relationship": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+                "code": "SPS",
+                "display": "Spouse"
+              }
+            ],
+            "text": "Ehepartner"
+          }
+        ],
+        "name": [
+          {
+            "family": "Müller",
+            "given": [
+              "Thomas"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "+49-89-5550193",
+            "use": "mobile"
+          }
+        ],
+        "address": [
+          {
+            "line": [
+              "Hauptstraße 42"
+            ],
+            "city": "München",
+            "postalCode": "80331",
+            "country": "DE"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555507",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-hf-001",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+              "version": "2026",
+              "code": "I50.13",
+              "display": "Globale Herzinsuffizienz: Mit Beschwerden bei leichterer Belastung (NYHA III)"
+            }
+          ],
+          "text": "Globale Herzinsuffizienz NYHA III"
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "encounter": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555503"
+        },
+        "recordedDate": "2026-11-18T10:00:00+01:00"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555508",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-htn-002",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+              "version": "2026",
+              "code": "I10.00",
+              "display": "Essentielle Hypertonie, nicht näher bezeichnet: Ohne Angabe einer hypertensiven Krise"
+            }
+          ],
+          "text": "Essentielle Hypertonie"
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "encounter": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555503"
+        },
+        "recordedDate": "2026-11-18T10:05:00+01:00"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555509",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-pm-001",
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://fhir.de/CodeSystem/bfarm/ops",
+              "version": "2026",
+              "code": "5-377.1",
+              "display": "Implantation eines Herzschrittmachers und Defibrillators: Schrittmacher, Zweikammersystem"
+            }
+          ],
+          "text": "Zweikammer-Herzschrittmacher-Implantation"
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "encounter": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555503"
+        },
+        "performedDateTime": "2026-11-20T11:20:00+01:00"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555510",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-penicillin-001",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          "medication"
+        ],
+        "criticality": "high",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "764146007",
+              "display": "Penicillin"
+            }
+          ],
+          "text": "Penicillin"
+        },
+        "patient": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "recordedDate": "2026-11-18",
+        "reaction": [
+          {
+            "manifestation": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "271807003",
+                    "display": "Exanthem"
+                  }
+                ],
+                "text": "Exanthem"
+              }
+            ],
+            "severity": "severe"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555511",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medreq-ramipril-001",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C09AA05",
+              "display": "Ramipril 5mg"
+            }
+          ],
+          "text": "Ramipril 5mg Tabletten"
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "encounter": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555503"
+        },
+        "dosageInstruction": [
+          {
+            "text": "1-0-0-0 (morgens 1 Tablette p.o.)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555512",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medreq-torasemid-002",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C03CA04",
+              "display": "Torasemid 10mg"
+            }
+          ],
+          "text": "Torasemid 10mg Tabletten"
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "encounter": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555503"
+        },
+        "dosageInstruction": [
+          {
+            "text": "1-0-0-0 (morgens 1 Tablette p.o.)"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:11111111-2222-4333-8444-555555555513",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "docref-discharge-pdf-001",
+        "status": "current",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "18842-5",
+              "display": "Discharge summary"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:11111111-2222-4333-8444-555555555502"
+        },
+        "date": "2026-11-26T14:55:00+01:00",
+        "description": "Entlassungsbrief_Mueller_Anna.pdf",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/pdf",
+              "title": "Entlassungsbrief_Mueller_Anna.pdf",
+              "data": "JVBERi0xLjQKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyA+PgplbmRvYmoKdHJhaWxlcgo8PCAvUm9vdCAxIDAgUiA+PgolJUVPRgo="
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

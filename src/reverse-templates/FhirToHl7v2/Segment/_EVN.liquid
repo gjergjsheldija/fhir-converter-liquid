@@ -1,0 +1,21 @@
+{%- assign evn1 = eventCode | default: 'T02' | hl7_escape -%}
+{%- assign evn2Raw = composition.date | default: questionnaireResponse.authored | default: encounter.period.end | default: bundle.timestamp -%}
+{%- assign evn2 = evn2Raw | hl7_datetime -%}
+{%- assign evnPrac = practitioner -%}
+{%- if composition.author[0] -%}
+{%- assign resolvedAuthor = composition.author[0] | resolve_ref: byRef -%}
+{%- if resolvedAuthor and resolvedAuthor.resourceType == 'Practitioner' -%}
+{%- assign evnPrac = resolvedAuthor -%}
+{%- endif -%}
+{%- endif -%}
+{%- assign evn5 = '' -%}
+{%- if evnPrac -%}
+{%- assign pracIdObj = evnPrac.identifier | identifier_by_system: '' -%}
+{%- assign pracIdVal = pracIdObj.value | default: evnPrac.id | hl7_escape -%}
+{%- assign pracFamily = evnPrac.name[0].family | hl7_escape -%}
+{%- assign pracGiven = evnPrac.name[0].given[0] | hl7_escape -%}
+{%- assign evn5 = pracIdVal | append: '^' | append: pracFamily | append: '^' | append: pracGiven -%}
+{%- endif -%}
+{%- assign evn6Raw = encounter.period.end | default: composition.date | default: questionnaireResponse.authored -%}
+{%- assign evn6 = evn6Raw | hl7_datetime -%}
+EVN|{{ evn1 }}|{{ evn2 }}|||{{ evn5 }}|{{ evn6 }}

@@ -1,0 +1,73 @@
+# ==============================================================================
+# Reference Customer Configuration: Example University Hospital
+# ==============================================================================
+# Every secret reference supports #jsonKey extraction across all 5 backends:
+#   - Environment JSON/var:  env://EXAMPLE_HOSPITAL_SECRETS#fhirBearerToken
+#   - AWS Secrets Manager:   aws-sm://prod/customers/example-hospital#fhirBearerToken
+#   - OpenBao / Vault KV v2: vault://secret/data/customers/example-hospital#fhirBearerToken
+#   - Infisical:             infisical://proj-id/prod/customers/example-hospital/SECRETS#fhirBearerToken
+#   - K8s CSI / Secret File: file://example-hospital/secrets.json#fhirBearerToken
+# ==============================================================================
+
+customerId: example-hospital
+name: Example University Hospital
+description: Reference bidirectional HL7v2 <-> FHIR R4 hospital profile
+
+inboundAuth:
+  type: api_key
+  headerName: X-Customer-Key
+  secretRef: env://EXAMPLE_HOSPITAL_SECRETS#inboundApiKey
+  # Production equivalents:
+  # secretRef: aws-sm://prod/customers/example-hospital#inboundApiKey
+  # secretRef: vault://secret/data/customers/example-hospital#inboundApiKey
+  # secretRef: infisical://proj-01/prod/customers/example-hospital/SECRETS#inboundApiKey
+  # secretRef: file://example-hospital/inbound-api-key
+
+identifiers:
+  mrnSystem: https://fhir.example-hospital.org/sid/mrn
+  visitNumberSystem: https://fhir.example-hospital.org/sid/visit-number
+  documentIdSystem: https://fhir.example-hospital.org/sid/document-id
+  assigningAuthority: EXHOSP
+  assigningAuthorityUniversalId: 1.2.276.0.76.4.999
+  assigningAuthorityUniversalIdType: ISO
+
+hl7v2:
+  sendingApplication: FHIR_CONVERTER
+  sendingFacility: EXHOSP
+  receivingApplication: KIS_ARCHIVE
+  receivingFacility: EXHOSP
+  versionId: "2.5.1"
+  processingId: P
+  charset: UNICODE UTF-8
+  timezone: "+0100"
+  requireCorrelationIds: true
+
+targets:
+  fhirServer:
+    baseUrl: https://fhir.example-hospital.org/fhir/r4
+    mode: conditional_update
+    timeoutMs: 15000
+    auth:
+      type: bearer
+      secretRef: env://EXAMPLE_HOSPITAL_SECRETS#fhirBearerToken
+      # OAuth2 Client Credentials alternative:
+      # type: oauth2_client_credentials
+      # tokenUrl: https://idp.example-hospital.org/realms/clinical/protocol/openid-connect/token
+      # clientId: fhir-converter-service
+      # clientSecretRef: aws-sm://prod/customers/example-hospital#fhirClientSecret
+      # scope: system/*.write
+
+  hl7v2Gateway:
+    baseUrl: https://hl7-gateway.example-hospital.org/v1/hl7v2
+    format: json_envelope
+    requireApplicationAck: true
+    timeoutMs: 15000
+    auth:
+      type: api_key_header
+      headerName: X-Gateway-Key
+      secretRef: env://EXAMPLE_HOSPITAL_SECRETS#hl7v2GatewayApiKey
+
+defaults:
+  fallbackToBuiltin: true
+  autoDeliverInbound: false
+  autoDeliverOutbound: false

@@ -7,9 +7,17 @@ import {readFileSync} from "fs";
 import {access, mkdir, readFile, readdir, stat, unlink, writeFile} from "fs/promises";
 import {dirname, join, resolve} from "path";
 import {fieldMapArchive, fieldMapFiles} from "../../scripts/hl7-fhir-map.mjs";
-import {AVAILABLE_PARSERS, BASE_TEMPLATE_FILES_LOCATION} from "../lib/constants/constants.js";
+import {
+    AVAILABLE_PARSERS,
+    BASE_TEMPLATE_FILES_LOCATION,
+    REVERSE_BASE_TEMPLATE_FILES_LOCATION,
+    REVERSE_SAMPLE_DATA_LOCATION,
+    REVERSE_TEMPLATE_FILES_LOCATION,
+    USER_REVERSE_SAMPLE_DATA_LOCATION
+} from "../lib/constants/constants.js";
 import dataHandlerFactory from "../lib/dataHandler/dataHandlerFactory.js";
 import {errorCodes, errorMessage} from "../lib/error/error.js";
+import fileSystemCache from "../lib/fsCache/cache.js";
 import {guideImagesRoot, renderGuideHtml} from "../lib/guide/renderGuide.js";
 import {external as libraryFilters} from "../lib/liquid-converter/liquid-helpers.js";
 import {convertInlineHl7v2} from "../lib/workers/worker.js";
@@ -89,6 +97,41 @@ function runGenerateLoop(aiModule, options) {
 }
 
 export default function registerStudioRoutes(app, {studioState, requireApiKey}) {
+    function getReverseTemplateFilesLocation() {
+        return studioState.reverseTemplateFilesLocation || REVERSE_TEMPLATE_FILES_LOCATION;
+    }
+
+    function getReverseBaseTemplateFilesLocation() {
+        return studioState.reverseBaseTemplateFilesLocation || REVERSE_BASE_TEMPLATE_FILES_LOCATION;
+    }
+
+    function getReverseSampleDataLocation() {
+        return studioState.reverseSampleDataLocation || REVERSE_SAMPLE_DATA_LOCATION;
+    }
+
+    function getUserReverseSampleDataLocation() {
+        return studioState.userReverseSampleDataLocation || USER_REVERSE_SAMPLE_DATA_LOCATION;
+    }
+
+    function getReverseTemplateCache() {
+        if (!studioState.reverseTemplateCache) {
+            studioState.reverseTemplateCache = new fileSystemCache(getReverseTemplateFilesLocation());
+        }
+        return studioState.reverseTemplateCache;
+    }
+
+    function getReverseMessageCache() {
+        if (!studioState.reverseMessageCache) {
+            studioState.reverseMessageCache = new fileSystemCache(getReverseSampleDataLocation());
+        }
+        return studioState.reverseMessageCache;
+    }
+
+    function isReverseDataTypeQuery(req) {
+        const requested = String((req.query && (req.query.dataType || req.query.type)) || "").toLowerCase();
+        return requested === "fhir";
+    }
+
     app.get("/guide", function (req, res) {
         renderGuideHtml(null)
             .then((html) => res.type("html").send(html))
@@ -179,6 +222,49 @@ export default function registerStudioRoutes(app, {studioState, requireApiKey}) 
      *         description: Unauthorized
      */
     app.get("/api/v1/sample-data", function (req, res) {
+        if (isReverseDataTypeQuery(req)) {
+            getReverseMessageCache()
+                .keys()
+                .then(async (files) => {
+                    const entries = files
+                        .filter((f) => f.startsWith("fhir/") && f.toLowerCase().endsWith(".json"))
+                        .map((f) => {
+                            return {messageName: f, source: "builtin"};
+                        });
+                    const byName = {};
+                    entries.forEach((entry) => {
+                        byName[entry.messageName] = entry;
+                    });
+                    try {
+                        const userFiles = await readdir(join(getUserReverseSampleDataLocation(), "fhir"));
+                        userFiles
+                            .filter((f) => !f.startsWith(".") && f.toLowerCase().endsWith(".json"))
+                            .forEach((f) => {
+                                const name = "fhir/" + f;
+                                if (byName[name]) {
+                                    byName[name].source = "user";
+                                } else {
+                                    const entry = {messageName: name, source: "user"};
+                                    entries.push(entry);
+                                    byName[name] = entry;
+                                }
+                            });
+                    } catch (userDirError) {
+                        // user reverse sample directory does not exist yet; bundled samples only
+                    }
+                    res.json({messages: entries});
+                })
+                .catch(() => {
+                    res.status(404);
+                    res.json(
+                        errorMessage(
+                            errorCodes.NotFound,
+                            "Unable to access sample data location"
+                        )
+                    );
+                });
+            return;
+        }
         studioState.messageCache
             .keys()
             .then(async (files) => {
@@ -241,12 +327,27 @@ export default function registerStudioRoutes(app, {studioState, requireApiKey}) 
     app.get("/api/v1/sample-data/:type/:file", function (req, res) {
         const type = req.params.type;
         const file = req.params.file;
-        if (type !== "hl7v2" || !/^[A-Za-z0-9._-]+$/.test(file)) {
+        if ((type !== "hl7v2" && type !== "fhir") || !/^[A-Za-z0-9._-]+$/.test(file)) {
             res.status(404);
             res.json(errorMessage(errorCodes.NotFound, "Sample data not found"));
             return;
         }
         const key = type + "/" + file;
+        if (type === "fhir") {
+            const userReverseRoot = getUserReverseSampleDataLocation();
+            access(join(userReverseRoot, key))
+                .then(() => readFile(join(userReverseRoot, key)))
+                .catch(() => getReverseMessageCache().get(key))
+                .then((content) => {
+                    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+                    res.end(content.toString());
+                })
+                .catch(() => {
+                    res.status(404);
+                    res.json(errorMessage(errorCodes.NotFound, "Sample data not found"));
+                });
+            return;
+        }
         access(join(studioState.userSampleDataLocation, key))
             .then(() => readFile(join(studioState.userSampleDataLocation, key)))
             .catch(() => studioState.messageCache.get(key))
@@ -254,6 +355,108 @@ export default function registerStudioRoutes(app, {studioState, requireApiKey}) 
             .catch(() => {
                 res.status(404);
                 res.json(errorMessage(errorCodes.NotFound, "Sample data not found"));
+            });
+    });
+
+    app.put("/api/v1/sample-data/fhir/:file", requireApiKey, function (req, res) {
+        let fileName = req.params.file;
+        if (!fileName || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Invalid sample file name."));
+            return;
+        }
+        if (!/\.json$/i.test(fileName)) {
+            if (/\.[A-Za-z0-9]+$/.test(fileName)) {
+                res.status(400);
+                res.json(errorMessage(errorCodes.BadRequest, "Sample file must end in .json."));
+                return;
+            }
+            fileName += ".json";
+        }
+        let body = "";
+        let parsed = null;
+        if (typeof req.body === "string") {
+            body = req.body;
+            if (!body.trim()) {
+                res.status(400);
+                res.json(errorMessage(errorCodes.BadRequest, "Sample bundle cannot be empty."));
+                return;
+            }
+            try {
+                parsed = JSON.parse(body);
+            } catch (parseErr) {
+                res.status(400);
+                res.json(errorMessage(errorCodes.BadRequest, "Sample bundle must be valid JSON."));
+                return;
+            }
+        } else if (req.body && typeof req.body === "object" && !Array.isArray(req.body) && Object.keys(req.body).length > 0) {
+            parsed = req.body;
+            body = JSON.stringify(req.body, null, 2);
+        } else {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Sample bundle cannot be empty."));
+            return;
+        }
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || parsed.resourceType !== "Bundle") {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "FHIR sample must be a JSON Bundle (resourceType 'Bundle')."));
+            return;
+        }
+        if (Buffer.byteLength(body, "utf8") > 5000000) {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Sample bundle is too large."));
+            return;
+        }
+        const builtinRoot = getReverseSampleDataLocation();
+        const userRoot = getUserReverseSampleDataLocation();
+        access(join(builtinRoot, "fhir", fileName))
+            .then(() => {
+                throw Object.assign(new Error("Built-in sample exists"), {isBuiltinConflict: true});
+            })
+            .catch((builtinError) => {
+                if (builtinError && builtinError.isBuiltinConflict) {
+                    res.status(409);
+                    res.json(errorMessage(errorCodes.Conflict, "Cannot overwrite a built-in sample. Save under a new file name."));
+                    return;
+                }
+                mkdir(join(userRoot, "fhir"), {recursive: true})
+                    .then(() => writeFile(join(userRoot, "fhir", fileName), body, "utf8"))
+                    .then(() =>
+                        res.status(200).json({ok: true, messageName: "fhir/" + fileName, source: "user"})
+                    )
+                    .catch(() => {
+                        res.status(500);
+                        res.json(errorMessage(errorCodes.WriteError, "Unable to save sample bundle."));
+                    });
+            });
+    });
+
+    app.delete("/api/v1/sample-data/fhir/:file", requireApiKey, function (req, res) {
+        const fileName = req.params.file;
+        if (!fileName || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
+            res.status(400);
+            res.json(errorMessage(errorCodes.BadRequest, "Invalid sample file name."));
+            return;
+        }
+        const builtinRoot = getReverseSampleDataLocation();
+        const userRoot = getUserReverseSampleDataLocation();
+        unlink(join(userRoot, "fhir", fileName))
+            .then(() => res.status(200).json({ok: true, messageName: "fhir/" + fileName}))
+            .catch((deleteError) => {
+                if (!deleteError || deleteError.code !== "ENOENT") {
+                    res.status(500);
+                    res.json(errorMessage(errorCodes.WriteError, "Unable to delete sample bundle."));
+                    return;
+                }
+                access(join(builtinRoot, "fhir", fileName))
+                    .then(() => {
+                        res.status(403);
+                        res.json(errorMessage(errorCodes.Unauthorized, "Built-in samples cannot be deleted."));
+                    })
+                    .catch(() => {
+                        res.status(404);
+                        res.json(errorMessage(errorCodes.NotFound, "Sample data not found"));
+                    });
             });
     });
 
@@ -348,7 +551,10 @@ export default function registerStudioRoutes(app, {studioState, requireApiKey}) 
      *         description: Templates not found
      */
     app.get("/api/v1/templates", function (req, res) {
-        studioState.templateCache
+        const activeTemplateCache = isReverseDataTypeQuery(req)
+            ? getReverseTemplateCache()
+            : studioState.templateCache;
+        activeTemplateCache
             .keys()
             .then((files) =>
                 res.json({
@@ -383,9 +589,16 @@ export default function registerStudioRoutes(app, {studioState, requireApiKey}) 
             return;
         }
         const text = typeof req.body === "string" ? req.body : "";
-        studioState.templateCache.set(key, text)
+        const isReverse = key.startsWith("FhirToHl7v2/");
+        const activeTemplateCache = isReverse ? getReverseTemplateCache() : studioState.templateCache;
+        const baseLocation = isReverse ? getReverseBaseTemplateFilesLocation() : BASE_TEMPLATE_FILES_LOCATION;
+        const prepareRoot = isReverse
+            ? mkdir(getReverseTemplateFilesLocation(), {recursive: true})
+            : Promise.resolve();
+        prepareRoot
+            .then(() => activeTemplateCache.set(key, text))
             .then(() => {
-                const dest = join(BASE_TEMPLATE_FILES_LOCATION, key);
+                const dest = join(baseLocation, key);
                 return mkdir(dirname(dest), {recursive: true}).then(() => writeFile(dest, text));
             })
             .then(() => {
@@ -418,8 +631,12 @@ export default function registerStudioRoutes(app, {studioState, requireApiKey}) 
      *         description: Not found
      */
     app.get("/api/v1/templates/:file(*)", function (req, res) {
-        studioState.templateCache
-            .get(req.params.file)
+        const key = req.params.file || "";
+        const activeTemplateCache = key.startsWith("FhirToHl7v2/")
+            ? getReverseTemplateCache()
+            : studioState.templateCache;
+        activeTemplateCache
+            .get(key)
             .then((content) => res.end(content.toString()))
             .catch(() => {
                 res.status(404);
@@ -491,7 +708,10 @@ export default function registerStudioRoutes(app, {studioState, requireApiKey}) 
 
         const resolveMessage = () => {
             if (body.messageName) {
-                return studioState.messageCache.get(body.messageName).then((content) => content.toString());
+                const msgCache = String(body.messageName).startsWith("fhir/")
+                    ? getReverseMessageCache()
+                    : studioState.messageCache;
+                return msgCache.get(body.messageName).then((content) => content.toString());
             }
             if (typeof body.sampleDataInline === "string" && body.sampleDataInline.length > 0) {
                 return Promise.resolve(body.sampleDataInline);

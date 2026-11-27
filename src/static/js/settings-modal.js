@@ -19,6 +19,12 @@ var DEFAULT_EDITOR_SETTINGS = {
     fhirConditional: false,
     fhirUpdate: false,
     fhirProfile: '',
+    hl7GwUrl: '',
+    hl7GwFormat: 'json_envelope',
+    hl7GwAuth: 'none',
+    hl7GwToken: '',
+    hl7GwUsername: '',
+    hl7GwPassword: '',
     aiProvider: 'openai',
     aiBaseUrl: '',
     aiModel: 'gpt-4.1-mini',
@@ -221,6 +227,13 @@ function showFhirAuthFields() {
     $('#settings-fhir-password-row').toggle(auth === 'basic');
 }
 
+function showHl7GwAuthFields() {
+    var auth = $('#settings-hl7gw-auth').val();
+    $('#settings-hl7gw-token-row').toggle(auth === 'bearer');
+    $('#settings-hl7gw-user-row').toggle(auth === 'basic');
+    $('#settings-hl7gw-password-row').toggle(auth === 'basic');
+}
+
 _settingsGlobal.SETTINGS_STORAGE_KEY = SETTINGS_STORAGE_KEY;
 _settingsGlobal.DEFAULT_EDITOR_SETTINGS = DEFAULT_EDITOR_SETTINGS;
 _settingsGlobal.currentEditorSettings = currentEditorSettings;
@@ -236,6 +249,7 @@ _settingsGlobal.guidanceText = guidanceText;
 _settingsGlobal.setGuidanceText = setGuidanceText;
 _settingsGlobal.showSettingsTab = showSettingsTab;
 _settingsGlobal.showFhirAuthFields = showFhirAuthFields;
+_settingsGlobal.showHl7GwAuthFields = showHl7GwAuthFields;
 
 if (typeof $ === 'function' && typeof document !== 'undefined') {
     $(document).ready(function () {
@@ -264,6 +278,13 @@ if (typeof $ === 'function' && typeof document !== 'undefined') {
             $('#settings-fhir-update').prop('checked', updateOn);
             $('#settings-fhir-profile').val(settings.fhirProfile || '');
             showFhirAuthFields();
+            $('#settings-hl7gw-url').val(settings.hl7GwUrl || '');
+            $('#settings-hl7gw-format').val(settings.hl7GwFormat || 'json_envelope');
+            $('#settings-hl7gw-auth').val(settings.hl7GwAuth || 'none');
+            $('#settings-hl7gw-token').val(settings.hl7GwToken || '');
+            $('#settings-hl7gw-username').val(settings.hl7GwUsername || '');
+            $('#settings-hl7gw-password').val(settings.hl7GwPassword || '');
+            showHl7GwAuthFields();
             if (typeof populateAiSettingsModal === 'function') {
                 populateAiSettingsModal();
             }
@@ -297,6 +318,7 @@ if (typeof $ === 'function' && typeof document !== 'undefined') {
         });
 
         $('#settings-fhir-auth').on('change', showFhirAuthFields);
+        $('#settings-hl7gw-auth').on('change', showHl7GwAuthFields);
         $('#settings-fhir-conditional').on('change', function () {
             if (this.checked) {
                 $('#settings-fhir-update').prop('checked', false);
@@ -323,6 +345,12 @@ if (typeof $ === 'function' && typeof document !== 'undefined') {
             settings.fhirConditional = $('#settings-fhir-conditional').prop('checked');
             settings.fhirUpdate = $('#settings-fhir-update').prop('checked');
             settings.fhirProfile = $('#settings-fhir-profile').val().trim();
+            settings.hl7GwUrl = ($('#settings-hl7gw-url').val() || '').trim();
+            settings.hl7GwFormat = $('#settings-hl7gw-format').val() || 'json_envelope';
+            settings.hl7GwAuth = $('#settings-hl7gw-auth').val() || 'none';
+            settings.hl7GwToken = $('#settings-hl7gw-token').val() || '';
+            settings.hl7GwUsername = $('#settings-hl7gw-username').val() || '';
+            settings.hl7GwPassword = $('#settings-hl7gw-password').val() || '';
             if (typeof saveAiFieldsFromModal === 'function') {
                 saveAiFieldsFromModal(settings);
             }

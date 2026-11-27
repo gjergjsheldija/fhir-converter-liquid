@@ -1,0 +1,348 @@
+{
+  "resourceType": "Bundle",
+  "id": "discharge-qr-bundle-002",
+  "type": "collection",
+  "timestamp": "2026-11-26T15:10:00+01:00",
+  "entry": [
+    {
+      "fullUrl": "https://hospital.example/fhir/QuestionnaireResponse/qr-discharge-99201",
+      "resource": {
+        "resourceType": "QuestionnaireResponse",
+        "id": "qr-discharge-99201",
+        "questionnaire": "https://hospital.example/fhir/Questionnaire/hospital-discharge-form",
+        "status": "completed",
+        "subject": {
+          "reference": "Patient/pat-mueller-001",
+          "display": "Anna Müller"
+        },
+        "encounter": {
+          "reference": "Encounter/enc-discharge-001"
+        },
+        "authored": "2026-11-26T15:05:00+01:00",
+        "author": {
+          "reference": "Practitioner/prac-weber-001",
+          "display": "Dr. med. Markus Weber"
+        },
+        "item": [
+          {
+            "linkId": "grp-mobility",
+            "text": "Mobility & Functional Status",
+            "item": [
+              {
+                "linkId": "barthel-index",
+                "text": "Barthel Index",
+                "code": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "96761-2",
+                    "display": "Barthel Index"
+                  }
+                ],
+                "answer": [
+                  {
+                    "valueInteger": 65
+                  }
+                ]
+              },
+              {
+                "linkId": "discharge-weight",
+                "text": "Discharge Body Weight",
+                "code": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "29463-7",
+                    "display": "Body weight"
+                  }
+                ],
+                "answer": [
+                  {
+                    "valueQuantity": {
+                      "value": 68.4,
+                      "unit": "kg",
+                      "system": "http://unitsofmeasure.org",
+                      "code": "kg"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "linkId": "grp-aftercare",
+            "text": "Post-Acute Care & Transition",
+            "item": [
+              {
+                "linkId": "home-care-needed",
+                "text": "Post-Acute Rehab / Home Care Needed",
+                "answer": [
+                  {
+                    "valueBoolean": true,
+                    "item": [
+                      {
+                        "linkId": "required-medical-aids",
+                        "text": "Required Medical Aids",
+                        "answer": [
+                          {
+                            "valueCoding": {
+                              "system": "http://snomed.info/sct",
+                              "code": "404949001",
+                              "display": "Rollator"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "linkId": "discharge-destination",
+                "text": "Discharge Destination",
+                "answer": [
+                  {
+                    "valueCoding": {
+                      "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                      "code": "home",
+                      "display": "Home with ambulatory nursing care"
+                    }
+                  }
+                ]
+              },
+              {
+                "linkId": "planned-followup-date",
+                "text": "Planned Follow-up Date",
+                "answer": [
+                  {
+                    "valueDate": "2026-12-03"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "linkId": "handover-notes",
+            "text": "Handover Notes",
+            "answer": [
+              {
+                "valueString": "Patient needs wound check & INR control | call GP^Office ~ urgent\nLine 2 handover"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://hospital.example/fhir/Patient/pat-mueller-001",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-mueller-001",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "https://hospital.example/fhir/sid/mrn",
+            "value": "PAT-100492"
+          },
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://fhir.de/CodeSystem/identifier-type-de-basis",
+                  "code": "GKV",
+                  "display": "Gesetzliche Krankenversicherung"
+                }
+              ]
+            },
+            "system": "http://fhir.de/sid/gkv/kvid-10",
+            "value": "A123456789"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Müller",
+            "given": [
+              "Anna"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "+49-89-5550192",
+            "use": "home"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1954-08-19",
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "Hauptstraße 42"
+            ],
+            "city": "München",
+            "postalCode": "80331",
+            "country": "DE"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://hospital.example/fhir/Encounter/enc-discharge-001",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-discharge-001",
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "VN",
+                  "display": "Visit number"
+                }
+              ]
+            },
+            "system": "https://hospital.example/fhir/sid/visit-nr",
+            "value": "FALL-2026-55901"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "Patient/pat-mueller-001"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "Practitioner/prac-weber-001",
+              "display": "Dr. med. Markus Weber"
+            }
+          }
+        ],
+        "period": {
+          "start": "2026-11-18T09:15:00+01:00",
+          "end": "2026-11-26T14:30:00+01:00"
+        },
+        "hospitalization": {
+          "dischargeDisposition": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                "code": "01",
+                "display": "Discharged to home"
+              }
+            ],
+            "text": "home"
+          }
+        },
+        "location": [
+          {
+            "location": {
+              "display": "Station 4B / Zimmer 412 / Bett 1"
+            },
+            "status": "completed"
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization/org-ukb-001"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://hospital.example/fhir/Practitioner/prac-weber-001",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "prac-weber-001",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "LANR"
+                }
+              ]
+            },
+            "system": "https://fhir.kbv.de/NamingSystem/KBV_NS_Base_ANR",
+            "value": "123456789"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Weber",
+            "given": [
+              "Markus"
+            ],
+            "prefix": [
+              "Dr. med."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://hospital.example/fhir/Organization/org-ukb-001",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "org-ukb-001",
+        "identifier": [
+          {
+            "system": "http://fhir.de/sid/arge-ik/iknr",
+            "value": "260914050"
+          }
+        ],
+        "name": "Universitätsklinikum Beispiel"
+      }
+    },
+    {
+      "fullUrl": "https://hospital.example/fhir/Condition/cond-hf-001",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-hf-001",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+              "version": "2026",
+              "code": "I50.13",
+              "display": "Globale Herzinsuffizienz: Mit Beschwerden bei leichterer Belastung (NYHA III)"
+            }
+          ],
+          "text": "Globale Herzinsuffizienz NYHA III"
+        },
+        "subject": {
+          "reference": "Patient/pat-mueller-001"
+        },
+        "encounter": {
+          "reference": "Encounter/enc-discharge-001"
+        },
+        "recordedDate": "2026-11-18T10:00:00+01:00"
+      }
+    }
+  ]
+}

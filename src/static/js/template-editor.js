@@ -28,7 +28,11 @@ var templateOutputSplit;
 var dataTemplateSplit;
 
 function getUrl(endpoint, fileName) {
-    return '/api/v1/' + endpoint + (fileName ? '/' + fileName : '');
+    var base = '/api/v1/' + endpoint + (fileName ? '/' + fileName : '');
+    if (!fileName && currentDataType === 'fhir' && (endpoint === 'sample-data' || endpoint === 'templates')) {
+        return base + '?dataType=fhir';
+    }
+    return base;
 }
 
 function getDataTypeSpecificUrl(endpoint, fileName) {
@@ -36,10 +40,35 @@ function getDataTypeSpecificUrl(endpoint, fileName) {
     return `${baseUrl}?unusedSegments=true&invalidAccess=true&debug=true`;
 }
 
+function applyTemplateList(templates) {
+    var names = (templates || []).map(function (template) {
+        return template.templateName;
+    });
+    var isFhirReverse = currentDataType === 'fhir';
+    var expectedPrefix = isFhirReverse ? 'fhirtohl7v2/' : 'hl7v2/';
+    var defaultPrefix = isFhirReverse ? 'FhirToHl7v2/' : 'Hl7v2/';
+    var match = names.find(function (name) {
+        return typeof name === 'string' && name.toLowerCase().startsWith(expectedPrefix);
+    });
+    templateKeyPrefix = match ? match.slice(0, match.indexOf('/') + 1) : defaultPrefix;
+    templateNames = names
+        .filter(function (name) {
+            return typeof name === 'string' && name.toLowerCase().startsWith(expectedPrefix);
+        })
+        .map(function (name) {
+            return name.substring(name.indexOf('/') + 1);
+        });
+    var root = typeof globalThis !== 'undefined' ? globalThis : window;
+    root.templateKeyPrefix = templateKeyPrefix;
+    root.templateNames = templateNames;
+}
+
 function clearLatestDebugInfo() {
     var root = typeof window !== 'undefined' ? window : globalThis;
     root.latestDebugInfo = null;
-    $(document).trigger('fhir:debug-updated', [root.latestDebugInfo]);
+    if (typeof $ === 'function' && typeof document !== 'undefined') {
+        $(document).trigger('fhir:debug-updated', [root.latestDebugInfo]);
+    }
 }
 
 function showConversionError(message) {
@@ -103,6 +132,24 @@ function conversionStatusLabel(resource) {
     if (resource && typeof resource === 'object' && typeof resource.resourceType === 'string' && resource.resourceType.length > 0) {
         return 'Converted · ' + resource.resourceType;
     }
+    if (
+        resource &&
+        typeof resource === 'object' &&
+        (typeof resource.hl7v2Message === 'string' || typeof resource.messageType === 'string' || typeof resource.segmentCount === 'number')
+    ) {
+        var msgType = (typeof resource.messageType === 'string' && resource.messageType.trim().length > 0)
+            ? resource.messageType.trim()
+            : 'HL7v2';
+        var segCount = typeof resource.segmentCount === 'number'
+            ? resource.segmentCount
+            : (typeof resource.hl7v2Message === 'string'
+                ? resource.hl7v2Message.split(/\r\n|\r|\n/).filter(function (line) { return line.trim().length > 0; }).length
+                : null);
+        if (typeof segCount === 'number') {
+            return 'Converted · ' + msgType + ' · ' + segCount + (segCount === 1 ? ' segment' : ' segments');
+        }
+        return 'Converted · ' + msgType;
+    }
     return 'Converted';
 }
 
@@ -120,9 +167,142 @@ function applyConversionStatus(resource, unusedCount) {
     syncSessionChrome();
 }
 
+function syncDirectionToggleUi() {
+    if (typeof $ !== 'function') {
+        return;
+    }
+    var project = typeof getActiveProject === 'function' ? getActiveProject() : null;
+    var isFhirReverse = currentDataType === 'fhir';
+    $('#direction-toggle').prop('hidden', Boolean(project));
+    $('#mode-hl7-to-fhir')
+        .toggleClass('is-active', !isFhirReverse)
+        .attr('aria-pressed', !isFhirReverse ? 'true' : 'false');
+    $('#mode-fhir-to-hl7')
+        .toggleClass('is-active', isFhirReverse)
+        .attr('aria-pressed', isFhirReverse ? 'true' : 'false');
+}
+
+function syncStudioDataTypePanes() {
+    var isFhirReverse = currentDataType === 'fhir';
+    if (typeof $ === 'function') {
+        $('#input-pane-label').text(isFhirReverse ? 'FHIR Bundle (JSON)' : 'Sample Data (HL7v2)');
+        $('#input-pane-icon').attr('href', isFhirReverse ? '/icons.svg#icon-json' : '/icons.svg#icon-message');
+        $('#output-pane-label').text(isFhirReverse ? 'HL7v2 Result' : 'FHIR Result');
+        $('#output-pane-icon').attr('href', isFhirReverse ? '/icons.svg#icon-hl7' : '/icons.svg#icon-json');
+        $('#import-sample-input').attr('accept', isFhirReverse ? '.json,application/json' : '.hl7,.txt,.msg');
+        $('#save-sample-name').attr('placeholder', isFhirReverse ? 'Name, .json optional' : 'Name, .hl7 optional');
+        $('#fold-input-button').prop('hidden', !isFhirReverse);
+        $('#fold-result-button').prop('hidden', isFhirReverse);
+        $('#ig-coverage-slot').prop('hidden', isFhirReverse);
+    }
+    if (dataEditor && typeof dataEditor.setOption === 'function') {
+        dataEditor.setOption('mode', isFhirReverse ? {name: 'javascript', json: true} : 'hl7v2');
+        dataEditor.setOption('foldGutter', true);
+    }
+    if (outputCode && typeof outputCode.setOption === 'function') {
+        outputCode.setOption('mode', isFhirReverse ? 'hl7v2' : {name: 'javascript', json: true});
+    }
+}
+
+function switchStudioDataType(nextDataType) {
+    var normalized = String(nextDataType || '').toLowerCase() === 'fhir' ? 'fhir' : 'hl7v2';
+    if (typeof closeAllTemplates === 'function' && typeof openTemplates !== 'undefined' && dataEditor) {
+        if (!closeAllTemplates(true)) {
+            syncDirectionToggleUi();
+            return false;
+        }
+    }
+    currentDataType = normalized;
+    var root = typeof globalThis !== 'undefined' ? globalThis : window;
+    root.currentDataType = normalized;
+    var nextPrefix = normalized === 'fhir' ? 'FhirToHl7v2/' : 'Hl7v2/';
+    if (typeof templateKeyPrefix !== 'undefined') {
+        templateKeyPrefix = nextPrefix;
+    }
+    root.templateKeyPrefix = nextPrefix;
+
+    if (dataEditor && typeof dataEditor.setValue === 'function') {
+        dataEditor.setValue('');
+    }
+    if (outputCode && typeof outputCode.setValue === 'function') {
+        outputCode.setValue('');
+    }
+    syncDirectionToggleUi();
+    syncStudioDataTypePanes();
+    if (dataTemplateSplit && typeof dataTemplateSplit.setSizes === 'function') {
+        var expanded = typeof $ === 'function' && $('#message-expand').attr('aria-expanded') === 'true';
+        if (!expanded) {
+            dataTemplateSplit.setSizes(normalized === 'fhir' ? [26, 74] : [16, 84]);
+        }
+    }
+    setUnusedLegend(false);
+    hideResultError();
+    hideConversionError();
+    if (typeof $ === 'function') {
+        $('#conversion-status').text('');
+    }
+    clearLatestDebugInfo();
+    if (typeof updateValidateButton === 'function') {
+        updateValidateButton();
+    }
+    refreshEditors();
+
+    var activeProj = (typeof getActiveProject === 'function') ? getActiveProject() : null;
+    if (!activeProj && typeof $ === 'function' && typeof $.ajax === 'function') {
+        $.ajax({
+            url: getUrl('sample-data'),
+            dataType: 'json',
+            cache: false,
+            success: function (sampleList) {
+                $.ajax({
+                    url: getUrl('templates'),
+                    dataType: 'json',
+                    cache: false,
+                    success: function (templateList) {
+                        if (currentDataType !== normalized) {
+                            return;
+                        }
+                        applyTemplateList((templateList && templateList.templates) || []);
+                        var messages = (sampleList && sampleList.messages) || [];
+                        root.cachedSamples = messages;
+                        var preferredSample = normalized === 'fhir'
+                            ? 'fhir/Discharge_Composition_Bundle.json'
+                            : 'hl7v2/ADT04-23.hl7';
+                        var preferredTemplate = normalized === 'fhir'
+                            ? 'MDM_T02.liquid'
+                            : 'ADT_A04.liquid';
+                        var chosenSample = messages.some(function (m) { return m.messageName === preferredSample; })
+                            ? preferredSample
+                            : (messages[0] ? messages[0].messageName : null);
+                        var chosenTemplate = (Array.isArray(templateNames) && templateNames.indexOf(preferredTemplate) !== -1)
+                            ? preferredTemplate
+                            : ((Array.isArray(templateNames) && templateNames[0]) || null);
+                        root.selectedSample = chosenSample;
+                        root.selectedTemplate = chosenTemplate;
+                        root.suggestedTemplate = null;
+                        if (typeof renderFileBrowser === 'function') {
+                            renderFileBrowser(messages);
+                        }
+                        if (chosenTemplate && typeof loadTemplate === 'function') {
+                            loadTemplate(chosenTemplate);
+                        }
+                        if (chosenSample && typeof loadData === 'function') {
+                            loadData(chosenSample, function () {
+                                convertData(true);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+    return true;
+}
+
 function syncSessionChrome() {
     var settings = typeof getSettings === 'function' ? getSettings() : {};
     var project = typeof getActiveProject === 'function' ? getActiveProject() : null;
+    syncDirectionToggleUi();
     var converted = $('#conversion-status').text().indexOf('Converted') === 0;
     $('#session-pitch').prop('hidden', Boolean(project) || !converted);
     $('#project-readonly').prop('hidden', !(project && project.kind === 'github'));
@@ -131,18 +311,24 @@ function syncSessionChrome() {
     $('#message-name').toggleClass('is-empty', sampleName === 'No sample');
     $('#template-open-name').toggleClass('is-empty', templateLabel === 'untitled');
     $('#convert-button').toggleClass('is-manual', settings.convertWhileTyping === false);
-    var pitch = 'This message is now a FHIR bundle.';
-    if (/ADT/i.test(sampleName)) {
+    var isFhirReverse = currentDataType === 'fhir';
+    var pitch = isFhirReverse
+        ? 'This FHIR bundle is now an HL7 v2 message.'
+        : 'This message is now a FHIR bundle.';
+    if (!isFhirReverse && /ADT/i.test(sampleName)) {
         pitch = 'This ADT message is now a FHIR bundle.';
     } else if (sampleName === 'No sample') {
-        pitch = 'Pick a sample. The FHIR result updates beside the template.';
+        pitch = isFhirReverse
+            ? 'Pick a FHIR bundle. The HL7v2 result updates beside the template.'
+            : 'Pick a sample. The FHIR result updates beside the template.';
     }
     $('#session-pitch').text(pitch);
 }
 
 function setMessageStripExpanded(expanded) {
     if (dataTemplateSplit) {
-        dataTemplateSplit.setSizes(expanded ? [42, 58] : [16, 84]);
+        var collapsedSizes = currentDataType === 'fhir' ? [26, 74] : [16, 84];
+        dataTemplateSplit.setSizes(expanded ? [45, 55] : collapsedSizes);
     }
     $('#message-expand').attr('aria-expanded', expanded ? 'true' : 'false').text(expanded ? 'Show less' : 'Show full message');
     refreshEditors();
@@ -242,6 +428,38 @@ function convertData(force) {
                     hasSuccessfulCallBeenMade = true;
                     var root = typeof window !== 'undefined' ? window : globalThis;
                     root.latestDebugInfo = (data && data.debugInfo) ? data.debugInfo : null;
+
+                    if (currentDataType === 'fhir' || (data && typeof data.hl7v2Message === 'string')) {
+                        var rawHl7 = (data && typeof data.hl7v2Message === 'string') ? data.hl7v2Message : '';
+                        var normalizedHl7 = rawHl7.replace(/\r\n|\r/g, '\n');
+                        if (root.latestDebugInfo) {
+                            root.latestDebugInfo.hl7v2Message = rawHl7;
+                            root.latestDebugInfo.messageType = data.messageType || null;
+                            root.latestDebugInfo.segmentCount = data.segmentCount;
+                        }
+                        if (dataEditor && typeof dataEditor.getDoc === 'function') {
+                            var fhirDoc = dataEditor.getDoc();
+                            if (fhirDoc && typeof fhirDoc.getAllMarks === 'function') {
+                                fhirDoc.getAllMarks().forEach(function (mark) {
+                                    if (mark && mark.className === 'unused-segment') {
+                                        mark.clear();
+                                    }
+                                });
+                            }
+                        }
+                        outputCode.setValue(normalizedHl7);
+                        $(document).trigger('fhir:debug-updated', [root.latestDebugInfo]);
+                        hideResultError();
+                        applyConversionStatus(data);
+                        hideConversionError();
+                        setUnusedLegend(false);
+                        if (typeof updateValidateButton === 'function') {
+                            updateValidateButton();
+                        }
+                        refreshEditors();
+                        return;
+                    }
+
                     if (root.latestDebugInfo) {
                         root.latestDebugInfo.unusedSegments = data.unusedSegments || [];
                         root.latestDebugInfo.fhirResource = data.fhirResource || null;
@@ -429,6 +647,8 @@ function changeDataType(dataType) {
                 });
 
                 dataEditor.setOption('mode', 'hl7v2');
+                syncDirectionToggleUi();
+                syncStudioDataTypePanes();
                 break;
             case 'CDA':
                 $('#editor-main, #editor-panes').removeClass('vertical-content');
@@ -449,6 +669,7 @@ function changeDataType(dataType) {
                 });
 
                 dataEditor.setOption('mode', 'xml');
+                syncDirectionToggleUi();
                 break;
         }
     }
@@ -511,14 +732,20 @@ function createNewTemplate() {
 var _editorGlobal = typeof globalThis !== 'undefined' ? globalThis : window;
 _editorGlobal.getUrl = getUrl;
 _editorGlobal.getDataTypeSpecificUrl = getDataTypeSpecificUrl;
+_editorGlobal.applyTemplateList = applyTemplateList;
 _editorGlobal.conversionStatusLabel = conversionStatusLabel;
 _editorGlobal.unchangedFromReference = unchangedFromReference;
 _editorGlobal.indexOfX = indexOfX;
 _editorGlobal.refreshEditors = refreshEditors;
 _editorGlobal.convertData = convertData;
 _editorGlobal.changeDataType = changeDataType;
+_editorGlobal.switchStudioDataType = switchStudioDataType;
+_editorGlobal.syncDirectionToggleUi = syncDirectionToggleUi;
+_editorGlobal.syncStudioDataTypePanes = syncStudioDataTypePanes;
 _editorGlobal.showConversionError = showConversionError;
 _editorGlobal.hideConversionError = hideConversionError;
+_editorGlobal.showResultError = showResultError;
+_editorGlobal.hideResultError = hideResultError;
 _editorGlobal.syncSessionChrome = syncSessionChrome;
 _editorGlobal.updateUnsavedDot = updateUnsavedDot;
 _editorGlobal.formatActiveTemplate = formatActiveTemplate;
@@ -711,6 +938,75 @@ if (typeof $ === 'function' && typeof document !== 'undefined') {
         });
 
         $('#format-template-button').on('click', formatActiveTemplate);
+
+        $('#mode-hl7-to-fhir').on('click', function () {
+            if (currentDataType !== 'hl7v2') {
+                switchStudioDataType('hl7v2');
+            }
+        });
+
+        $('#mode-fhir-to-hl7').on('click', function () {
+            if (currentDataType !== 'fhir') {
+                switchStudioDataType('fhir');
+            }
+        });
+
+        if (typeof bindEditorFoldToggle === 'function' && dataEditor) {
+            bindEditorFoldToggle(dataEditor, '#fold-input-button');
+        }
+
+        if (typeof renderFileBrowser === 'function' && !renderFileBrowser._fhirWrapped) {
+            var origRenderFileBrowser = renderFileBrowser;
+            renderFileBrowser = function (messages) {
+                var normalized = Array.isArray(messages) ? messages.map(function (item) {
+                    if (
+                        currentDataType === 'fhir' &&
+                        item &&
+                        typeof item.messageName === 'string' &&
+                        item.messageName.toLowerCase().startsWith('fhir/')
+                    ) {
+                        return Object.assign({}, item, {projectSample: true});
+                    }
+                    return item;
+                }) : messages;
+                return origRenderFileBrowser(normalized);
+            };
+            renderFileBrowser._fhirWrapped = true;
+            _editorGlobal.renderFileBrowser = renderFileBrowser;
+        }
+
+        if (typeof removeUserSample === 'function' && !removeUserSample._fhirWrapped) {
+            var origRemoveUserSample = removeUserSample;
+            removeUserSample = function (sample) {
+                if (currentDataType === 'fhir' || (sample && typeof sample.full === 'string' && sample.full.indexOf('fhir/') === 0)) {
+                    if (typeof window !== 'undefined' && typeof window.confirm === 'function' && !window.confirm('Delete sample "' + sample.label + '"?')) {
+                        return;
+                    }
+                    $.ajax({
+                        url: getUrl('sample-data', 'fhir/' + sample.label),
+                        type: 'DELETE',
+                        dataType: 'json'
+                    }).done(function () {
+                        if (typeof selectedSample !== 'undefined' && selectedSample === sample.full) {
+                            selectedSample = null;
+                            _editorGlobal.selectedSample = null;
+                        }
+                        if (typeof refreshFileBrowser === 'function') {
+                            refreshFileBrowser();
+                        }
+                    }).fail(function (xhr) {
+                        var body = (xhr && xhr.responseJSON) || {};
+                        var msg = (body.error && typeof body.error.message === 'string') ? body.error.message : 'Could not delete sample.';
+                        showConversionError(msg);
+                    });
+                    return;
+                }
+                return origRemoveUserSample(sample);
+            };
+            removeUserSample._fhirWrapped = true;
+            _editorGlobal.removeUserSample = removeUserSample;
+        }
+
         if (typeof updateValidateButton === 'function') {
             updateValidateButton();
         }

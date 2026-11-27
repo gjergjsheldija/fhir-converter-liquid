@@ -1,0 +1,19 @@
+{%- assign dgSetId = setId | default: 1 -%}
+{%- assign dgCoding = cond.code | coding_by_system: 'http://fhir.de/CodeSystem/bfarm/icd-10-gm', true -%}
+{%- if dgCoding.system contains 'icd-10-gm' -%}
+{%- assign dgSys = 'I10G' -%}
+{%- elsif dgCoding.system contains 'icd-10' -%}
+{%- assign dgSys = 'I10' -%}
+{%- elsif dgCoding.system contains 'snomed' -%}
+{%- assign dgSys = 'SCT' -%}
+{%- else -%}
+{%- assign dgSys = 'L' -%}
+{%- endif -%}
+{%- assign dgCode = dgCoding.code | default: '' | hl7_escape -%}
+{%- assign dgDisp = dgCoding.display | default: cond.code.text | default: '' | hl7_escape -%}
+{%- assign dg3 = dgCode | append: '^' | append: dgDisp | append: '^' | append: dgSys -%}
+{%- assign dg4 = cond.code.text | default: dgCoding.display | default: '' | hl7_escape -%}
+{%- assign dg5Raw = cond.recordedDate | default: cond.onsetDateTime -%}
+{%- assign dg5 = dg5Raw | hl7_datetime -%}
+{%- assign dg6 = diagType | default: 'F' | hl7_escape -%}
+DG1|{{ dgSetId }}||{{ dg3 }}|{{ dg4 }}|{{ dg5 }}|{{ dg6 }}|||||||||{{ dgSetId }}
