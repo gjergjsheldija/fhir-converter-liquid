@@ -1,8 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
-
 // One provider call plus the two prompt builders used by the generate loop.
 // This module never touches the converter. The decide-whether-it-renders step
 // lives in the generate route so tests can stub the provider in isolation.

@@ -3,24 +3,25 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-import { workerTaskProcessor } from './workerUtils.js';
-
-workerTaskProcessor((msg) => {
-    return new Promise((fulfill, reject) => {
+export default async function (msg) {
+    try {
         switch (msg.TestOnly) {
             case 'exit':
                 process.exit(2);
                 break;
             case 'error':
                 throw new Error('random error');
+            case 'slow':
+                await new Promise((resolve) => setTimeout(resolve, msg.delayMs || 100));
+                return 'slow-done';
             case 'msg1':
-                fulfill('b');
-                break;
+                return 'b';
             case 'msg2':
-                fulfill('c');
-                break;
+                return 'c';
             default:
-                reject('unknown msg!');
+                return 'unknown msg!';
         }
-    });
-});
+    } catch (err) {
+        return err instanceof Error ? err.message : err;
+    }
+}

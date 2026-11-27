@@ -1,0 +1,42 @@
+{%- assign txaComp = comp | default: composition -%}
+{%- assign txaQr = qr | default: questionnaireResponse -%}
+{%- assign txaDocRef = docRef | default: documentReference -%}
+{%- assign txa2 = customer.documentType | default: 'DS' | hl7_escape -%}
+{%- if txaDocRef.content[0].attachment.contentType == 'application/pdf' -%}
+{%- assign txa3 = 'AP' -%}
+{%- else -%}
+{%- assign txa3 = 'TX' -%}
+{%- endif -%}
+{%- assign txa4Raw = txaComp.date | default: txaQr.authored | default: encounter.period.end | default: bundle.timestamp -%}
+{%- assign txa4 = txa4Raw | hl7_datetime -%}
+{%- assign txaPrac = practitioner -%}
+{%- if txaComp.author[0] -%}
+{%- assign resolvedTxaAuthor = txaComp.author[0] | resolve_ref: byRef -%}
+{%- if resolvedTxaAuthor and resolvedTxaAuthor.resourceType == 'Practitioner' -%}
+{%- assign txaPrac = resolvedTxaAuthor -%}
+{%- endif -%}
+{%- elsif txaQr.author -%}
+{%- assign resolvedQrAuthor = txaQr.author | resolve_ref: byRef -%}
+{%- if resolvedQrAuthor and resolvedQrAuthor.resourceType == 'Practitioner' -%}
+{%- assign txaPrac = resolvedQrAuthor -%}
+{%- endif -%}
+{%- endif -%}
+{%- assign txa5 = '' -%}
+{%- if txaPrac -%}
+{%- assign txaPracIdObj = txaPrac.identifier | identifier_by_system: '' -%}
+{%- assign txaPracId = txaPracIdObj.value | default: txaPrac.id | default: '' | hl7_escape -%}
+{%- assign txaPracFam = txaPrac.name[0].family | default: '' | hl7_escape -%}
+{%- assign txaPracGiv = txaPrac.name[0].given[0] | default: '' | hl7_escape -%}
+{%- assign txa5 = txaPracId | append: '^' | append: txaPracFam | append: '^' | append: txaPracGiv -%}
+{%- endif -%}
+{%- assign txa6Raw = txaComp.date | default: txaQr.authored | default: txa4Raw -%}
+{%- assign txa6 = txa6Raw | hl7_datetime -%}
+{%- assign compIdObj = txaComp.identifier | identifier_by_system: '' -%}
+{%- assign qrIdObj = txaQr.identifier | identifier_by_system: '' -%}
+{%- assign txa12Raw = compIdObj.value | default: txaComp.id | default: qrIdObj.value | default: txaQr.id | default: txaDocRef.id | default: bundle.id | default: 'DOC-1' -%}
+{%- assign txa12 = txa12Raw | hl7_escape -%}
+{%- assign txa16 = txaComp.title | default: txaDocRef.description | default: 'Hospital Discharge Summary' | hl7_escape -%}
+{%- assign rawDocStatus = txaComp.status | default: txaQr.status | default: 'final' -%}
+{%- assign txa17 = rawDocStatus | map_doc_status -%}
+{%- assign txa18 = txaComp.confidentiality | default: 'U' | hl7_escape -%}
+TXA|1|{{ txa2 }}|{{ txa3 }}|{{ txa4 }}|{{ txa5 }}|{{ txa6 }}|||{{ txa5 }}|||{{ txa12 }}||||{{ txa16 }}|{{ txa17 }}|{{ txa18 }}|AV

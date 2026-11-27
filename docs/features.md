@@ -1,6 +1,6 @@
 # Features
 
-The editor at `http://localhost:2019` authors Liquid maps for HL7 v2 and C-CDA, converts them to FHIR R4, and can check or send the result. Built-in mode is HL7 v2 (accepting `\r\n`, `\n`, and bare `\r` MLLP terminators plus `MSH-18` character sets `8859/1`, `ISO-8859-15`, `WINDOWS-1252`, and `UTF-8`). C-CDA runs inside a project. Generated Bundles emit clean `FHIR Converter Liquid` Provenance narratives with no `TEMPLATE_VERSION_PLACEHOLDER` tokens or upstream tarball URLs.
+The editor and conversion engine at `http://localhost:2019` convert bidirectionally between HL7 v2 and FHIR R4 (`HL7v2 -> FHIR` and `FHIR -> HL7v2`), convert C-CDA documents to FHIR R4, and can validate or deliver results directly to a FHIR R4 server or an HL7 v2 REST gateway. Built-in `HL7v2 -> FHIR` mode accepts `\r\n`, `\n`, and bare `\r` MLLP terminators plus `MSH-18` character sets `8859/1`, `ISO-8859-15`, `WINDOWS-1252`, and `UTF-8`, emitting clean `FHIR Converter Liquid` Provenance narratives with no `TEMPLATE_VERSION_PLACEHOLDER` tokens or upstream tarball URLs. Built-in `FHIR -> HL7v2` mode turns self-contained FHIR R4 `document` and `collection` Bundles (such as Hospital Discharge Summaries and `QuestionnaireResponse` assessments) into `\r`-delimited ER7 messages (`MDM^T02`, `ADT^A03`, `ORU^R01`). Per-customer pipelines under `CUSTOMERS_ROOT` combine `config.yaml`, `input/`, and `output/` templates with Vault-backed secret references.
 
 Each feature has its own page.
 
@@ -18,3 +18,5 @@ Each feature has its own page.
 | [Site pack](features/site-pack.md) | Rewrite codes (with optional `"preserveSource": true`) and resolve multi-facility HIE Assigning Authority identifier systems |
 | [Project CLI](features/project-cli.md) | Convert HL7 v2 or C-CDA messages (`bin/convert.mjs`) or check a project's expected golden bundles |
 | [Open Integration Engine](features/oie.md) | Route MLLP HL7 v2 dynamically from `MSH-9`, forward `CONVERT_API_KEY`, and return `MSA|AA` or `MSA|AE` ACKs |
+| [FHIR to HL7 v2](features/fhir-to-hl7v2.md) | Convert self-contained FHIR R4 Discharge Summary (`Composition`) and `QuestionnaireResponse` Bundles into `MDM^T02`, `ADT^A03`, or `ORU^R01` ER7 messages and deliver them to an HL7 v2 REST gateway |
+| [Customer pipelines & Vault](features/customer-pipelines.md) | Configure per-customer `config.yaml`, `input/`, and `output/` folders under `CUSTOMERS_ROOT` with `aws-sm://`, `vault://`, `infisical://`, `file://`, and `env://` secrets and `?deliver=true` delivery |

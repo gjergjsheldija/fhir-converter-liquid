@@ -13,6 +13,19 @@ import { batchRender } from "./filters/batchRender.js";
 import { gzip } from "./filters/gzip.js";
 import { sha1Hash } from "./filters/sha1Hash.js";
 import { base64Encode } from "./filters/base64Encode.js";
+import {
+    hl7Escape,
+    stripXhtml,
+    hl7Datetime,
+    hl7ControlId,
+    resolveRef,
+    identifierBySystem,
+    identifierByType,
+    codingBySystem,
+    mapGender,
+    mapDocStatus,
+    flattenQrItems
+} from "./filters/hl7v2OutputFilters.js";
 
 export const external = [
     {
@@ -156,5 +169,60 @@ export const external = [
         name: 'base64_encode',
         description: 'Base64 of the UTF-8 bytes of a string (pinned StringFilters.Base64Encode)',
         func: base64Encode
+    },
+    {
+        name: 'hl7_escape',
+        description: 'Escapes HL7v2 ER7 delimiters and line breaks safely for text/FT/ST fields',
+        func: hl7Escape
+    },
+    {
+        name: 'strip_xhtml',
+        description: 'Strips XHTML tags and decodes HTML entities into clean multi-line clinical text',
+        func: stripXhtml
+    },
+    {
+        name: 'hl7_datetime',
+        description: 'Converts ISO-8601 FHIR date/dateTime/instant strings into HL7v2 DTM/DT format',
+        func: hl7Datetime
+    },
+    {
+        name: 'hl7_control_id',
+        description: 'Generates a deterministic or random HL7v2 MSH-10 Message Control ID (<= 20 chars)',
+        func: hl7ControlId
+    },
+    {
+        name: 'resolve_ref',
+        description: 'Resolves a FHIR Reference string or object against a Bundle byRef index',
+        func: resolveRef
+    },
+    {
+        name: 'identifier_by_system',
+        description: 'Selects a FHIR Identifier matching a system URI with optional fallback to first',
+        func: identifierBySystem
+    },
+    {
+        name: 'identifier_by_type',
+        description: 'Selects a FHIR Identifier matching a type.coding.code (e.g. MR, VN, GKV)',
+        func: identifierByType
+    },
+    {
+        name: 'coding_by_system',
+        description: 'Selects a FHIR Coding from a CodeableConcept or coding[] by preferred system URI',
+        func: codingBySystem
+    },
+    {
+        name: 'map_gender',
+        description: 'Maps FHIR AdministrativeGender (male/female/other/unknown) to HL7v2 Table 0001',
+        func: mapGender
+    },
+    {
+        name: 'map_doc_status',
+        description: 'Maps FHIR Composition/QuestionnaireResponse status to HL7v2 TXA-17 Table 0271',
+        func: mapDocStatus
+    },
+    {
+        name: 'flatten_qr_items',
+        description: 'Recursively flattens FHIR QuestionnaireResponse.item[] into normalized OBX descriptors',
+        func: flattenQrItems
     },
 ];

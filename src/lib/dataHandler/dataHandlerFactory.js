@@ -7,6 +7,7 @@ import {resolve} from "path";
 //import {fileURLToPath} from "url";
 import hl7v2 from "../parsers/hl7v2/hl7v2Liquid.js";
 import ccda from "../parsers/ccda/ccda.js";
+import fhir from "../parsers/fhir/fhir.js";
 import dummy from "../parsers/dummy/dummy.js";
 
 //const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +16,7 @@ import dummy from "../parsers/dummy/dummy.js";
 //const directory = join(__dirname, "../parsers/");
 
 
-const map = {hl7v2, ccda, dummy};
+const map = {hl7v2, ccda, fhir, dummy};
 
 export default class dataHandlerFactory {
     static createDataHandler(dataType) {

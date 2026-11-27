@@ -1,0 +1,20 @@
+{%- assign cust = customer | default: customerContext -%}
+{%- assign sendApp = cust.sendingApplication | default: 'FHIR_CONVERTER' -%}
+{%- assign sendFac = cust.sendingFacility | default: 'EXHOSP' -%}
+{%- assign recvApp = cust.receivingApplication | default: 'KIS_ARCHIVE' -%}
+{%- assign recvFac = cust.receivingFacility | default: 'EXHOSP' -%}
+{%- assign versionId = cust.versionId | default: '2.5.1' -%}
+{%- assign charset = cust.charset | default: 'UNICODE UTF-8' -%}
+{%- assign assignAuth = cust.assigningAuthority | default: 'EXHOSP' -%}
+{%- assign controlId = bundle.id | default: msg.id | default: 'DOC-0001' -%}
+{%- assign mrnVal = patient.identifier[0].value -%}
+{%- assign visitVal = encounter.identifier[0].value -%}
+{%- assign familyName = patient.name[0].family -%}
+{%- assign givenName = patient.name[0].given[0] -%}
+{%- assign docTitle = composition.title | default: documentReference.description | default: 'Discharge Summary' -%}
+MSH|^~\&|{{ sendApp }}|{{ sendFac }}|{{ recvApp }}|{{ recvFac }}|20261126120000||MDM^T02^MDM_T02|{{ controlId }}|P|{{ versionId }}||||||{{ charset }}
+EVN|T02|20261126120000
+PID|1||{% if mrnVal %}{{ mrnVal }}^^^{{ assignAuth }}^MR{% endif %}||{{ familyName }}^{{ givenName }}
+PV1|1|I|||||||||||||||||{% if visitVal %}{{ visitVal }}^^^{{ assignAuth }}^VN{% endif %}
+TXA|1|DS|TX|20261126120000||||||||{{ controlId }}|||||AU
+OBX|1|TX|DOC^{{ docTitle }}||Example University Hospital clinical summary for {{ givenName }} {{ familyName }}||||||F

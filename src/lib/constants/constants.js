@@ -40,10 +40,21 @@ export const CCDA_LIQUID_TEMPLATE_LOCATION = join(
     "Ccda"
 );
 export const HL7V2_DATA_LOCATION = join(__dirname, sampleDataFolder, "hl7v2");
+export const REVERSE_BASE_TEMPLATE_FILES_LOCATION = join(__dirname, "../../reverse-templates/");
+export const REVERSE_TEMPLATE_FILES_LOCATION = join(__dirname, "../../service-reverse-templates");
+export const FHIR_TO_HL7V2_LIQUID_TEMPLATE_LOCATION = join(
+    __dirname,
+    "../../service-reverse-templates",
+    "FhirToHl7v2"
+);
+export const REVERSE_SAMPLE_DATA_LOCATION = join(__dirname, "../../reverse-samples");
+export const USER_REVERSE_SAMPLE_DATA_LOCATION = join(__dirname, "../../service-reverse-samples");
+export const CUSTOMERS_LOCATION = join(__dirname, "../../../customers");
 export const CLS_NAMESPACE = "conversionRequest";
 export const CLS_KEY_TEMPLATE_LOCATION = "templateLocation";
 export const TIMEZONE = "TIMEZONE";
 
 export let constants = [AVAILABLE_PARSERS, BASE_TEMPLATE_FILES_LOCATION, TEMPLATE_FILES_LOCATION, SAMPLE_DATA_LOCATION, USER_SAMPLE_DATA_LOCATION,
     STATIC_LOCATION, CODE_MIRROR_LOCATION, MOVE_TO_GLOBAL_KEY_NAME, HL7V2_TEMPLATE_LOCATION, HL7V2_LIQUID_TEMPLATE_LOCATION, CCDA_LIQUID_TEMPLATE_LOCATION, HL7V2_DATA_LOCATION,
+    REVERSE_BASE_TEMPLATE_FILES_LOCATION, REVERSE_TEMPLATE_FILES_LOCATION, FHIR_TO_HL7V2_LIQUID_TEMPLATE_LOCATION, REVERSE_SAMPLE_DATA_LOCATION, USER_REVERSE_SAMPLE_DATA_LOCATION, CUSTOMERS_LOCATION,
     CLS_NAMESPACE, CLS_KEY_TEMPLATE_LOCATION, TIMEZONE];

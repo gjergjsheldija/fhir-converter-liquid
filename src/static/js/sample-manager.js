@@ -5,30 +5,61 @@
 /* eslint-disable no-undef, no-unused-vars */
 
 var SAMPLE_FILE_EXTENSIONS = ['.hl7', '.txt', '.msg'];
+var FHIR_SAMPLE_FILE_EXTENSIONS = ['.json'];
 var BUILTIN_SAMPLE_CONFLICT = 'Cannot overwrite a built-in sample. Save under a new file name.';
 
-function isSupportedSampleFile(fileName) {
+function isFhirSampleMode(dataType) {
+    var activeType = dataType !== undefined
+        ? dataType
+        : (typeof currentDataType !== 'undefined' ? currentDataType : 'hl7v2');
+    return String(activeType || '').toLowerCase() === 'fhir';
+}
+
+function activeSampleExtensions(dataType) {
+    return isFhirSampleMode(dataType) ? FHIR_SAMPLE_FILE_EXTENSIONS : SAMPLE_FILE_EXTENSIONS;
+}
+
+function isSupportedSampleFile(fileName, dataType) {
     var lower = String(fileName || '').toLowerCase();
-    return SAMPLE_FILE_EXTENSIONS.some(function (ext) {
+    return activeSampleExtensions(dataType).some(function (ext) {
         return lower.endsWith(ext);
     });
 }
 
-function sanitizeSampleFileName(fileName) {
+function sanitizeSampleFileName(fileName, dataType) {
+    var fhirMode = isFhirSampleMode(dataType);
+    var allowedExts = activeSampleExtensions(dataType);
+    var defaultExt = fhirMode ? '.json' : '.hl7';
     var base = String(fileName || '');
     var dot = base.lastIndexOf('.');
     var ext = dot === -1 ? '' : base.substring(dot).toLowerCase();
     if (dot !== -1) {
         base = base.substring(0, dot);
     }
-    if (SAMPLE_FILE_EXTENSIONS.indexOf(ext) === -1) {
-        ext = '.hl7';
+    if (allowedExts.indexOf(ext) === -1) {
+        ext = defaultExt;
     }
     base = base.replace(/[^A-Za-z0-9._-]/g, '_').replace(/^\./, '');
     if (!base) {
         base = 'sample';
     }
     return base + ext;
+}
+
+function validateFhirBundleSampleText(text) {
+    if (typeof text !== 'string' || !text.trim()) {
+        return {ok: false, message: 'Sample bundle cannot be empty.'};
+    }
+    var parsed;
+    try {
+        parsed = JSON.parse(text);
+    } catch (ex) {
+        return {ok: false, message: 'FHIR sample must be valid JSON.'};
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || parsed.resourceType !== 'Bundle') {
+        return {ok: false, message: 'FHIR sample must be a JSON Bundle (resourceType "Bundle").'};
+    }
+    return {ok: true, bundle: parsed};
 }
 
 function sampleEventTypeFromTemplate(templateName) {
@@ -65,7 +96,47 @@ function buildSyntheticSampleMessage(typeEvent) {
     return lines.join('\n') + '\n';
 }
 
+function buildSyntheticFhirBundle() {
+    var bundle = {
+        resourceType: 'Bundle',
+        id: 'synthetic-discharge-bundle',
+        type: 'document',
+        timestamp: '2026-01-01T12:00:00Z',
+        entry: [
+            {
+                fullUrl: 'urn:uuid:patient-1',
+                resource: {
+                    resourceType: 'Patient',
+                    id: 'patient-1',
+                    identifier: [{system: 'http://hospital.example.org/mrn', value: '10001'}],
+                    name: [{family: 'Doe', given: ['Jane']}],
+                    gender: 'female',
+                    birthDate: '1980-01-01'
+                }
+            },
+            {
+                fullUrl: 'urn:uuid:encounter-1',
+                resource: {
+                    resourceType: 'Encounter',
+                    id: 'encounter-1',
+                    status: 'finished',
+                    class: {system: 'http://terminology.hl7.org/CodeSystem/v3-ActCode', code: 'IMP'},
+                    subject: {reference: 'Patient/patient-1'},
+                    period: {start: '2026-01-01T08:00:00Z', end: '2026-01-01T12:00:00Z'}
+                }
+            }
+        ]
+    };
+    return JSON.stringify(bundle, null, 2) + '\n';
+}
+
 function createNewSample() {
+    if (isFhirSampleMode()) {
+        dataEditor.setValue(buildSyntheticFhirBundle());
+        $('#message-name').text('synthetic-bundle.json (unsaved)');
+        convertData(true);
+        return;
+    }
     var typeEvent = sampleEventTypeFromTemplate(typeof activeTemplate !== 'undefined' && activeTemplate && activeTemplate.name);
     dataEditor.setValue(buildSyntheticSampleMessage(typeEvent));
     $('#message-name').text('synthetic-' + typeEvent.replace('^', '_') + '.hl7 (unsaved)');
@@ -106,15 +177,24 @@ function putSampleFile(fileName, text, callback) {
         });
         return;
     }
+    var fhirMode = isFhirSampleMode();
+    if (fhirMode) {
+        var validation = validateFhirBundleSampleText(text);
+        if (!validation.ok) {
+            callback({status: 400, message: validation.message}, null);
+            return;
+        }
+    }
+    var sampleTypePrefix = fhirMode ? 'fhir/' : 'hl7v2/';
     $.ajax({
-        url: getUrl('sample-data', 'hl7v2/' + fileName),
+        url: getUrl('sample-data', sampleTypePrefix + fileName),
         type: 'PUT',
         contentType: 'text/plain',
         processData: false,
         data: text,
         dataType: 'json'
     }).done(function (response) {
-        callback(null, response && response.messageName ? response.messageName : 'hl7v2/' + fileName);
+        callback(null, response && response.messageName ? response.messageName : sampleTypePrefix + fileName);
     }).fail(function (xhr) {
         callback(sampleAjaxError(xhr), null);
     });
@@ -135,7 +215,9 @@ function finishImportedSample(error, messageName) {
     selectedSample = messageName;
     refreshFileBrowser();
     loadData(messageName, function (text) {
-        highlightMatchingTemplate(text);
+        if (!isFhirSampleMode()) {
+            highlightMatchingTemplate(text);
+        }
     });
 }
 
@@ -183,7 +265,9 @@ function importMultipleSamples(files) {
                         if (saved.length) {
                             selectedSample = saved[0];
                             loadData(saved[0], function (loadedText) {
-                                highlightMatchingTemplate(loadedText);
+                                if (!isFhirSampleMode()) {
+                                    highlightMatchingTemplate(loadedText);
+                                }
                             });
                         }
                         if (errors.length) {
@@ -200,9 +284,13 @@ function handleImportedSamples(files) {
     if (!files.length) {
         return;
     }
-    var supported = files.filter(isSupportedSampleFile);
+    var supported = files.filter(function (file) {
+        return isSupportedSampleFile(file && file.name ? file.name : file);
+    });
     if (!supported.length) {
-        showConversionError('Imported files must end in .hl7, .txt, or .msg.');
+        showConversionError(isFhirSampleMode()
+            ? 'Imported files must end in .json.'
+            : 'Imported files must end in .hl7, .txt, or .msg.');
         return;
     }
     if (supported.length === 1) {
@@ -214,6 +302,18 @@ function handleImportedSamples(files) {
 
 function defaultSampleFileName(text) {
     if (typeof text !== 'string' || !text) {
+        return '';
+    }
+    if (isFhirSampleMode()) {
+        try {
+            var parsed = JSON.parse(text);
+            if (parsed && parsed.resourceType === 'Bundle') {
+                var rawBase = (parsed.id || parsed.type || 'bundle').replace(/[^A-Za-z0-9._-]/g, '_');
+                return (rawBase || 'bundle') + '.json';
+            }
+        } catch (ex) {
+            return '';
+        }
         return '';
     }
     var parts = text.split('\n', 1)[0].split('|');
@@ -240,7 +340,12 @@ function closeSaveSampleForm() {
 function cancelSaveSampleForm() {
     closeSaveSampleForm();
     var errorText = $('#conversion-error').text();
-    if (errorText === 'Enter a sample name.' || errorText === 'Invalid sample file name.' || errorText === 'Sample message cannot be empty.') {
+    if (
+        errorText === 'Enter a sample name.' ||
+        errorText === 'Invalid sample file name.' ||
+        errorText === 'Sample message cannot be empty.' ||
+        errorText === 'Sample bundle cannot be empty.'
+    ) {
         hideConversionError();
     }
 }
@@ -251,8 +356,9 @@ function saveCurrentSample() {
         showConversionError('Enter a sample name.');
         return;
     }
+    var fhirMode = isFhirSampleMode();
     if (!isSupportedSampleFile(name)) {
-        name += '.hl7';
+        name += fhirMode ? '.json' : '.hl7';
     }
     if (!/^[A-Za-z0-9._-]+$/.test(name)) {
         showConversionError('Invalid sample file name.');
@@ -260,8 +366,15 @@ function saveCurrentSample() {
     }
     var text = dataEditor.getValue();
     if (!text) {
-        showConversionError('Sample message cannot be empty.');
+        showConversionError(fhirMode ? 'Sample bundle cannot be empty.' : 'Sample message cannot be empty.');
         return;
+    }
+    if (fhirMode) {
+        var check = validateFhirBundleSampleText(text);
+        if (!check.ok) {
+            showConversionError(check.message);
+            return;
+        }
     }
     putSampleFile(name, text, function (error, messageName) {
         if (error) {
@@ -275,7 +388,9 @@ function saveCurrentSample() {
         $('#message-name').text(name);
         syncSessionChrome();
         refreshFileBrowser();
-        highlightMatchingTemplate(text);
+        if (!fhirMode) {
+            highlightMatchingTemplate(text);
+        }
     });
 }
 
@@ -314,11 +429,15 @@ function setupSampleDropZone($zone, onFiles) {
 
 var _sampleGlobal = typeof globalThis !== 'undefined' ? globalThis : window;
 _sampleGlobal.SAMPLE_FILE_EXTENSIONS = SAMPLE_FILE_EXTENSIONS;
+_sampleGlobal.FHIR_SAMPLE_FILE_EXTENSIONS = FHIR_SAMPLE_FILE_EXTENSIONS;
 _sampleGlobal.BUILTIN_SAMPLE_CONFLICT = BUILTIN_SAMPLE_CONFLICT;
+_sampleGlobal.isFhirSampleMode = isFhirSampleMode;
 _sampleGlobal.isSupportedSampleFile = isSupportedSampleFile;
 _sampleGlobal.sanitizeSampleFileName = sanitizeSampleFileName;
+_sampleGlobal.validateFhirBundleSampleText = validateFhirBundleSampleText;
 _sampleGlobal.sampleEventTypeFromTemplate = sampleEventTypeFromTemplate;
 _sampleGlobal.buildSyntheticSampleMessage = buildSyntheticSampleMessage;
+_sampleGlobal.buildSyntheticFhirBundle = buildSyntheticFhirBundle;
 _sampleGlobal.createNewSample = createNewSample;
 _sampleGlobal.readTextFile = readTextFile;
 _sampleGlobal.sampleAjaxError = sampleAjaxError;
@@ -389,15 +508,26 @@ if (typeof $ === 'function' && typeof document !== 'undefined') {
         });
 
         setupSampleDropZone($('.msg-area'), function (files) {
-            var file = files.filter(isSupportedSampleFile)[0];
+            var file = files.filter(function (f) {
+                return isSupportedSampleFile(f && f.name ? f.name : f);
+            })[0];
             if (!file) {
-                showConversionError('Dropped files must end in .hl7, .txt, or .msg.');
+                showConversionError(isFhirSampleMode()
+                    ? 'Dropped files must end in .json.'
+                    : 'Dropped files must end in .hl7, .txt, or .msg.');
                 return;
             }
             readTextFile(file, function (text) {
                 if (text === null) {
                     showConversionError('Could not read ' + file.name + '.');
                     return;
+                }
+                if (isFhirSampleMode()) {
+                    var check = validateFhirBundleSampleText(text);
+                    if (!check.ok) {
+                        showConversionError(check.message);
+                        return;
+                    }
                 }
                 dataEditor.setValue(text);
                 $('#message-name').text(file.name + ' (unsaved)');
@@ -406,9 +536,13 @@ if (typeof $ === 'function' && typeof document !== 'undefined') {
         });
 
         setupSampleDropZone($('#file-browser'), function (files) {
-            var supported = files.filter(isSupportedSampleFile);
+            var supported = files.filter(function (f) {
+                return isSupportedSampleFile(f && f.name ? f.name : f);
+            });
             if (!supported.length) {
-                showConversionError('Dropped files must end in .hl7, .txt, or .msg.');
+                showConversionError(isFhirSampleMode()
+                    ? 'Dropped files must end in .json.'
+                    : 'Dropped files must end in .hl7, .txt, or .msg.');
                 return;
             }
             importMultipleSamples(supported);

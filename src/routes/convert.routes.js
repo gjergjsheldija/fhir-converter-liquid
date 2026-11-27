@@ -24,7 +24,51 @@ function sendProjectConvertError(res, err) {
     res.status(status).json(errorMessage(code, err && err.message ? err.message : "Project request failed."));
 }
 
-export default function registerConvertRoutes(app, {workerPool, recorder, requireConvertKey, requireApiKey}) {
+function prefersRawHl7v2(req) {
+    const accept = String((req.headers && req.headers.accept) || "").toLowerCase();
+    return accept.includes("application/hl7-v2") || accept.includes("x-application/hl7-v2+er7");
+}
+
+function normalizeAuditSrcData(srcData) {
+    if (typeof srcData === "string") {
+        return srcData;
+    }
+    if (srcData && typeof srcData === "object") {
+        try {
+            return JSON.stringify(srcData);
+        } catch (err) {
+            return "";
+        }
+    }
+    return "";
+}
+
+function extractTemplateRouteSrcData(req) {
+    if (req.params.srcDataType === "fhir") {
+        if (typeof req.body === "string") {
+            return req.body;
+        }
+        if (Buffer.isBuffer(req.body)) {
+            return req.body.toString("utf8");
+        }
+        if (req.body && typeof req.body === "object" && !Array.isArray(req.body)) {
+            if (req.body.resourceType === "Bundle") {
+                return req.body;
+            }
+            if (req.body.srcData !== undefined) {
+                return req.body.srcData;
+            }
+            if (Object.keys(req.body).length === 0) {
+                return "";
+            }
+            return req.body;
+        }
+        return "";
+    }
+    return req.body != null ? req.body.toString() : "";
+}
+
+export default function registerConvertRoutes(app, {workerPool, recorder, requireConvertKey, requireApiKey, enableProjectConvert = true}) {
     app.get("/api/v1/conversions/failures", requireApiKey, function (req, res) {
         flushFailureWrites().then(() => {
             res.status(200).json({
@@ -39,25 +83,30 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
      * @swagger
      * /api/v1/convert/{srcDataType}:
      *   post:
-     *     description: Converts given data to FHIR using template
+     *     summary: Converts source data using an inline Liquid template (HL7v2/C-CDA -> FHIR or FHIR -> HL7v2)
+     *     description: Supports srcDataType 'hl7v2' (returns fhirResource), 'ccda' (returns fhirResource), and 'fhir' (accepts a FHIR R4 Bundle JSON string or object and returns hl7v2Message).
      *     produces:
      *       - application/json
+     *       - application/hl7-v2
      *     consumes:
-     *       - text/plain
+     *       - application/json
+     *       - application/fhir+json
      *     parameters:
      *       - name: srcDataType
-     *         description: Data type of the source (e.g. 'hl7v2')
+     *         description: Source data type ('hl7v2', 'ccda', or 'fhir')
      *         in: path
      *         required: true
      *         type: string
+     *         enum: [hl7v2, ccda, fhir]
      *       - name: conversion
-     *         description: Conversion task
+     *         description: Conversion task envelope
      *         in: body
      *         required: true
      *         schema:
      *           type: object
      *           properties:
      *             srcData:
+     *               description: Raw HL7v2/C-CDA string, or FHIR R4 Bundle JSON object/string when srcDataType is 'fhir'
      *               type: string
      *             template:
      *               type: string
@@ -92,34 +141,44 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
      *         type: string
      *     responses:
      *       200:
-     *         description: Converted message
+     *         description: Converted message ({ fhirResource } for hl7v2/ccda, or { hl7v2Message } for fhir)
      *       400:
      *         description: Bad request
      *       401:
      *         description: Unauthorized
+     *       422:
+     *         description: Missing required hospital correlation IDs when requireCorrelationIds is enabled
      */
     app.post("/api/v1/convert/:srcDataType", requireConvertKey(), function (req, res, next) {
         const flags = parseConversionQueryFlags(req.query);
+        const body = req.body || {};
         runConversion({
             workerPool,
             workerTask: {
                 type: "/api/convert/:srcDataType",
                 srcDataType: req.params.srcDataType,
-                srcData: req.body.srcData,
-                template: req.body.template,
-                templatesOverride: req.body.templatesOverride,
+                srcData: body.srcData,
+                template: body.template,
+                templatesOverride: body.templatesOverride,
+                customerContext: body.customerContext,
+                requireCorrelationIds: body.requireCorrelationIds === true,
                 timezone: req.headers.timezone,
                 debug: flags.retDebug
             },
             flags,
             auditContext: {
-                srcData: req.body.srcData,
-                template: req.body.template
+                srcData: normalizeAuditSrcData(body.srcData),
+                template: body.template
             },
             recorder,
-            recordFailure: true
+            recordFailure: true,
+            requestId: req.requestId
         })
             .then(({status, resultMessage}) => {
+                if (status === 200 && req.params.srcDataType === "fhir" && prefersRawHl7v2(req) && resultMessage && typeof resultMessage.hl7v2Message === "string") {
+                    res.status(200).type("application/hl7-v2; charset=utf-8").send(resultMessage.hl7v2Message);
+                    return;
+                }
                 res.status(status).json(resultMessage);
             })
             .catch(next);
@@ -129,31 +188,37 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
      * @swagger
      * /api/v1/convert/{srcDataType}/{template}:
      *   post:
-     *     description: Converts given data to FHIR using template
+     *     summary: Converts source data using a named server template (HL7v2 -> FHIR or FHIR -> HL7v2)
+     *     description: For srcDataType='hl7v2', send raw ER7 text/plain (e.g. template 'ADT_A01.liquid'). For srcDataType='fhir', send a self-contained FHIR R4 Bundle JSON (e.g. template 'MDM_T02', 'ADT_A03', or 'ORU_R01'). Set Accept to 'application/hl7-v2' to receive raw ER7 directly.
      *     produces:
      *       - application/json
+     *       - application/hl7-v2
      *     consumes:
      *       - text/plain
+     *       - application/hl7-v2
+     *       - application/fhir+json
+     *       - application/json
      *     parameters:
      *       - name: srcDataType
-     *         description: Data type of the source (e.g. 'hl7v2')
+     *         description: Source data type ('hl7v2' or 'fhir')
      *         in: path
      *         required: true
      *         type: string
+     *         enum: [hl7v2, fhir]
      *       - name: template
-     *         description: Name of a specific template
+     *         description: Name of template (e.g. 'ADT_A01.liquid' for hl7v2, or 'MDM_T02' / 'ADT_A03' / 'ORU_R01' for fhir)
      *         in: path
      *         required: true
      *         type: string
      *       - name: srcData
-     *         description: the source data to convert
+     *         description: Raw HL7v2 text or FHIR R4 Bundle JSON object
      *         in: body
      *         required: true
      *         schema:
-     *           type: string
+     *           type: object
      *       - name: api-version
      *         in: query
-     *         description: API version to use. The current version is 1.0. Previous versions, including passing no version, are deprecated.
+     *         description: API version to use. The current version is 1.0.
      *         required: false
      *         type: string
      *       - name: unusedSegments
@@ -173,7 +238,7 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
      *         type: string
      *     responses:
      *       200:
-     *         description: Converted message
+     *         description: Converted message ({ fhirResource } or { hl7v2Message }, or raw application/hl7-v2)
      *       400:
      *         description: Bad request
      *       401:
@@ -186,7 +251,7 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
             ...parseConversionQueryFlags(req.query),
             retDebug: false
         };
-        const srcData = req.body.toString();
+        const srcData = extractTemplateRouteSrcData(req);
         runConversion({
             workerPool,
             workerTask: {
@@ -198,17 +263,26 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
             },
             flags,
             auditContext: {
-                srcData,
+                srcData: normalizeAuditSrcData(srcData),
                 template: req.params.template
             },
             recorder,
-            recordFailure: false
+            recordFailure: false,
+            requestId: req.requestId
         })
             .then(({status, resultMessage}) => {
+                if (status === 200 && req.params.srcDataType === "fhir" && prefersRawHl7v2(req) && resultMessage && typeof resultMessage.hl7v2Message === "string") {
+                    res.status(200).type("application/hl7-v2; charset=utf-8").send(resultMessage.hl7v2Message);
+                    return;
+                }
                 res.status(status).json(resultMessage);
             })
             .catch(next);
     });
+
+    if (enableProjectConvert === false) {
+        return;
+    }
 
     app.post("/api/v1/projects/convert", requireConvertKey(), function (req, res) {
         const flags = parseConversionQueryFlags(req.query);
@@ -238,7 +312,8 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
                         template: body.template
                     },
                     recorder,
-                    recordFailure: true
+                    recordFailure: true,
+                    requestId: req.requestId
                 })
             )
             .then(({status, resultMessage}) => {
@@ -338,7 +413,8 @@ export default function registerConvertRoutes(app, {workerPool, recorder, requir
                     template: rawTemplate
                 },
                 recorder,
-                recordFailure: true
+                recordFailure: true,
+                requestId: req.requestId
             });
 
             res.status(status).json(resultMessage);

@@ -1,8 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
-
 import {execFile} from "node:child_process";
 import {readdir, readFile, stat} from "fs/promises";
 import {resolve} from "path";

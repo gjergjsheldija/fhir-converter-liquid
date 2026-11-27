@@ -1,7 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-// -------------------------------------------------------------------------------------------------
 /* eslint-disable no-undef, no-unused-vars */
 // Stateful Fold All / Unfold All toggle controls for the Liquid template editor
 // (templateCodeEditor) and the FHIR result JSON editor (outputCode).

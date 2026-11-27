@@ -6,8 +6,15 @@
 import {access, readFile} from "fs/promises";
 import {resolve, sep} from "path";
 import {applySitePack, collectUnmapped, loadSitePack} from "../projects/sitePack.js";
+import logging from "../logging/logging.js";
 import {appendAuditAsync} from "./convertAudit.js";
 import {appendFailureAsync, controlIdOf} from "./failureLog.js";
+
+const logger = logging();
+
+export function isStatelessRuntime() {
+    return process.env.STATELESS_RUNTIME === "true" || process.env.STATELESS_RUNTIME === "1";
+}
 
 export async function fileExists(filePath) {
     try {
@@ -97,27 +104,59 @@ export function createConversionRecorder() {
     const counts = {failed: 0, succeeded: 0};
 
     // One audit line per convert attempt: status, template, MSH-10. Never the body or the key.
-    function auditConvert(status, template, srcData) {
-        appendAuditAsync({
-            status,
-            template: typeof template === "string" ? template : "",
-            controlId: controlIdOf(srcData)
-        }).catch(() => {});
+    function auditConvert(status, template, srcData, meta = {}) {
+        const safeMeta = meta && typeof meta === "object" ? meta : {};
+        const tpl = typeof template === "string" ? template : "";
+        const controlId = controlIdOf(srcData);
+        if (process.env.NODE_ENV !== "testing") {
+            logger.info({
+                event: "conversion.audit",
+                status,
+                template: tpl,
+                controlId,
+                requestId: safeMeta.requestId || undefined,
+                customerId: safeMeta.customerId || undefined,
+                durationMs: safeMeta.durationMs
+            });
+        }
+        if (!isStatelessRuntime()) {
+            appendAuditAsync({
+                status,
+                template: tpl,
+                controlId
+            }).catch(() => {});
+        }
     }
 
-    function recordConversion(status, resultMessage, srcData, template) {
-        auditConvert(status, template, srcData);
+    function recordConversion(status, resultMessage, srcData, template, meta = {}) {
+        const safeMeta = meta && typeof meta === "object" ? meta : {};
+        auditConvert(status, template, srcData, safeMeta);
         if (status === 200) {
             counts.succeeded++;
             return;
         }
         counts.failed++;
-        const detail = resultMessage && resultMessage.error && resultMessage.error.message;
-        appendFailureAsync({
-            template,
-            message: detail || "Conversion failed.",
-            raw: srcData
-        }).catch(() => {});
+        const detail = (resultMessage && resultMessage.error && resultMessage.error.message) || "Conversion failed.";
+        const tpl = typeof template === "string" ? template : "";
+        const controlId = controlIdOf(srcData);
+        if (process.env.NODE_ENV !== "testing") {
+            logger.warn({
+                event: "conversion.failed",
+                status,
+                template: tpl,
+                controlId,
+                requestId: safeMeta.requestId || undefined,
+                customerId: safeMeta.customerId || undefined,
+                message: detail
+            });
+        }
+        if (!isStatelessRuntime()) {
+            appendFailureAsync({
+                template,
+                message: detail,
+                raw: srcData
+            }).catch(() => {});
+        }
     }
 
     return {
@@ -134,8 +173,11 @@ export async function runConversion({
     projectRoot = null,
     auditContext = {},
     recorder = null,
-    recordFailure = true
+    recordFailure = true,
+    requestId,
+    customerId
 }) {
+    const startedAt = Date.now();
     const result = await workerPool.exec(workerTask);
     if (projectRoot && result.status === 200 && result.resultMsg && result.resultMsg.fhirResource) {
         const mapped = await applyProjectSitePack(projectRoot, result.resultMsg.fhirResource);
@@ -143,11 +185,16 @@ export async function runConversion({
         result.resultMsg.fhirResource = mapped.fhirResource;
     }
     const resultMessage = pruneConversionMetadata(result.resultMsg, flags);
+    const meta = {
+        requestId,
+        customerId,
+        durationMs: Date.now() - startedAt
+    };
     if (recorder) {
         if (recordFailure) {
-            recorder.recordConversion(result.status, resultMessage, auditContext.srcData, auditContext.template);
+            recorder.recordConversion(result.status, resultMessage, auditContext.srcData, auditContext.template, meta);
         } else {
-            recorder.auditConvert(result.status, auditContext.template, auditContext.srcData);
+            recorder.auditConvert(result.status, auditContext.template, auditContext.srcData, meta);
         }
     }
     return {

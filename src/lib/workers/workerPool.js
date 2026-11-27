@@ -3,91 +3,120 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-import {MessageChannel, Worker} from "worker_threads";
+import os from 'node:os';
+import path from 'node:path';
+import Piscina from 'piscina';
 
-// worker pool : assigns the tasks (as soon as they are created) to the workers, 
-// so that worker thread can utilize CPU efficiently in case of IO bound stuff in 
-// the task.
-// In case worker exits, all the tasks already asigned to it also fail.
-
-// Usage:
-//     Parent: 
-//         var workerThreadPool = new WorkerPool('./src/worker.js', 4);
-//         workerThreadPool.exec({'param1': 1, 'param2' : 2}, (result) => { ... });
-//     Workers: 
-//         worker.workerTaskProcessor((msg) => {
-//             return new Promise((fulfill, reject) => {...}});
+export function resolveWorkerConcurrency(explicitSize) {
+    if (explicitSize !== undefined && explicitSize !== null) {
+        return Math.max(1, Math.floor(Number(explicitSize)) || 1);
+    }
+    if (process.env.WORKER_CONCURRENCY) {
+        return Math.max(1, Math.floor(Number(process.env.WORKER_CONCURRENCY)) || 1);
+    }
+    const available = typeof os.availableParallelism === 'function'
+        ? os.availableParallelism()
+        : os.cpus().length;
+    return Math.min(4, Math.max(1, available));
+}
 
 export default class WorkerPool {
-    constructor(filename, size) {
-        this._workers = [];
-        this._filename = filename;
-        this._rrIndex = 0;
-        const workerCount = Math.max(1, Math.floor(Number(size)) || 1);
-        for (var i = 0; i < workerCount; i++) {
-            this._workers.push(this._createSingleWorker(i));
+    constructor(filename, size, options = {}) {
+        const resolvedFilename = path.resolve(filename);
+        const workerCount = resolveWorkerConcurrency(size);
+        const maxQueue = options.maxQueue !== undefined
+            ? options.maxQueue
+            : (Number(process.env.WORKER_MAX_QUEUE) || 256);
+        const taskTimeoutMs = options.taskTimeoutMs !== undefined
+            ? options.taskTimeoutMs
+            : (Number(process.env.WORKER_TASK_TIMEOUT_MS) || 30000);
+
+        this._piscina = new Piscina({
+            filename: resolvedFilename,
+            minThreads: workerCount,
+            maxThreads: workerCount,
+            maxQueue
+        });
+        this._destroyed = false;
+        this._cacheEpoch = 0;
+        this._size = workerCount;
+        this._maxQueue = maxQueue;
+        this._taskTimeoutMs = taskTimeoutMs;
+    }
+
+    get _workers() {
+        return { length: this._destroyed ? 0 : this._size };
+    }
+
+    isReady() {
+        return !this._destroyed && this._piscina != null;
+    }
+
+    stats() {
+        return {
+            threads: this._piscina.threads.length,
+            maxThreads: this._size,
+            queueSize: this._piscina.queueSize,
+            completed: this._piscina.completed
+        };
+    }
+
+    async exec(msg, execOptions = {}) {
+        if (this._destroyed) {
+            const err = new Error('Worker pool has been destroyed.');
+            err.status = 503;
+            err.code = 'ServiceUnavailable';
+            throw err;
+        }
+
+        if (this._maxQueue > 0 && Number.isFinite(this._maxQueue) && this._piscina.queueSize >= this._maxQueue) {
+            const queueErr = new Error('Conversion worker queue is full; try again shortly.');
+            queueErr.status = 503;
+            queueErr.code = 'ServiceUnavailable';
+            throw queueErr;
+        }
+
+        const payload = (msg !== null && typeof msg === 'object' && !Array.isArray(msg))
+            ? { ...msg, _cacheEpoch: this._cacheEpoch }
+            : msg;
+
+        const timeoutMs = execOptions.timeoutMs !== undefined
+            ? execOptions.timeoutMs
+            : this._taskTimeoutMs;
+        const signal = execOptions.signal || (
+            Number.isFinite(timeoutMs) && timeoutMs > 0 && typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function'
+                ? AbortSignal.timeout(timeoutMs)
+                : undefined
+        );
+
+        try {
+            return await this._piscina.run(payload, signal ? { signal } : undefined);
+        } catch (err) {
+            if (err && (err.code === 'PISCINA_QUEUE_LIMIT_REACHED' || /queue/i.test(err.message))) {
+                const queueErr = new Error('Conversion worker queue is full; try again shortly.');
+                queueErr.status = 503;
+                queueErr.code = 'ServiceUnavailable';
+                throw queueErr;
+            }
+            if (err && (err.name === 'AbortError' || err.name === 'TimeoutError')) {
+                const timeoutErr = new Error('Conversion timed out.');
+                timeoutErr.status = 504;
+                timeoutErr.code = 'Timeout';
+                throw timeoutErr;
+            }
+            throw err;
         }
     }
 
-    _createSingleWorker(index) {
-        var worker = new Worker(this._filename);
-
-        worker.once('exit', (code) => {
-            //console.log(`worker ${index} exiting with code ${code}`);
-            if (code <= 1) { // worker.terminate uses exit code 1 
-                return;
-            }
-            this._replace(worker, index);
-            worker.terminate();
-            worker.removeAllListeners();
-        });
-
-        //console.log(`created worker ${index} with thread id ${worker.threadId}. count = ${this._workers.length}`);
-        return worker;
+    broadcast() {
+        this._cacheEpoch++;
     }
 
     destroy() {
-        this._workers.forEach((worker) => worker.terminate());
-        this._workers = null;
-    }
-
-    _replace(worker, index) {
-        const newWorker = this._createSingleWorker(index);
-        this._workers[index] = newWorker;
-    }
-
-    exec(msg) {
-        return new Promise((fulfill, reject) => {
-            // For reference, Msg channel creation is 3 orders of magnitude cheaper
-            // than worker creation (~10 micro sec vs ~7 milli sec).
-            const channel = new MessageChannel();
-
-            const stopWaiting = (code) => {
-                reject(`worker exited with code ${code}!`);
-            };
-
-            const selectedWorkerIndex = this._rrIndex++ % this._workers.length;
-
-            channel.port2.once('message', (result) => {
-                this._workers[selectedWorkerIndex].removeListener('exit', stopWaiting);
-                channel.port1.close();
-                channel.port2.close();
-                fulfill(result);
-            });
-
-            this._workers[selectedWorkerIndex].prependOnceListener('exit', stopWaiting);
-
-            this._workers[selectedWorkerIndex].postMessage({
-                channelWorkerPort: channel.port1,
-                'msg': msg
-            }, [channel.port1]);
-        });
-    }
-
-    broadcast(msg) {
-        for (var i = 0; i < this._workers.length; ++i) {
-            var channel = new MessageChannel();
-            this._workers[i].postMessage({channelWorkerPort: channel.port1, 'msg': msg}, [channel.port1]);
+        if (this._destroyed) {
+            return Promise.resolve();
         }
+        this._destroyed = true;
+        return this._piscina.destroy();
     }
 }

@@ -1,0 +1,16 @@
+{%- assign prSetId = setId | default: 1 -%}
+{%- assign prCoding = proc.code | coding_by_system: 'http://fhir.de/CodeSystem/bfarm/ops', true -%}
+{%- if prCoding.system contains 'ops' -%}
+{%- assign prSys = 'OPS' -%}
+{%- elsif prCoding.system contains 'snomed' -%}
+{%- assign prSys = 'SCT' -%}
+{%- else -%}
+{%- assign prSys = 'L' -%}
+{%- endif -%}
+{%- assign prCode = prCoding.code | default: '' | hl7_escape -%}
+{%- assign prDisp = prCoding.display | default: proc.code.text | default: '' | hl7_escape -%}
+{%- assign pr3 = prCode | append: '^' | append: prDisp | append: '^' | append: prSys -%}
+{%- assign pr4 = proc.code.text | default: prCoding.display | default: '' | hl7_escape -%}
+{%- assign pr5Raw = proc.performedDateTime | default: proc.performedPeriod.start -%}
+{%- assign pr5 = pr5Raw | hl7_datetime -%}
+PR1|{{ prSetId }}||{{ pr3 }}|{{ pr4 }}|{{ pr5 }}
