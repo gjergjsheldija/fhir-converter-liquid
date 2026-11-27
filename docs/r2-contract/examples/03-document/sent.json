@@ -1,0 +1,141 @@
+{
+  "resourceType": "Bundle",
+  "id": "f29446fd-1fc0-3c4a-e674-1734d1819d9b",
+  "type": "transaction",
+  "timestamp": "2026-11-27T10:30:00.000Z",
+  "identifier": {
+    "system": "https://fhir.example-hospital.org/sid/message-control-id",
+    "value": "SYN-MSG-0003"
+  },
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:76492911-be19-9085-e68e-f84f7fcf78ab",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR"
+                }
+              ]
+            },
+            "system": "https://fhir.example-hospital.org/sid/mrn",
+            "value": "SYN-MRN-0001"
+          }
+        ],
+        "name": [
+          {
+            "family": "MUSTER",
+            "given": [
+              "MAX"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1985-04-12",
+        "address": [
+          {
+            "line": [
+              "200 Example Ave"
+            ],
+            "city": "Testville",
+            "state": "TS",
+            "postalCode": "00001",
+            "country": "ZZ"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient?identifier=https%3A%2F%2Ffhir.example-hospital.org%2Fsid%2Fmrn|SYN-MRN-0001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1992d02a-d8c0-4e5d-e23f-e25324869af2",
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "VN"
+                }
+              ]
+            },
+            "system": "https://fhir.example-hospital.org/sid/visit-number",
+            "value": "SYN-VISIT-1001"
+          }
+        ],
+        "status": "in-progress",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "urn:uuid:76492911-be19-9085-e68e-f84f7fcf78ab"
+        },
+        "period": {
+          "start": "2026-11-27T07:00:00.000Z"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=https%3A%2F%2Ffhir.example-hospital.org%2Fsid%2Fvisit-number|SYN-VISIT-1001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:373cc685-a96b-912f-6d04-70cfb1b5d540",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "identifier": [
+          {
+            "system": "https://fhir.example-hospital.org/sid/document-id",
+            "value": "SYN-DOC-9001"
+          }
+        ],
+        "status": "current",
+        "docStatus": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11488-4",
+              "display": "Consultation note"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:76492911-be19-9085-e68e-f84f7fcf78ab"
+        },
+        "date": "2026-11-27T10:25:00.000Z",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/pdf",
+              "title": "Consultation note",
+              "creation": "2026-11-27T10:25:00.000Z",
+              "data": "JVBERi0xLjQKJVN5bnRoZXRpYyB0ZXN0IGRvY3VtZW50CiUlRU9GCg=="
+            }
+          }
+        ],
+        "context": {
+          "encounter": [
+            {
+              "reference": "urn:uuid:1992d02a-d8c0-4e5d-e23f-e25324869af2"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "DocumentReference?identifier=https%3A%2F%2Ffhir.example-hospital.org%2Fsid%2Fdocument-id|SYN-DOC-9001"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "resourceType": "OperationOutcome",
+  "issue": [
+    {
+      "severity": "error",
+      "code": "invalid",
+      "diagnostics": "Unable to parse input data. Error: Invalid HL7 v2 message, first segment id = PID"
+    }
+  ],
+  "id": "r2-example-06-rejected",
+  "requestId": "r2-example-06-rejected",
+  "phase": "conversion"
+}

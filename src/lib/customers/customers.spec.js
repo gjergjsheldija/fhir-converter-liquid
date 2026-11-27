@@ -65,7 +65,7 @@ describe("customers (customerConfig & customerPipeline)", function () {
             const loaded = await loadCustomer("example-hospital", CUSTOMERS_LOCATION);
             assert.strictEqual(loaded.customerId, "example-hospital");
             assert.strictEqual(loaded.name, "Example University Hospital");
-            assert.deepStrictEqual(loaded.templates.input, ["ADT_A01.liquid"]);
+            assert.deepStrictEqual(loaded.templates.input, ["ADT_A01.liquid", "ADT_A03.liquid", "ADT_A08.liquid", "MDM_T02.liquid"]);
             assert.deepStrictEqual(loaded.templates.output, ["MDM_T02.liquid"]);
             assert.strictEqual(loaded.defaults.fallbackToBuiltin, true);
             assert.strictEqual(loaded.defaults.autoDeliverInbound, false);

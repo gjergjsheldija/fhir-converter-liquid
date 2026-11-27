@@ -1,0 +1,69 @@
+{% assign firstSegments = hl7v2Data | get_first_segments: 'MSH|PID|PV1|TXA|OBX' -%}
+{% assign patientId = firstSegments.PID.3.1.Value | generate_uuid -%}
+{% assign bundleId = firstSegments.MSH.10.Value | generate_uuid -%}
+{% assign docIdValue = firstSegments.TXA.12.1.Value -%}
+{% assign docId = docIdValue | generate_uuid -%}
+{% assign docStatus = firstSegments.TXA.17.Value -%}
+{
+    {% include 'R2/BundleHeader' MSH: firstSegments.MSH, ID: bundleId -%}
+    "entry": [
+        {% include 'R2/Patient' PID: firstSegments.PID, ID: patientId -%}
+        {% if firstSegments.PV1.19.1.Value -%}
+        {% assign encounterId = firstSegments.PV1.19.1.Value | generate_uuid -%}
+        {% include 'R2/Encounter' PV1: firstSegments.PV1, ID: encounterId, PatientID: patientId -%}
+        {% endif -%}
+        {
+            "fullUrl": "DocumentReference/{{ docId }}",
+            "resource": {
+                "resourceType": "DocumentReference",
+                "id": "{{ docId }}",
+                "identifier": [
+                    {
+                        "system": "https://fhir.example-hospital.org/sid/document-id",
+                        "value": "{{ docIdValue }}"
+                    }
+                ],
+                "status": "current",
+                {% if docStatus == "AU" or docStatus == "LA" -%}
+                "docStatus": "final",
+                {% elsif docStatus == "IP" or docStatus == "PA" or docStatus == "DI" -%}
+                "docStatus": "preliminary",
+                {% endif -%}
+                "type": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "{{ firstSegments.OBX.3.1.Value }}",
+                            "display": "{{ firstSegments.OBX.3.2.Value }}"
+                        }
+                    ]
+                },
+                "subject": {
+                    "reference": "Patient/{{ patientId }}"
+                },
+                {% if firstSegments.TXA.4.Value -%}
+                "date": "{{ firstSegments.TXA.4.Value | format_as_date_time }}",
+                {% endif -%}
+                "content": [
+                    {
+                        "attachment": {
+                            "contentType": "{{ firstSegments.OBX.5.2.Value }}/{{ firstSegments.OBX.5.3.Value }}",
+                            "title": "{{ firstSegments.OBX.3.2.Value }}",
+                            {% if firstSegments.TXA.4.Value -%}
+                            "creation": "{{ firstSegments.TXA.4.Value | format_as_date_time }}",
+                            {% endif -%}
+                            "data": "{{ firstSegments.OBX.5.5.Value }}"
+                        }
+                    }
+                ],
+                {% if firstSegments.PV1.19.1.Value -%}
+                "context": {
+                    "encounter": [
+                        { "reference": "Encounter/{{ encounterId }}" }
+                    ]
+                },
+                {% endif -%}
+            }
+        },
+    ]
+}

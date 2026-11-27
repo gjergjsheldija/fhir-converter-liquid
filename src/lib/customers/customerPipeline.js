@@ -11,6 +11,7 @@ import {sendResource} from "../fhir/sendResource.js";
 import {sendHl7v2ToGateway} from "../hl7v2/sendHl7v2.js";
 import {defaultSecretResolver} from "../vault/secretResolver.js";
 import {loadCustomer} from "./customerConfig.js";
+import {findMissingInboundCorrelationIds} from "./inboundCorrelation.js";
 
 function httpError(status, message) {
     const error = new Error(message);
@@ -87,6 +88,20 @@ export async function runCustomerInbound({
     }
     if (typeof srcData !== "string" || !srcData.trim()) {
         throw httpError(400, "No srcData provided.");
+    }
+
+    const requireCorrelationIds = !(customer.hl7v2 && customer.hl7v2.requireCorrelationIds === false);
+    if (requireCorrelationIds) {
+        const missing = findMissingInboundCorrelationIds(srcData);
+        if (missing.length > 0) {
+            const err = httpError(
+                422,
+                `Missing hospital correlation ID(s): ${missing.join(", ")}. ` +
+                "R2 conditionally updates on these identifiers, so the message is rejected."
+            );
+            err.phase = "validation";
+            throw err;
+        }
     }
 
     const fallbackToBuiltin = !(customer.defaults && customer.defaults.fallbackToBuiltin === false);

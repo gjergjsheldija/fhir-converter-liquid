@@ -1,0 +1,10 @@
+    "resourceType": "Bundle",
+    "id": "{{ ID }}",
+    "type": "batch",
+    {% if MSH.7 -%}
+    "timestamp": "{{ MSH.7.Value | format_as_date_time }}",
+    {% endif -%}
+    "identifier": {
+        "system": "https://fhir.example-hospital.org/sid/message-control-id",
+        "value": "{{ MSH.10.Value }}"
+    },

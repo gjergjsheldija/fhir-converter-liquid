@@ -107,3 +107,14 @@ Not started. One spec per change. Specs 14 and 22 stay blocked and are not in th
 - `specs/gap/08-conditional-update.md` — **Done (2026-11-20)** — A second Settings option sends one transaction of conditional PUTs. It cannot be combined with conditional create. No out-of-order guard.
 - `specs/gap/09-oie-archive-msh10.md` — **Blocked (2026-11-20)** — The channel XML has no MSH-10 expression. The only variable is `${message.encodedData}`. The ACK is README text, not a mapping. Do not invent a File Writer name.
 - `specs/gap/10-ccda-expected-outputs.md` — **Blocked (2026-11-20)** — Upstream `v7.0` has 22 C-CDA expected files under `TestData/Expected/Ccda/`. This engine's output differs from all 22 in content, and a template edit is not allowed. Nothing was synced. See the spec's Evidence and Open decision.
+
+---
+
+## R2 Boundary track (`specs/r2-boundary/00-order.md`)
+
+- `specs/r2-boundary/01-mapper-to-r2-contract.md` — **Done (2026-11-27)** — Documented the mapper-to-R2 HTTP/FHIR bundle contract in `docs/r2-contract/mapper-to-r2.md`, separating verified current code behavior from the proposed R2 bundle API contract. No code changes.
+- `specs/r2-boundary/02-typed-openapi-for-customer-routes.md` — **Done (2026-11-27)** — Exported typed OpenAPI 3.0.3 (`docs/r2-contract/openapi.json`) via `npm run openapi:export` scoped to customer inbound/outbound + `/healthz` + `/readyz`; updated `sendCustomerError` to return FHIR `OperationOutcome`; documented `422`/FHIR-target `502`/`504` gaps.
+- `specs/r2-boundary/03-first-case-examples.md` — **Done (2026-11-27)** — Generated 6 synthetic first-case examples under `docs/r2-contract/examples/` via `scripts/build-r2-examples.mjs` (`npm run examples:build`) with zero-drift test `src/lib/customers/r2Examples.spec.js`.
+- `specs/r2-boundary/04-identifier-conventions.md` — **Done (2026-11-27)** — Documented identifier systems, `CX-4` mapping, `identifiers.json` site-pack rules, uniqueness scope, `requireCorrelationIds` asymmetry, and onboarding checklist in `docs/r2-contract/identifiers.md`. No code changes.
+- `specs/r2-boundary/05-sequence-diagrams.md` — **Done (2026-11-27)** — Added top-level ownership overview and 5 Mermaid sequence diagrams (success, duplicate, rejected, R2 unavailable, outbound) in `docs/r2-contract/flows.md`. No code changes.
+- `specs/r2-boundary/06-examples-as-sent-to-r2.md` — **Done (2026-11-27)** — Conditional-update `sent.json` per example, minimal Patient/Encounter/DocumentReference customer templates (shared `R2/` partials), PDF in `DocumentReference.content`, inbound `422` for missing `MSH-10`/`PID-3`/`PV1-19`/`TXA-12`, new `07-missing-identifier`.

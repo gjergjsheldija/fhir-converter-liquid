@@ -10,7 +10,6 @@ import {
     runCustomerInbound,
     runCustomerOutbound
 } from "../lib/customers/customerPipeline.js";
-import {errorCodes, errorMessage} from "../lib/error/error.js";
 
 function parseDeliverFlag(query = {}) {
     if (query.deliver === undefined) {
@@ -19,13 +18,48 @@ function parseDeliverFlag(query = {}) {
     return query.deliver === "true" || query.deliver === "1" || query.deliver === true;
 }
 
-function sendCustomerError(req, res, err) {
-    const status = err && Number.isInteger(err.status) ? err.status : 400;
-    const code = status === 401
-        ? errorCodes.Unauthorized
-        : (status === 404 ? errorCodes.NotFound : errorCodes.BadRequest);
-    const payload = errorMessage(code, err && err.message ? err.message : "Customer pipeline request failed.");
+function mapStatusToIssueCode(status) {
+    if (status === 401) {
+        return "login";
+    }
+    if (status === 403) {
+        return "forbidden";
+    }
+    if (status === 404) {
+        return "not-found";
+    }
+    if (status === 409) {
+        return "conflict";
+    }
+    if (status === 422) {
+        return "processing";
+    }
+    if (status === 502 || status === 503) {
+        return "transient";
+    }
+    if (status === 504) {
+        return "timeout";
+    }
+    if (status >= 500) {
+        return "exception";
+    }
+    return "invalid";
+}
+
+export function buildCustomerOperationOutcome(req, err, status) {
+    const diagnostics = err && err.message ? err.message : "Customer pipeline request failed.";
+    const payload = {
+        resourceType: "OperationOutcome",
+        issue: [
+            {
+                severity: "error",
+                code: mapStatusToIssueCode(status),
+                diagnostics
+            }
+        ]
+    };
     if (req && req.requestId) {
+        payload.id = req.requestId;
         payload.requestId = req.requestId;
     }
     if (err && err.phase) {
@@ -34,6 +68,12 @@ function sendCustomerError(req, res, err) {
     if (err && err.detail !== undefined) {
         payload.detail = err.detail;
     }
+    return payload;
+}
+
+function sendCustomerError(req, res, err) {
+    const status = err && Number.isInteger(err.status) ? err.status : 400;
+    const payload = buildCustomerOperationOutcome(req, err, status);
     res.status(status).json(payload);
 }
 
@@ -215,6 +255,17 @@ export default function registerCustomersRoutes(app, {workerPool, recorder, requ
                 traceparent: req.traceparent
             });
 
+            if (status >= 400) {
+                const err = new Error(
+                    (resultMessage && resultMessage.error && resultMessage.error.message) ||
+                    "Customer inbound conversion failed."
+                );
+                err.status = status;
+                err.phase = "conversion";
+                sendCustomerError(req, res, err);
+                return;
+            }
+
             res.status(status).json(resultMessage);
         } catch (err) {
             sendCustomerError(req, res, err);
@@ -292,6 +343,17 @@ export default function registerCustomersRoutes(app, {workerPool, recorder, requ
                 requestId: req.requestId,
                 traceparent: req.traceparent
             });
+
+            if (status >= 400) {
+                const err = new Error(
+                    (resultMessage && resultMessage.error && resultMessage.error.message) ||
+                    "Customer outbound conversion failed."
+                );
+                err.status = status;
+                err.phase = "conversion";
+                sendCustomerError(req, res, err);
+                return;
+            }
 
             if (status === 200 && !resultMessage.delivery && prefersRawHl7v2(req) && typeof resultMessage.hl7v2Message === "string") {
                 res.status(200).type("application/hl7-v2; charset=utf-8").send(resultMessage.hl7v2Message);

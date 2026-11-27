@@ -1,0 +1,93 @@
+{
+  "resourceType": "Bundle",
+  "id": "f5219fde-bb98-5410-b515-e8926d0e4ff1",
+  "type": "transaction",
+  "timestamp": "2026-11-27T07:00:00.000Z",
+  "identifier": {
+    "system": "https://fhir.example-hospital.org/sid/message-control-id",
+    "value": "SYN-MSG-0001"
+  },
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:76492911-be19-9085-e68e-f84f7fcf78ab",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR"
+                }
+              ]
+            },
+            "system": "https://fhir.example-hospital.org/sid/mrn",
+            "value": "SYN-MRN-0001"
+          }
+        ],
+        "name": [
+          {
+            "family": "MUSTER",
+            "given": [
+              "MAX"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1985-04-12",
+        "address": [
+          {
+            "line": [
+              "100 Synthetic Way"
+            ],
+            "city": "Testville",
+            "state": "TS",
+            "postalCode": "00001",
+            "country": "ZZ"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient?identifier=https%3A%2F%2Ffhir.example-hospital.org%2Fsid%2Fmrn|SYN-MRN-0001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1992d02a-d8c0-4e5d-e23f-e25324869af2",
+      "resource": {
+        "resourceType": "Encounter",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "VN"
+                }
+              ]
+            },
+            "system": "https://fhir.example-hospital.org/sid/visit-number",
+            "value": "SYN-VISIT-1001"
+          }
+        ],
+        "status": "in-progress",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "urn:uuid:76492911-be19-9085-e68e-f84f7fcf78ab"
+        },
+        "period": {
+          "start": "2026-11-27T07:00:00.000Z"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter?identifier=https%3A%2F%2Ffhir.example-hospital.org%2Fsid%2Fvisit-number|SYN-VISIT-1001"
+      }
+    }
+  ]
+}

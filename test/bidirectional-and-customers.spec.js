@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {createServer} from "node:http";
-import {mkdir, mkdtemp, readFile, rm, writeFile} from "node:fs/promises";
+import {mkdir, mkdtemp, readFile, rm, writeFile, cp} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import {dirname, join} from "node:path";
 import {fileURLToPath} from "node:url";
@@ -107,6 +107,8 @@ describe("Bidirectional FHIR <-> HL7v2 HTTP API, Gateways, Swagger & Customer Pi
 
         const refInputTpl = await readFile(join(repoRoot, "customers/example-hospital/input/ADT_A01.liquid"), "utf8");
         await writeFile(join(custDir, "input/ADT_A01.liquid"), refInputTpl, "utf8");
+        // The reference templates share partials under input/R2/.
+        await cp(join(repoRoot, "customers/example-hospital/input/R2"), join(custDir, "input/R2"), {recursive: true});
 
         const configYaml = [
             "customerId: klinikum-west",

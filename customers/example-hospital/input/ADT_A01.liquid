@@ -1,73 +1,13 @@
 {% assign firstSegments = hl7v2Data | get_first_segments: 'MSH|PID|PV1' -%}
-{% assign mrnValue = firstSegments.PID.3.1.Value | default: 'UNKNOWN-MRN' -%}
-{% assign visitValue = firstSegments.PV1.19.1.Value | default: firstSegments.MSH.10.Value -%}
-{% assign patientId = mrnValue | generate_uuid -%}
-{% assign encounterId = visitValue | generate_uuid -%}
-{% assign bundleId = firstSegments.MSH.10.Value | default: mrnValue | generate_uuid -%}
+{% assign patientId = firstSegments.PID.3.1.Value | generate_uuid -%}
+{% assign bundleId = firstSegments.MSH.10.Value | generate_uuid -%}
 {
-    "resourceType": "Bundle",
-    "id": "{{ bundleId }}",
-    "type": "batch",
-    {% if firstSegments.MSH.7 -%}
-    "timestamp": "{{ firstSegments.MSH.7.Value | format_as_date_time }}",
-    {% endif -%}
-    "identifier": {
-        "system": "https://fhir.example-hospital.org/sid/message-control-id",
-        "value": "{{ firstSegments.MSH.10.Value }}"
-    },
+    {% include 'R2/BundleHeader' MSH: firstSegments.MSH, ID: bundleId -%}
     "entry": [
-        {
-            "fullUrl": "Patient/{{ patientId }}",
-            "resource": {
-                "resourceType": "Patient",
-                "id": "{{ patientId }}",
-                "identifier": [
-                    {
-                        "type": {
-                            "coding": [
-                                {
-                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                                    "code": "MR"
-                                }
-                            ]
-                        },
-                        "system": "https://fhir.example-hospital.org/sid/mrn",
-                        "value": "{{ mrnValue }}"
-                    }
-                ],
-                "name": [
-                    {
-                        "family": "{{ firstSegments.PID.5.1.Value }}",
-                        "given": [
-                            "{{ firstSegments.PID.5.2.Value }}"
-                        ]
-                    }
-                ]
-                {% if firstSegments.PID.7.Value -%},
-                "birthDate": "{{ firstSegments.PID.7.Value | add_hyphens_date }}"
-                {% endif -%}
-            }
-        },
-        {
-            "fullUrl": "Encounter/{{ encounterId }}",
-            "resource": {
-                "resourceType": "Encounter",
-                "id": "{{ encounterId }}",
-                "status": "in-progress",
-                "class": {
-                    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-                    "code": "{{ firstSegments.PV1.2.Value | default: 'IMP' }}"
-                },
-                "identifier": [
-                    {
-                        "system": "https://fhir.example-hospital.org/sid/visit-number",
-                        "value": "{{ visitValue }}"
-                    }
-                ],
-                "subject": {
-                    "reference": "Patient/{{ patientId }}"
-                }
-            }
-        }
+        {% include 'R2/Patient' PID: firstSegments.PID, ID: patientId -%}
+        {% if firstSegments.PV1.19.1.Value -%}
+        {% assign encounterId = firstSegments.PV1.19.1.Value | generate_uuid -%}
+        {% include 'R2/Encounter' PV1: firstSegments.PV1, ID: encounterId, PatientID: patientId -%}
+        {% endif -%}
     ]
 }

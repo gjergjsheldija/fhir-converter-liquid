@@ -1,0 +1,13 @@
+{
+  "resourceType": "OperationOutcome",
+  "issue": [
+    {
+      "severity": "error",
+      "code": "processing",
+      "diagnostics": "Missing hospital correlation ID(s): PID-3. R2 conditionally updates on these identifiers, so the message is rejected."
+    }
+  ],
+  "id": "r2-example-07-missing-identifier",
+  "requestId": "r2-example-07-missing-identifier",
+  "phase": "validation"
+}

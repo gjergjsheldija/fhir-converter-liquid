@@ -1,0 +1,13 @@
+{% assign firstSegments = hl7v2Data | get_first_segments: 'MSH|PID|PV1' -%}
+{% assign patientId = firstSegments.PID.3.1.Value | generate_uuid -%}
+{% assign bundleId = firstSegments.MSH.10.Value | generate_uuid -%}
+{
+    {% include 'R2/BundleHeader' MSH: firstSegments.MSH, ID: bundleId -%}
+    "entry": [
+        {% include 'R2/Patient' PID: firstSegments.PID, ID: patientId -%}
+        {% if firstSegments.PV1.19.1.Value -%}
+        {% assign encounterId = firstSegments.PV1.19.1.Value | generate_uuid -%}
+        {% include 'R2/Encounter' PV1: firstSegments.PV1, ID: encounterId, PatientID: patientId -%}
+        {% endif -%}
+    ]
+}

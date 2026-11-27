@@ -25,6 +25,8 @@
     "start": "node src/index.js",
     "start:runtime": "node src/runtime.js",
     "convert:project": "node bin/convert.mjs",
+    "openapi:export": "node scripts/export-openapi.mjs",
+    "examples:build": "node scripts/build-r2-examples.mjs",
     "eslint": "eslint {src,test}/**/*.js",
     "test:generate": "env NODE_ENV=testing AI_OPENAI_API_KEY=test-mock-key NODE_OPTIONS=\"--import ./test/mocks/register-templategenerate-loader.mjs\" node node_modules/.bin/nyc --exit --timeout 10000 node node_modules/mocha/bin/mocha.js src/routes.spec.js"
   },

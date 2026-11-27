@@ -1,0 +1,52 @@
+{% assign pv1Class = PV1.2.Value -%}
+{% if pv1Class == "I" or pv1Class == "IMP" -%}
+{% assign classCode = "IMP" -%}{% assign classDisplay = "inpatient encounter" -%}
+{% elsif pv1Class == "O" or pv1Class == "AMB" -%}
+{% assign classCode = "AMB" -%}{% assign classDisplay = "ambulatory" -%}
+{% elsif pv1Class == "E" or pv1Class == "EMER" -%}
+{% assign classCode = "EMER" -%}{% assign classDisplay = "emergency" -%}
+{% else -%}
+{% assign classCode = "IMP" -%}{% assign classDisplay = "inpatient encounter" -%}
+{% endif -%}
+{
+    "fullUrl": "Encounter/{{ ID }}",
+    "resource": {
+        "resourceType": "Encounter",
+        "id": "{{ ID }}",
+        "identifier": [
+            {
+                "type": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                            "code": "VN"
+                        }
+                    ]
+                },
+                "system": "https://fhir.example-hospital.org/sid/visit-number",
+                "value": "{{ PV1.19.1.Value }}"
+            }
+        ],
+        {% if PV1.45.Value -%}
+        "status": "finished",
+        {% else -%}
+        "status": "in-progress",
+        {% endif -%}
+        "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "{{ classCode }}",
+            "display": "{{ classDisplay }}"
+        },
+        "subject": {
+            "reference": "Patient/{{ PatientID }}"
+        },
+        {% if PV1.44.Value -%}
+        "period": {
+            "start": "{{ PV1.44.Value | format_as_date_time }}",
+            {% if PV1.45.Value -%}
+            "end": "{{ PV1.45.Value | format_as_date_time }}",
+            {% endif -%}
+        },
+        {% endif -%}
+    }
+},
